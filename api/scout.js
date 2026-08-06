@@ -17,60 +17,51 @@ export default async function handler(req, res) {
     let googleLensMatches = [];
     let googleLensTitle = '';
 
-    // 1. Call SerpApi Google Lens API if available
-    const targetUrl = imageUrl || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f';
-    if (SERPAPI_KEY) {
+    // 1. SerpApi Google Lens lookup
+    if (SERPAPI_KEY && imageUrl) {
       try {
         const serpResp = await fetch(
-          `https://serpapi.com/search.json?engine=google_lens&url=${encodeURIComponent(targetUrl)}&api_key=${SERPAPI_KEY}`
+          `https://serpapi.com/search.json?engine=google_lens&url=${encodeURIComponent(imageUrl)}&api_key=${SERPAPI_KEY}`
         );
         const serpData = await serpResp.json();
-        
         if (serpData.visual_matches && serpData.visual_matches.length > 0) {
           googleLensMatches = serpData.visual_matches.slice(0, 3).map(m => m.title);
           googleLensTitle = serpData.visual_matches[0].title;
         }
       } catch (sErr) {
-        console.warn('SerpApi lookup note:', sErr.message);
+        console.warn('SerpApi note:', sErr.message);
       }
     }
 
-    // 2. Query Gemini 1.5 Vision AI
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(200).json({
-        aiAnalysis: {
-          category: 'Fashion',
-          summary: googleLensTitle || 'Tailored Evening Blazer & Garment',
-          details: { garmentOrBookName: googleLensTitle || 'Double-Breasted Blazer', color: 'Neutral', styleOrGenre: 'Evening / Wall Street', keyAttributes: ['Tailored', 'Event Attire', 'Designer'] },
-          confidence: 97,
-          externalBuyUrl: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(googleLensTitle || 'designer blazer')}`
-        }
-      });
-    }
-
+    // 2. Call Gemini 1.5 Flash Vision
     const matches = base64Data ? base64Data.match(/^data:(.+);base64,(.+)$/) : null;
     const mimeType = matches ? matches[1] : 'image/jpeg';
     const rawBase64 = matches ? matches[2] : '';
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const prompt = `Analyze this image for Instagram Scout Visual Search with high precision.
-    Google Lens API Context Matched: ${googleLensMatches.join(' | ') || 'None'}.
+    const prompt = `Analyze this image precisely for Instagram Scout Visual Search.
+    Google Lens Matches: ${googleLensMatches.join(' | ') || 'None'}.
 
-    Categorize into ONE of: "Fashion", "Literature", "Food", "Travel", "Architecture".
+    Categorize into EXACTLY ONE of: "Food", "Fashion", "Literature", "Travel", "Architecture", "Finance", "News".
 
-    Return ONLY a valid raw JSON object without markdown formatting:
+    - If FOOD: Identify dish name, cuisine, and top restaurant recommendations.
+    - If LITERATURE: Identify book title, author, and Amazon search query.
+    - If FASHION: Identify garment type, color, style, and store query.
+    - If TRAVEL / ARCHITECTURE: Identify exact landmark, city, and country.
+    - If FINANCE / NEWS: Identify entity, company, or market news topic.
+
+    Return ONLY a valid JSON object without markdown fences:
     {
-      "category": "Fashion" | "Literature" | "Food" | "Travel" | "Architecture",
-      "summary": "${googleLensTitle || '1 sentence title or description'}",
+      "category": "Food" | "Fashion" | "Literature" | "Travel" | "Architecture" | "Finance" | "News",
+      "summary": "Exact identification title",
+      "primaryLocation": "Exact landmark/city or 'Global'",
+      "confidence": 98,
       "details": {
-        "garmentOrBookName": "Extracted item or landmark name",
-        "color": "Primary colors",
-        "styleOrGenre": "Style vibe or genre",
+        "itemName": "Specific item or venue name",
         "keyAttributes": ["Attribute 1", "Attribute 2", "Attribute 3"]
       },
-      "confidence": 98,
-      "searchQuery": "Targeted Google Shopping or search query"
+      "searchQuery": "Construct targeted search query"
     }`;
 
     const contentPayload = rawBase64 
@@ -78,28 +69,4 @@ export default async function handler(req, res) {
       : [prompt];
 
     const result = await model.generateContent(contentPayload);
-
-    const rawText = result.response.text().replace(/```json|```|```/g, '').trim();
-    const aiData = JSON.parse(rawText);
-
-    const queryToUse = aiData.searchQuery || googleLensTitle || aiData.summary;
-    const encodedQuery = encodeURIComponent(queryToUse);
-    aiData.externalBuyUrl = aiData.category === 'Fashion'
-      ? `[https://www.google.com/search?tbm=shop&q=$](https://www.google.com/search?tbm=shop&q=$){encodedQuery}`
-      : `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){encodedQuery}`;
-
-    return res.status(200).json({ aiAnalysis: aiData });
-
-  } catch (err) {
-    console.error('Scout API Error:', err);
-    return res.status(200).json({
-      aiAnalysis: {
-        category: 'Fashion',
-        summary: 'Tailored Event Outfit',
-        details: { garmentOrBookName: 'Designer Gala Outfit', color: 'Classic Neutral', styleOrGenre: 'Wall Street Chic', keyAttributes: ['Elegance', 'Event Attire'] },
-        confidence: 96,
-        externalBuyUrl: '[https://www.google.com/search?tbm=shop&q=designer+gala+dress](https://www.google.com/search?tbm=shop&q=designer+gala+dress)'
-      }
-    });
-  }
-}
+    const rawText = result.response.text().replace(/```json|
