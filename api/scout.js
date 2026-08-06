@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { base64Data, userIntent } = req.body;
+    const { base64Data } = req.body;
     if (!base64Data) return res.status(400).json({ error: 'base64Data is required' });
 
     const matches = base64Data.match(/^data:(.+);base64,(.+)$/);
@@ -25,18 +25,26 @@ export default async function handler(req, res) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const prompt = `Analyze this image for Instagram Scout AI Visual Search.
-    Categorize into one of: "Food", "Fashion", "Travel", "Literature", "Architecture".
-    Be strictly honest about location certainty. If you aren't 100% sure of the exact venue name, provide top probable venue guesses.
+    const prompt = `Analyze this image for Instagram Scout Visual Search with high precision.
+    Categorize into ONE of: "Fashion", "Literature", "Food", "Travel", "Architecture".
 
-    Return ONLY a raw JSON object:
+    - If FASHION: Extract garment type, color, pattern, material, style vibe (e.g., "Beige Double-Breasted Linen Blazer").
+    - If LITERATURE: Extract book title, author, cover style, genre.
+    - If FOOD/TRAVEL/ARCHITECTURE: Identify dish, venue, or landmark accurately without guessing false locations.
+
+    Return ONLY a raw JSON object (no markdown tags):
     {
-      "category": "Food" | "Fashion" | "Travel" | "Literature" | "Architecture",
-      "summary": "1 sentence describing the visual item, food, or place",
-      "primaryLocation": "Best estimated venue/location name or region",
-      "confidence": 88,
-      "alternativeGuesses": ["Probable Venue/Location 1", "Probable Venue/Location 2"],
-      "suggestedAction": "Reserve Table | Shop Look | Plan Trip | Buy Book"
+      "category": "Fashion" | "Literature" | "Food" | "Travel" | "Architecture",
+      "summary": "Specific 1-sentence title or description",
+      "details": {
+        "garmentOrBookName": "Specific name/title extracted",
+        "color": "Primary colors",
+        "styleOrGenre": "Style vibe or genre",
+        "keyAttributes": ["Attribute 1", "Attribute 2", "Attribute 3"]
+      },
+      "primaryLocation": "Exact venue or city if applicable, or 'Global Style/Book'",
+      "confidence": 96,
+      "searchQuery": "Construct a targeted search query string for Google Shopping or Search (e.g., 'buy beige double breasted linen blazer women' or 'buy book The Great Gatsby')"
     }`;
 
     const result = await model.generateContent([
@@ -47,20 +55,19 @@ export default async function handler(req, res) {
     const rawText = result.response.text().replace(/```json|```/g, '').trim();
     const aiData = JSON.parse(rawText);
 
-    // Auto-save analyzed item to Supabase table
-    await supabase.from('saved_items').insert([{
-      title: aiData.summary,
-      username: '@scout_auto_saved',
-      type: 'post',
-      category: aiData.category.toLowerCase(),
-      city: aiData.primaryLocation,
-      country: 'Global'
-    }]);
+    // Build real-time external search & shopping link
+    const encodedQuery = encodeURIComponent(aiData.searchQuery || aiData.summary);
+    const shoppingUrl = aiData.category === 'Fashion'
+      ? `https://www.google.com/search?tbm=shop&q=${encodedQuery}`
+      : `https://www.google.com/search?q=${encodedQuery}`;
 
+    aiData.externalBuyUrl = shoppingUrl;
+
+    // Fetch related saved posts from Supabase matching the detected category
     const { data: savedPosts } = await supabase
       .from('saved_items')
       .select('*')
-      .eq('category', aiData.category.toLowerCase())
+      .ilike('category', `%${aiData.category}%`)
       .limit(4);
 
     return res.status(200).json({
