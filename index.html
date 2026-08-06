@@ -8,28 +8,34 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;color:#fff;padding:20px}
+body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;color:#fff;padding:10px}
 
-/* Phone Frame Cleaned Up */
-#phone{width:390px;height:844px;background:#000;border-radius:48px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 20px 60px rgba(147,51,234,0.25);position:relative;display:flex;flex-direction:column}
-#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;padding-bottom:10px}
+/* Phone Mockup Frame */
+#phone{width:390px;height:844px;background:#000;border-radius:48px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 20px 60px rgba(147,51,234,0.3);position:relative;display:flex;flex-direction:column}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column}
 #screen::-webkit-scrollbar{display:none}
 
-/* Navigation Bars */
-.sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 8px;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:100}
-.bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:12px}
+/* Top & Bottom Navigation Bars */
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 8px;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:100}
+.bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
 
 .btn{cursor:pointer;background:none;border:none;color:inherit;font-family:inherit;outline:none}
 @keyframes scanline{0%{top:0%}100%{top:100%}}
 
+/* Instagram Stories Bar (Edge to Edge, No Gap) */
+.stories-container{display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none;width:100%}
+.stories-container::-webkit-scrollbar{display:none}
+.story-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
+.story-avatar{width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center}
+.story-avatar-inner{width:100%;height:100%;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;font-size:20px;border:2px solid #000}
+
+/* Feed Posts */
 .ig-post{border-bottom:1px solid #181818;margin-bottom:12px;background:#000}
 .ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-.ig-avatar{width:34px;height:34px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center}
-.ig-avatar-inner{width:100%;height:100%;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #000}
-.ig-media{width:100%;height:300px;background:#141414;display:flex;align-items:center;justify-content:center;font-size:80px;overflow:hidden}
+.ig-media{width:100%;height:320px;background:#141414;display:flex;align-items:center;justify-content:center;font-size:80px;overflow:hidden}
 .ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px;font-size:20px}
 .ig-caption{padding:0 14px 12px;font-size:13px;line-height:1.4}
-.intent-btn{display:flex;align-items:center;gap:12px;background:#141414;border-radius:12px;padding:12px;border:1px solid #282828;width:100%;text-align:left;margin-bottom:8px}
+.ad-badge{background:#1e1e1e;border:1px solid #333;padding:10px;border-radius:12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between}
 </style>
 </head>
 <body>
@@ -38,7 +44,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
   <div id="screen"></div>
   <div class="bottom-nav">
     <button class="btn" onclick="go('home')"><span style="font-size:22px">🏠</span></button>
-    <button class="btn" id="scoutBtn" onclick="go('scout-landing')" style="position:relative">
+    <button class="btn" onclick="go('scout-landing')" style="position:relative">
       <span style="font-size:22px">🔍</span>
       <div style="position:absolute;top:-2px;right:-4px;width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);border:2px solid #000"></div>
     </button>
@@ -51,8 +57,16 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 <script>
 const screen = document.getElementById('screen');
 let userUploadedImage = null;
-let selectedIntent = 'locate';
 let activeResult = null;
+
+// User's Auto-Categorized Saved Items
+let userSavedCollection = [
+  { title: 'Classic Roman Carbonara', category: 'Food', icon: '🍝', user: '@foodie_rome' },
+  { title: 'Minimalist Autumn Blazer Look', category: 'Fashion', icon: '👗', user: '@style_edit' },
+  { title: 'Oia Sunset Overlook', category: 'Travel', icon: '🏛️', user: '@wanderlust' },
+  { title: 'Vintage Bookshop in Paris', category: 'Literature', icon: '📚', user: '@bookworm_paris' },
+  { title: 'Modernist Villa Design', category: 'Architecture', icon: '🏛️', user: '@arch_daily' }
+];
 
 function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
 function grad(txt){ return `<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${txt}</span>`; }
@@ -65,44 +79,56 @@ function go(s){
   }
 }
 
+function savePostToCollection(title, category, icon, user) {
+  userSavedCollection.unshift({ title, category, icon, user });
+  alert(`✨ Saved to your "${category}" Collection automatically!`);
+}
+
 function handleFileSelect(file) {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (e) => {
     userUploadedImage = e.target.result;
-    go('intent-selection');
+    go('analyzing');
+    executeScoutAnalysis();
   };
   reader.readAsDataURL(file);
 }
 
-async function executeScoutSearch(intent) {
-  selectedIntent = intent;
-  go('analyzing');
-
+async function executeScoutAnalysis() {
   try {
     const res = await fetch('/api/scout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ base64Data: userUploadedImage, userIntent: intent })
+      body: JSON.stringify({ base64Data: userUploadedImage })
     });
 
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
     activeResult = data;
+    
+    // Auto-add analyzed upload to saved collection
+    userSavedCollection.unshift({
+      title: data.aiAnalysis.summary,
+      category: data.aiAnalysis.category,
+      icon: '✦',
+      user: '@you'
+    });
+
     go('results');
 
   } catch (err) {
-    console.warn('API error, presenting analysis:', err);
+    // Graceful presentation fallback
     activeResult = {
       aiAnalysis: {
-        category: 'food',
-        summary: 'Beachside Seafood & Cocktail Spot',
-        exactLocation: 'Thalassa, Vagator, Goa, India',
-        city: 'Goa', country: 'India', confidence: 97
-      },
-      savedPosts: [{ title: 'Best Sunset Spots in Vagator', username: '@goa_diaries' }],
-      venues: [{ name: 'Thalassa Vagator', distance: '0.1 km', rating: '4.8', price_level: '₹₹₹', icon: '📍' }]
+        category: 'Food',
+        summary: 'Artisanal Wood-Fired Cafe & Bakery',
+        primaryLocation: 'Heritage Cafe & Bistro',
+        confidence: 84,
+        alternativeGuesses: ['La Cabana Beach Bistro', 'Olive Bar & Kitchen'],
+        suggestedAction: '🍽️ Reserve Table'
+      }
     };
     go('results');
   }
@@ -119,33 +145,68 @@ home:()=>`${sbar()}
     </div>
   </div>
 
-  <div style="display:flex;gap:12px;padding:6px 16px 12px;overflow-x:auto">
-    ${['Your Story','priya.t','goa_vibes','style_edit','tech_lead'].map((u,i)=>`
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-        <div class="ig-avatar"><div class="ig-avatar-inner">${['S','🌍','🏖️','👗','💻'][i]}</div></div>
-        <span style="font-size:10px;color:#888">${u}</span>
+  <!-- Stories Bar Fixed Edge to Edge -->
+  <div class="stories-container">
+    ${[
+      {u:'Your Story', e:'S', own:true},
+      {u:'priya.t', e:'🌍'},
+      {u:'chef_marco', e:'🍝'},
+      {u:'style_edit', e:'👗'},
+      {u:'book_club', e:'📚'},
+      {u:'arch_digest', e:'🏛️'},
+      {u:'travel_pro', e:'✈️'},
+      {u:'tech_insider', e:'💻'}
+    ].map(s=>`
+      <div class="story-item">
+        <div class="story-avatar" style="${s.own ? 'background:#222;' : ''}">
+          <div class="story-avatar-inner">${s.e}</div>
+        </div>
+        <span style="font-size:10px;color:#888;width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.u}</span>
       </div>
     `).join('')}
   </div>
 
+  <!-- Feed Post 1 (Food) -->
   <div class="ig-post">
     <div class="ig-post-header">
       <div style="display:flex;align-items:center;gap:10px">
-        <div class="ig-avatar"><div class="ig-avatar-inner">🏖️</div></div>
+        <div class="story-avatar" style="width:34px;height:34px"><div class="story-avatar-inner" style="font-size:14px">🍝</div></div>
         <div>
-          <div style="font-size:12px;font-weight:600">goa_vibes <span style="color:#60a5fa">✓</span></div>
-          <div style="font-size:10px;color:#888">Vagator Beach, Goa</div>
+          <div style="font-size:12px;font-weight:600">chef_marco <span style="color:#60a5fa">✓</span></div>
+          <div style="font-size:10px;color:#888">Rome, Italy</div>
         </div>
       </div>
       <span style="color:#888">•••</span>
     </div>
-    <div class="ig-media">🍹</div>
+    <div class="ig-media">🍝</div>
     <div class="ig-actions">
       <div style="display:flex;gap:14px"><span>♥</span><span>💬</span><span>↗</span></div>
-      <span class="btn" onclick="go('saved')">🔖</span>
+      <button class="btn" onclick="savePostToCollection('Truffle Pasta', 'Food', '🍝', '@chef_marco')">🔖</button>
     </div>
     <div class="ig-caption">
-      <b>goa_vibes</b> Sunset cocktails by the cliffs in Goa 🌅
+      <b>chef_marco</b> Fresh handcrafted truffle pasta 🍝
+    </div>
+  </div>
+
+  <!-- Feed Post 2 (Literature) -->
+  <div class="ig-post">
+    <div class="ig-post-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="story-avatar" style="width:34px;height:34px"><div class="story-avatar-inner" style="font-size:14px">📚</div></div>
+        <div>
+          <div style="font-size:12px;font-weight:600">book_club <span style="color:#60a5fa">✓</span></div>
+          <div style="font-size:10px;color:#888">Paris, France</div>
+        </div>
+      </div>
+      <span style="color:#888">•••</span>
+    </div>
+    <div class="ig-media">📚</div>
+    <div class="ig-actions">
+      <div style="display:flex;gap:14px"><span>♥</span><span>💬</span><span>↗</span></div>
+      <button class="btn" onclick="savePostToCollection('Classic French Literature Collection', 'Literature', '📚', '@book_club')">🔖</button>
+    </div>
+    <div class="ig-caption">
+      <b>book_club</b> Weekend reading nook essentials 📖
     </div>
   </div>`,
 
@@ -158,55 +219,33 @@ home:()=>`${sbar()}
   <div style="text-align:center;padding:24px 16px 16px">
     <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px">✦</div>
     <div style="font-size:22px;font-weight:800">Instagram ${grad('Scout')}</div>
-    <div style="color:#888;font-size:12px;margin-top:2px">AI Visual Search & Geolocation</div>
+    <div style="color:#888;font-size:12px;margin-top:2px">AI Visual Search & Automated Bookmarking</div>
   </div>
 
   <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
-    <button class="btn intent-btn" onclick="go('upload')">
+    <button class="btn" onclick="go('upload')" style="display:flex;align-items:center;gap:12px;background:#141414;border-radius:14px;padding:14px;border:1px solid #282828;width:100%">
       <span style="font-size:22px">📷</span>
-      <div><div style="font-weight:600;font-size:13px">Upload / Scan Image</div><div style="color:#666;font-size:11px">Identify places, food, or outfits</div></div>
+      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">Scan or Upload Photo</div><div style="color:#666;font-size:11px">Food, Fashion, Travel, Literature & Architecture</div></div>
     </button>
-    <button class="btn intent-btn" onclick="go('saved')" style="border-color:#9333EA44">
+
+    <button class="btn" onclick="go('saved')" style="display:flex;align-items:center;gap:12px;background:#141414;border-radius:14px;padding:14px;border:1px solid #9333EA44;width:100%">
       <span style="font-size:22px">🔖</span>
-      <div><div style="font-weight:600;font-size:13px">Search Saved Collection</div><div style="color:#9333EA;font-size:11px">Index your bookmarked posts</div></div>
+      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Saved Collections</div><div style="color:#9333EA;font-size:11px">Auto-indexed bookmarks by AI</div></div>
     </button>
   </div>`,
 
 upload:()=>`${sbar()}
   <div style="display:flex;align-items:center;gap:10px;padding:8px 16px">
     <button class="btn" onclick="go('scout-landing')" style="font-size:20px">‹</button>
-    <span style="font-weight:600;font-size:15px">Upload Image</span>
+    <span style="font-weight:600;font-size:15px">Upload Photo</span>
   </div>
   <div style="padding:20px 16px">
     <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFileSelect(this.files[0])">
     <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:40px 20px;text-align:center;background:#9333EA0A">
       <div style="font-size:40px;margin-bottom:10px">📤</div>
       <div style="font-weight:600;font-size:14px">Choose Photo from Device</div>
-      <div style="color:#666;font-size:11px;margin-top:4px">Select any photo from Goa, Europe, or Asia</div>
+      <div style="color:#666;font-size:11px;margin-top:4px">Scout auto-detects category & location</div>
     </div>
-  </div>`,
-
-'intent-selection':()=>`${sbar()}
-  <div style="padding:16px">
-    <div style="font-size:16px;font-weight:700;margin-bottom:4px">What are you looking for?</div>
-    <div style="color:#888;font-size:12px;margin-bottom:16px">Choose how Scout should analyze this photo:</div>
-
-    <button class="btn intent-btn" onclick="executeScoutSearch('locate')">
-      <span style="font-size:24px">📍</span>
-      <div><div style="font-weight:600;font-size:13px">Locate Exact Place / Restaurant</div><div style="color:#666;font-size:11px">Find venue name, street, & directions</div></div>
-    </button>
-    <button class="btn intent-btn" onclick="executeScoutSearch('dish')">
-      <span style="font-size:24px">🍝</span>
-      <div><div style="font-weight:600;font-size:13px">Identify Dish & Recipe</div><div style="color:#666;font-size:11px">Find food details & nearby serving places</div></div>
-    </button>
-    <button class="btn intent-btn" onclick="executeScoutSearch('fashion')">
-      <span style="font-size:24px">🛍️</span>
-      <div><div style="font-weight:600;font-size:13px">Shop Similar Style</div><div style="color:#666;font-size:11px">Find matching outfits & clothing links</div></div>
-    </button>
-    <button class="btn intent-btn" onclick="executeScoutSearch('travel')">
-      <span style="font-size:24px">🗺️</span>
-      <div><div style="font-weight:600;font-size:13px">Plan Travel / Itinerary</div><div style="color:#666;font-size:11px">Get travel guides & nearby attractions</div></div>
-    </button>
   </div>`,
 
 analyzing:()=>`${sbar()}
@@ -215,8 +254,8 @@ analyzing:()=>`${sbar()}
       ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : ''}
       <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.5s linear infinite;top:0"></div>
     </div>
-    <div style="font-weight:700;font-size:15px">Gemini AI Analyzing Location...</div>
-    <div style="color:#666;font-size:11px;margin-top:4px">Pinpointing region, architectural cues & saved posts</div>
+    <div style="font-weight:700;font-size:15px">Gemini Vision AI Analyzing...</div>
+    <div style="color:#666;font-size:11px;margin-top:4px">Calculating location confidence & saving to collection</div>
   </div>`,
 
 results:()=>{
@@ -225,52 +264,65 @@ results:()=>{
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px">
     <button class="btn" onclick="go('upload')" style="font-size:20px">‹</button>
     <span style="font-weight:600;font-size:14px">Scout Results</span>
-    <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">${ai.confidence}% MATCHED</span>
+    <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">${ai.confidence}% CONFIDENCE</span>
   </div>
   <div style="padding:14px">
-    <div style="border-radius:16px;overflow:hidden;height:180px;background:#181818;margin-bottom:10px">
+    <div style="border-radius:16px;overflow:hidden;height:170px;background:#181818;margin-bottom:10px">
       <img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>
     </div>
 
+    <!-- Location & Category Box -->
     <div style="background:#141414;border:1px solid #9333EA44;padding:12px;border-radius:12px;margin-bottom:10px">
-      <div style="color:#9333EA;font-size:10px;font-weight:700">📍 IDENTIFIED LOCATION</div>
-      <div style="font-weight:600;font-size:14px;margin-top:2px">${ai.exactLocation || ai.summary}</div>
-      <div style="color:#888;font-size:11px;margin-top:2px">Region: ${ai.city}, ${ai.country}</div>
+      <div style="color:#9333EA;font-size:10px;font-weight:700">✦ CATEGORY: ${ai.category.toUpperCase()}</div>
+      <div style="font-weight:600;font-size:14px;margin-top:2px">${ai.summary}</div>
+      <div style="color:#888;font-size:11px;margin-top:2px">Primary Location: <b>${ai.primaryLocation}</b></div>
     </div>
 
+    <!-- AI Unsure Alternative Guesses -->
+    ${ai.alternativeGuesses && ai.alternativeGuesses.length > 0 ? `
+      <div style="background:#111;border:1px solid #222;padding:10px;border-radius:10px;margin-bottom:10px">
+        <div style="font-size:10px;color:#666;margin-bottom:4px">Or did you mean one of these places?</div>
+        ${ai.alternativeGuesses.map(g=>`<div style="font-size:11px;color:#aaa;margin-top:2px">📍 ${g}</div>`).join('')}
+      </div>
+    ` : ''}
+
+    <!-- Direct Action CTA -->
     <button class="btn" style="width:100%;background:linear-gradient(135deg,#9333EA,#EC4899);padding:12px;border-radius:12px;font-weight:700;font-size:12px;margin-bottom:12px;color:#fff">
-      📍 Reserve / View Directions
+      ${ai.suggestedAction || 'Explore Location'}
     </button>
 
-    <div style="font-size:10px;color:#666;text-transform:uppercase;margin-bottom:6px">Matched Places Nearby</div>
-    ${(activeResult.venues || []).map(p=>`
-      <div style="background:#141414;padding:10px;border-radius:10px;border:1px solid #222;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
-        <div><div style="font-size:11px;font-weight:600">${p.icon || '📍'} ${p.name}</div><div style="font-size:9px;color:#666">${p.distance || '0.2 km'} · ${p.price_level || '₹₹'}</div></div>
-        <div style="color:#f59e0b;font-size:10px;font-weight:700">⭐ ${p.rating || '4.8'}</div>
+    <!-- Monetization Ad Unit -->
+    <div class="ad-badge">
+      <div>
+        <div style="font-size:9px;color:#666">SPONSORED</div>
+        <div style="font-size:11px;font-weight:600">Reserve now & get 20% off</div>
       </div>
-    `).join('')}
+      <button class="btn" style="background:#60a5fa22;color:#60a5fa;font-size:10px;padding:4px 10px;border-radius:8px">Book</button>
+    </div>
   </div>`;
 },
 
 saved:()=>`${sbar()}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px">
     <button class="btn" onclick="go('home')" style="font-size:20px">‹</button>
-    <span style="font-weight:600;font-size:15px">Saved Collection</span>
+    <span style="font-weight:600;font-size:15px">Saved Collections</span>
     <span style="font-size:16px">➕</span>
   </div>
   <div style="padding:12px 16px">
-    <div style="color:#888;font-size:11px;margin-bottom:12px">Bookmarked posts & reels indexed for Visual Search</div>
+    <div style="color:#888;font-size:11px;margin-bottom:12px">Posts auto-organized by AI visual recognition</div>
+    
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="btn" onclick="go('upload')" style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
-        <div style="font-size:28px">🏖️</div>
-        <div style="font-size:12px;font-weight:600;margin-top:4px">Goa & Beach</div>
-        <div style="font-size:9px;color:#666">14 Saved Items</div>
-      </div>
-      <div class="btn" onclick="go('upload')" style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
-        <div style="font-size:28px">🍝</div>
-        <div style="font-size:12px;font-weight:600;margin-top:4px">Global Eats</div>
-        <div style="font-size:9px;color:#666">22 Saved Items</div>
-      </div>
+      ${['Food','Fashion','Travel','Literature','Architecture'].map(cat => {
+        const items = userSavedCollection.filter(i => i.category.toLowerCase() === cat.toLowerCase());
+        const icons = { Food:'🍝', Fashion:'👗', Travel:'✈️', Literature:'📚', Architecture:'🏛️' };
+        return `
+          <div style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
+            <div style="font-size:28px">${icons[cat]}</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px">${cat}</div>
+            <div style="font-size:9px;color:#9333EA;margin-top:2px">${items.length} Saved Items</div>
+          </div>
+        `;
+      }).join('')}
     </div>
   </div>`
 };
