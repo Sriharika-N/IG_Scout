@@ -5,43 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
 <title>Instagram Scout — AI Visual Search Prototype</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22[http://www.w3.org/2000/svg%22](http://www.w3.org/2000/svg%22) viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-body{background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px}
+body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:20px;color:#fff}
 
 /* Phone Frame */
-#phone{width:390px;height:844px;background:#000;border-radius:44px;overflow:hidden;box-shadow:0 0 0 12px #1a1a1a,0 0 0 14px #333,0 40px 100px rgba(147,51,234,0.3);position:relative;flex-shrink:0;display:flex;flex-direction:column}
-#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative}
+#phone{width:390px;height:844px;background:#000;border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 0 0 12px #2c2c2e,0 30px 90px rgba(147,51,234,0.35);position:relative;flex-shrink:0;display:flex;flex-direction:column}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;background:#000}
 #screen::-webkit-scrollbar{display:none}
 
-.sbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:50}
-.bottom-nav{height:65px;background:#000;border-top:1px solid #1a1a1a;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:12px}
-.btn{cursor:pointer;background:none;border:none;color:inherit;padding:0;font-family:inherit;font-size:inherit}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:50}
+.bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
+.btn{cursor:pointer;background:none;border:none;color:inherit;padding:0;font-family:inherit;font-size:inherit;display:inline-flex;align-items:center;justify-content:center}
 
 @keyframes scanline{0%{top:0%}100%{top:100%}}
-@keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastSlide{from{transform:translate(-50%,100%);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 
-.fadeup{animation:fadeup 0.35s ease forwards}
+.fadeup{animation:fadeup 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards}
 
 /* Instagram Posts */
-.ig-post{border-bottom:1px solid #181818;margin-bottom:12px;background:#000}
-.ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
-.ig-media{width:100%;height:320px;background:#1a1a1a;overflow:hidden}
+.ig-post{border-bottom:1px solid #1a1a1a;margin-bottom:12px;background:#000}
+.ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+.ig-media{width:100%;height:380px;background:#141414;overflow:hidden;position:relative}
 .ig-media img{width:100%;height:100%;object-fit:cover;display:block}
-.ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 16px 6px;font-size:20px}
-.ig-caption{padding:0 16px 12px;font-size:13px;line-height:1.4}
+.ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px;font-size:22px}
+.ig-caption{padding:0 14px 12px;font-size:13px;line-height:1.4}
 
-.search-input{width:100%;background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
+.search-input{width:100%;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
+.search-input::placeholder{color:#777}
 
 /* Grid Cards for Collections */
-.grid-container{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px}
-.thumb-card{background:#111;border:1px solid #222;border-radius:16px;overflow:hidden;text-align:left;cursor:pointer;position:relative}
-.thumb-card img{width:100%;height:120px;object-fit:cover;display:block;background:#222}
+.grid-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 14px}
+.thumb-card{background:#121212;border:1px solid #222;border-radius:14px;overflow:hidden;text-align:left;cursor:pointer;position:relative;transition:transform 0.15s ease}
+.thumb-card:active{transform:scale(0.97)}
+.thumb-card img{width:100%;height:130px;object-fit:cover;display:block;background:#1a1a1a}
 
-/* Aesthetics In-App Toast Pill */
-#toastPill{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid #9333EA88;padding:10px 18px;border-radius:24px;font-size:11px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.8);display:none;z-index:200;white-space:nowrap;animation:toastSlide 0.25s ease}
+/* Toast Pill */
+#toastPill{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid #9333EAaa;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.8);display:none;z-index:200;white-space:nowrap;animation:toastSlide 0.25s ease}
 </style>
 </head>
 <body>
@@ -50,14 +52,16 @@ body{background:#111;display:flex;align-items:center;justify-content:center;min-
   <div id="screen"></div>
   <div id="toastPill"></div>
   <div class="bottom-nav">
-    <button class="btn" onclick="go('home')"><span style="font-size:22px">🏠</span></button>
-    <button class="btn" id="scoutBtn" onclick="go('scout-landing')" style="position:relative">
+    <button class="btn" onclick="go('home')" title="Home Feed"><span style="font-size:22px">🏠</span></button>
+    <button class="btn" id="scoutBtn" onclick="go('scout-landing')" style="position:relative" title="AI Scout">
       <span style="font-size:22px">🔍</span>
-      <div style="position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:7px;color:white;border:2px solid #000">✦</div>
+      <div style="position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:8px;color:white;border:2px solid #000">✦</div>
     </button>
     <button class="btn" onclick="go('saved')" title="Saved Collection"><span style="font-size:20px">🔖</span></button>
-    <button class="btn" onclick="go('upload')"><span style="font-size:22px">➕</span></button>
-    <div style="width:24px;height:24px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">S</div>
+    <button class="btn" onclick="go('upload')" title="Upload Image"><span style="font-size:22px">➕</span></button>
+    <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;padding:2px;cursor:pointer" onclick="go('saved')">
+      <div style="width:100%;height:100%;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">S</div>
+    </div>
   </div>
 </div>
 
@@ -73,41 +77,37 @@ let currentSavedCategory = null;
 function showToast(msg) {
   toast.textContent = msg;
   toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 2000);
+  setTimeout(() => { toast.style.display = 'none'; }, 2200);
 }
 
-// Guaranteed High-Res Wikimedia / Direct Photos
+// Guaranteed High-Res Unsplash CDN URLs for Categories
 const categoryCovers = {
-  Fashion: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)',
-  Food: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg)',
-  Travel: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg)',
-  Literature: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg)'
+  Fashion: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80',
+  Food: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+  Travel: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop&q=80',
+  Literature: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&auto=format&fit=crop&q=80'
 };
 
-// 30 Verified Real Posts (Strictly Food, Travel, Literature, Fashion)
+// Real Feed Posts with High-Quality Image URLs
 const initialPosts = [
-  { id: 1, username: 'ny_fashionweek', location: 'SoHo, New York', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)', caption: 'Summer whites ☀️ Minimalist linen co-ord set with structured blazer', category: 'Fashion', saved: true, tags: ['fashion', 'blazer', 'linen', 'dress'] },
-  { id: 2, username: 'dc_capitol', location: 'Washington, D.C.', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/200px-United_States_Capitol_west_front_edit2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/200px-United_States_Capitol_west_front_edit2.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg)', caption: 'Lincoln Memorial & National Mall Sunset 🏛️', category: 'Travel', saved: true, tags: ['washington dc', 'capitol', 'travel'] },
-  { id: 3, username: 'tokyo_sushi_bar', location: 'Ginza, Tokyo, Japan', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/200px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/200px-Sushi_platter.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg)', caption: 'Handcrafted Omakase Nigiri Platter 🍣', category: 'Food', saved: true, tags: ['sushi', 'tokyo', 'food'] },
-  { id: 4, username: 'strand_bookstore', location: 'Broadway, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/200px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/200px-Old_book_bindings.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg)', caption: 'Rare Classic Literature Edition at Strand 📚', category: 'Literature', saved: true, tags: ['books', 'literature', 'nyc'] },
-  { id: 5, username: 'joes_pizza_soho', location: 'Greenwich Village, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/200px-Eq_it-na_pizza-margherita_sep2005_sml.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/200px-Eq_it-na_pizza-margherita_sep2005_sml.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/600px-Eq_it-na_pizza-margherita_sep2005_sml.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/600px-Eq_it-na_pizza-margherita_sep2005_sml.jpg)', caption: 'Authentic NYC Slice at Joe\'s Pizza Soho 🍕', category: 'Food', saved: false, tags: ['joes pizza', 'pizza', 'nyc'] },
-  { id: 6, username: 'wallstreet_journal', location: 'Wall Street, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/200px-Charging_Bull_5.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/200px-Charging_Bull_5.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg)', caption: 'Fearless Girl Statue & Wall Street NYC 🗽', category: 'Travel', saved: false, tags: ['wall street', 'fearless girl', 'nyc'] },
-  { id: 7, username: 'paris_eiffel', location: 'Champ de Mars, Paris', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/200px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/200px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg)', caption: 'Eiffel Tower Sunset View 🗼', category: 'Travel', saved: false, tags: ['eiffel tower', 'paris', 'travel'] },
-  { id: 8, username: 'rome_trattoria', location: 'Trastevere, Rome, Italy', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/200px-Spaghetti_carbonara_2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/200px-Spaghetti_carbonara_2.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/600px-Spaghetti_carbonara_2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/600px-Spaghetti_carbonara_2.jpg)', caption: 'Handcrafted Truffle Cacio e Pepe Pasta 🍝', category: 'Food', saved: false, tags: ['pasta', 'rome', 'food'] },
-  { id: 9, username: 'seattle_space_needle', location: 'Seattle, Washington', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/200px-Space_Needle_2011-07-04.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/200px-Space_Needle_2011-07-04.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/600px-Space_Needle_2011-07-04.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/600px-Space_Needle_2011-07-04.jpg)', caption: 'Seattle Skyline & Space Needle Night View 🏙️', category: 'Travel', saved: false, tags: ['seattle', 'space needle'] },
-  { id: 10, username: 'met_gala_style', location: 'Fifth Avenue, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)', caption: 'Met Gala Tailored Linen Wrap Evening Look 👗', category: 'Fashion', saved: false, tags: ['dress', 'fashion', 'gala'] }
+  { id: 1, username: 'soho_style', location: 'SoHo, New York', userImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80', mediaImg: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&auto=format&fit=crop&q=80', caption: 'Linen season in full swing ☀️ Tailored blazer paired with wide-leg trousers.', category: 'Fashion', saved: true, liked: false, tags: ['fashion', 'blazer', 'linen', 'outfit', 'style'] },
+  { id: 2, username: 'paris_journal', location: 'Champ de Mars, Paris', userImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80', mediaImg: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop&q=80', caption: 'Golden hour views over the Eiffel Tower 🗼✨', category: 'Travel', saved: true, liked: true, tags: ['paris', 'eiffel tower', 'travel', 'france'] },
+  { id: 3, username: 'tokyo_bites', location: 'Ginza, Tokyo', userImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80', mediaImg: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&auto=format&fit=crop&q=80', caption: 'Fresh handcrafted Omakase nigiri platter in Ginza 🍣', category: 'Food', saved: true, liked: false, tags: ['sushi', 'tokyo', 'food', 'japan', 'omakase'] },
+  { id: 4, username: 'rare_reads', location: 'Greenwich Village, NYC', userImg: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80', mediaImg: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80', caption: 'Found this vintage hardbound classic edition from 1924 📚', category: 'Literature', saved: true, liked: true, tags: ['books', 'literature', 'rare books', 'library'] },
+  { id: 5, username: 'trattoria_roma', location: 'Trastevere, Rome', userImg: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80', mediaImg: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80', caption: 'Authentic Truffle Cacio e Pepe in the heart of Rome 🍝', category: 'Food', saved: false, liked: false, tags: ['pasta', 'rome', 'italy', 'food'] },
+  { id: 6, username: 'street_couture', location: 'Milan Fashion Week', userImg: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&auto=format&fit=crop&q=80', mediaImg: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&auto=format&fit=crop&q=80', caption: 'Autumn runway highlights & leather trench silhouettes 🧥', category: 'Fashion', saved: false, liked: false, tags: ['fashion', 'milan', 'coat', 'trench', 'style'] }
 ];
 
 const mockData = {
-  food: { label: 'Looks like a beautifully plated dish from a top restaurant', emoji: '🍝', bg: '#2d1510', nearby: [{ n: 'Trattoria Roma', d: '0.3 km', r: '4.8', p: '$$$', e: '🍝' }], shop: [{ n: 'Gourmet Sauce Set', b: 'Rao\'s', p: '$29', r: '4.9', e: '🫙', badge: 'Top Rated' }], saves: [{ t: 'reel', l: 'Pasta recipe · 2M views', u: '@foodie_global' }] },
-  fashion: { label: 'A stunning minimalist white linen co-ord set with structured blazer', emoji: '👗', bg: '#1e1e1e', nearby: [{ n: 'Zara Soho', d: '0.5 km', r: '4.5', p: '$$$', e: '👗' }], shop: [{ n: 'Linen Co-ord Set', b: 'Zara', p: '$89', r: '4.6', e: '👗', badge: 'Trending' }], saves: [{ t: 'reel', l: 'Summer minimalist outfits', u: '@stylewithtanvi' }] },
-  travel: { label: 'A breathtaking view of iconic landmarks and scenery', emoji: '🏛️', bg: '#1a2a4a', nearby: [{ n: 'Grand View Point', d: '0.5 km', r: '4.9', p: '$$$', e: '🏛️' }], shop: [{ n: 'Travel Package 7D', b: 'Booking.com', p: '$1,200', r: '4.8', e: '✈️', badge: 'Top Seller' }], saves: [{ t: 'reel', l: 'Travel hidden gems', u: '@travel_pro' }] },
-  literature: { label: 'A rare vintage literature edition and classic book collection', emoji: '📚', bg: '#14532d', nearby: [{ n: 'Strand Bookstore', d: '0.2 km', r: '4.9', p: '$$', e: '📚' }], shop: [{ n: 'Classic Hardcover Edition', b: 'Amazon', p: '$24', r: '4.9', e: '📚', badge: 'Bestseller' }], saves: [{ t: 'post', l: 'Must-read classic novels', u: '@strand_books' }] }
+  food: { label: 'Fresh Omakase Sushi Platter or Artisanal Pasta', emoji: '🍣', bg: '#2d1510', buyQuery: 'best+sushi+restaurant+near+me', saves: [{ t: 'reel', l: 'Top Omakase spots in Tokyo', u: '@tokyo_bites' }, { t: 'post', l: 'Rome Truffle Pasta Recipe', u: '@trattoria_roma' }] },
+  fashion: { label: 'Minimalist Linen Blazer & Tailored Co-ord Set', emoji: '👗', bg: '#1e1e1e', buyQuery: 'minimalist+linen+blazer+set', saves: [{ t: 'reel', l: 'Summer linen outfit guide', u: '@soho_style' }, { t: 'post', l: 'Milan Streetwear picks', u: '@street_couture' }] },
+  travel: { label: 'Iconic Eiffel Tower & Paris Architectural Landmarks', emoji: '🗼', bg: '#1a2a4a', buyQuery: 'paris+travel+guide+and+tours', saves: [{ t: 'reel', l: 'Paris secret photography spots', u: '@paris_journal' }] },
+  literature: { label: 'Vintage Hardcover Classics & Collector Editions', emoji: '📚', bg: '#14532d', buyQuery: 'vintage+hardcover+classic+books', saves: [{ t: 'post', l: 'Must-read classic novels list', u: '@rare_reads' }] }
 };
 
-function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
+function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:11px">●●● WiFi 85%</span></div>`; }
 function grad(txt){ return `<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${txt}</span>`; }
-function sponsored(icon, brand, copy, cta){ return `<div style="margin:12px 16px 16px;padding:12px;border-radius:16px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;border-radius:10px;background:#1a2a3a;display:flex;align-items:center;justify-content:center;font-size:18px">${icon}</div><div style="flex:1"><div style="color:#555;font-size:10px">Sponsored · ${brand}</div><div style="color:#eee;font-size:11px;font-weight:600">${copy}</div></div><button class="btn" style="color:#60a5fa;font-size:11px;font-weight:600">${cta}</button></div>`; }
+function sponsored(icon, brand, copy, cta, linkUrl){ return `<div style="margin:12px 14px 16px;padding:12px;border-radius:16px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:10px"><div style="width:38px;height:38px;border-radius:10px;background:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:18px">${icon}</div><div style="flex:1"><div style="color:#666;font-size:10px;font-weight:600">Sponsored · ${brand}</div><div style="color:#eee;font-size:11px;font-weight:600">${copy}</div></div><button class="btn" onclick="openExternalLink('${linkUrl}')" style="color:#60a5fa;font-size:11px;font-weight:600">${cta}</button></div>`; }
 
 function go(s, cat){
   if(cat) currentCat = cat;
@@ -121,7 +121,16 @@ function go(s, cat){
 
 function openExternalLink(url) {
   if (url) {
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
+
+function toggleLikePost(postId, btnEl) {
+  const post = initialPosts.find(p => p.id === postId);
+  if (post) {
+    post.liked = !post.liked;
+    btnEl.textContent = post.liked ? '❤️' : '♥';
+    btnEl.style.color = post.liked ? '#ef4444' : '#fff';
   }
 }
 
@@ -159,14 +168,20 @@ async function executeScoutAnalysis(imgUrl) {
     const res = await fetch('/api/scout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ base64Data: userUploadedImage, imageUrl: imgUrl })
+      body: JSON.stringify({ base64Data: userUploadedImage?.startsWith('data:') ? userUploadedImage : null, imageUrl: imgUrl || userUploadedImage })
     });
 
     const data = await res.json();
-    activeResult = data;
+    if (data?.aiAnalysis) {
+      activeResult = data;
+      if (data.aiAnalysis.category) {
+        currentCat = data.aiAnalysis.category.toLowerCase();
+      }
+    }
     go('results');
   } catch (err) {
-    console.warn('Backend fallback:', err);
+    console.warn('Backend endpoint fallback activated:', err);
+    activeResult = null;
     go('results');
   }
 }
@@ -174,54 +189,60 @@ async function executeScoutAnalysis(imgUrl) {
 const screens = {
 home:()=>`${sbar()}
   <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px 4px">
-    <span style="font-size:24px;font-weight:700;font-family:Georgia,serif">Instagram</span>
+    <span style="font-size:24px;font-weight:700;font-family:'Grand Hotel',Georgia,serif;letter-spacing:0.5px">Instagram</span>
     <div style="display:flex;gap:16px;font-size:20px">
       <span class="btn" onclick="go('saved')">🔖</span>
-      <span>♥</span>
-      <span>💬</span>
+      <span class="btn">💬</span>
     </div>
   </div>
 
-  <div style="display:flex;gap:12px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">
+  <div style="display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">
     <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-      <div style="width:60px;height:60px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center">
-        <div style="width:100%;height:100%;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #000">Sri</div>
+      <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center">
+        <div style="width:100%;height:100%;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #000">Your Story</div>
       </div>
-      <span style="font-size:10px;color:#666">Your Story</span>
+      <span style="font-size:10px;color:#aaa">Your Story</span>
     </div>
     ${initialPosts.map(p => `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-        <div style="width:60px;height:60px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center">
-          <img src="${p.userImg}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #000"/>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer" onclick="triggerScoutOnItem(${p.id})">
+        <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center">
+          <img src="${p.userImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000"/>
         </div>
-        <span style="font-size:10px;color:#666;width:56px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.username}</span>
+        <span style="font-size:10px;color:#ccc;width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.username}</span>
       </div>
     `).join('')}
   </div>
 
-  <div style="padding-bottom:20px">
+  <div style="padding-bottom:10px">
     ${initialPosts.map(p => `
       <div class="ig-post">
         <div class="ig-post-header">
           <div style="display:flex;align-items:center;gap:10px">
-            <img src="${p.userImg}" style="width:32px;height:32px;border-radius:50%;object-fit:cover"/>
+            <img src="${p.userImg}" style="width:34px;height:34px;border-radius:50%;object-fit:cover"/>
             <div>
-              <div style="font-size:13px;font-weight:600">${p.username} <span style="color:#60a5fa">✓</span></div>
-              <div style="font-size:11px;color:#666">${p.location}</div>
+              <div style="font-size:13px;font-weight:600">${p.username} <span style="color:#60a5fa;font-size:11px">✓</span></div>
+              <div style="font-size:10px;color:#888">${p.location}</div>
             </div>
           </div>
-          <span style="font-size:18px;color:#888">···</span>
+          <span style="font-size:18px;color:#888;cursor:pointer">···</span>
         </div>
         <div class="ig-media" onclick="triggerScoutOnItem(${p.id})" style="cursor:pointer">
           <img src="${p.mediaImg}"/>
+          <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;gap:4px">
+            <span style="color:#9333EA">✦</span> Tap to Scout
+          </div>
         </div>
         <div class="ig-actions">
-          <div style="display:flex;gap:14px"><span>♥</span><span>💬</span><span>↗</span></div>
+          <div style="display:flex;gap:14px">
+            <button class="btn" onclick="toggleLikePost(${p.id}, this)" style="color:${p.liked ? '#ef4444' : '#fff'}">${p.liked ? '❤️' : '♥'}</button>
+            <button class="btn">💬</button>
+            <button class="btn">↗</button>
+          </div>
           <button class="btn" onclick="toggleSavePost(${p.id}, this)">${p.saved ? '🔖' : '🏷️'}</button>
         </div>
         <div class="ig-caption">
-          <b>${p.username}</b> <span style="color:#ccc">${p.caption}</span>
-          <div style="font-size:10px;color:#9333EA;margin-top:4px;cursor:pointer" onclick="triggerScoutOnItem(${p.id})">✦ Tap photo to Scout with AI</div>
+          <b>${p.username}</b> <span style="color:#ddd">${p.caption}</span>
+          <div style="font-size:11px;color:#a855f7;margin-top:4px;font-weight:600;cursor:pointer" onclick="triggerScoutOnItem(${p.id})">✦ AI Visual Search Available</div>
         </div>
       </div>
     `).join('')}
@@ -231,20 +252,20 @@ home:()=>`${sbar()}
   <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
     <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
     <div style="flex:1">
-      <input type="text" class="search-input" id="scoutSearchBox" placeholder="Search 'dresses', 'books', 'sushi'..." oninput="renderSearchResults(this.value)">
+      <input type="text" class="search-input" id="scoutSearchBox" placeholder="Search 'blazer', 'sushi', 'books'..." oninput="renderSearchResults(this.value)">
     </div>
   </div>
 
   <div id="searchResultsArea">
-    <div style="text-align:center;padding:32px 24px 24px">
-      <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 16px;position:relative">✦<div style="position:absolute;top:-6px;right:-6px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid #9333EA44">AI</div></div>
-      <div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:4px">Instagram ${grad('Scout')}</div>
-      <div style="color:#666;font-size:13px">Show me anything. I'll find it for you.</div>
+    <div style="text-align:center;padding:28px 24px 20px">
+      <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px;position:relative">✦<div style="position:absolute;top:-4px;right:-4px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid #9333EA44">AI</div></div>
+      <div style="font-size:24px;font-weight:800;color:#fff;margin-bottom:4px">Instagram ${grad('Scout')}</div>
+      <div style="color:#888;font-size:12px">Visual Search for Fashion, Food, Travel & Literature</div>
     </div>
-    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
-      ${[{icon:'🖼️',t:'Upload from Camera Roll',s:'Find anything from your photos',col:'#9333EA',cat:'food'},{icon:'📷',t:'Point Your Camera',s:'Scan anything in real time',col:'#EC4899',cat:'fashion'},{icon:'🔖',t:'Search Your Saved Posts',s:'Unlock your saved collection',col:'#F59E0B',cat:'travel'}].map(a=>`<button class="btn action-btn" data-cat="${a.cat}" style="display:flex;align-items:center;gap:14px;background:#111;border-radius:16px;padding:14px;border:1px solid ${a.col}33;width:100%"><div style="width:46px;height:46px;border-radius:12px;background:${a.col}22;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${a.icon}</div><div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${a.t}</div><div style="color:#555;font-size:11px;margin-top:2px">${a.s}</div></div><span style="color:#444;font-size:18px">›</span></button>`).join('')}
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+      ${[{icon:'🖼️',t:'Upload Image',s:'Search items from your photos',col:'#9333EA',cat:'fashion'},{icon:'📷',t:'Point & Scan',s:'Scan real-world items live',col:'#EC4899',cat:'food'},{icon:'🔖',t:'Browse Saved Collections',s:'Visual match inside bookmarks',col:'#F59E0B',cat:'travel'}].map(a=>`<button class="btn action-btn" onclick="go('upload','${a.cat}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid ${a.col}33;width:100%"><div style="width:44px;height:44px;border-radius:12px;background:${a.col}22;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${a.icon}</div><div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${a.t}</div><div style="color:#666;font-size:11px;margin-top:2px">${a.s}</div></div><span style="color:#555;font-size:18px">›</span></button>`).join('')}
     </div>
-    ${sponsored('🛍️','Nykaa Fashion','Discover trending looks near you','Shop')}
+    ${sponsored('🛍️','Myntra Fashion','Discover trending apparel matches near you','Explore','https://www.google.com/search?tbm=shop&q=trending+fashion+outfits')}
   </div>`,
 
 upload:()=>`${sbar()}
@@ -252,112 +273,107 @@ upload:()=>`${sbar()}
     <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
     <span style="font-weight:600;font-size:15px">Upload to Scout</span>
   </div>
-  <div style="padding:20px 16px">
+  <div style="padding:16px">
     <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFileSelect(this.files[0])">
-    <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA66;border-radius:24px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;background:#9333EA08">
-      <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:28px">📤</div>
-      <div style="text-align:center"><div style="font-weight:600;color:#fff;font-size:14px;margin-bottom:4px">Upload Any Image</div><div style="color:#555;font-size:12px">Food · Fashion · Travel · Literature</div></div>
-      <div style="padding:10px 24px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:13px;font-weight:600;color:#fff">Choose Photo</div>
+    <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:#9333EA0d">
+      <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:26px">📤</div>
+      <div style="text-align:center"><div style="font-weight:600;color:#fff;font-size:14px;margin-bottom:2px">Select Image File</div><div style="color:#777;font-size:11px">Supports PNG, JPG, WEBP</div></div>
+      <div style="padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:12px;font-weight:600;color:#fff">Choose Photo</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;padding:0 20px;margin:4px 0 16px"><div style="flex:1;height:1px;background:#222"></div><span style="color:#444;font-size:12px">or try a demo</span><div style="flex:1;height:1px;background:#222"></div></div>
+  <div style="display:flex;align-items:center;gap:12px;padding:0 20px;margin:4px 0 12px"><div style="flex:1;height:1px;background:#222"></div><span style="color:#555;font-size:11px">or tap a demo picture</span><div style="flex:1;height:1px;background:#222"></div></div>
   <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
-    <div style="color:#444;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Demo Categories — Scout in Action</div>
-    ${[{e:'🍝',t:'Food',cat:'food'},{e:'👗',t:'Fashion Outfit',cat:'fashion'},{e:'🏛️',t:'Travel Destination',cat:'travel'},{e:'📚',t:'Literature',cat:'literature'}].map(d=>`<button class="btn demo-btn" data-cat="${d.cat}" style="display:flex;align-items:center;gap:14px;background:#111;border-radius:16px;padding:14px;border:1px solid #222;width:100%"><div style="width:52px;height:52px;border-radius:12px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${d.e}</div><div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${d.t}</div><div style="color:#555;font-size:11px;margin-top:2px">Tap to see Scout analyse this</div></div><div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:20px;background:#EC489922"><span style="font-size:10px;color:#EC4899">✦ Scout</span></div></button>`).join('')}
+    ${[{e:'👗',t:'Fashion Outfit',cat:'fashion'},{e:'🍣',t:'Food Platter',cat:'food'},{e:'🗼',t:'Travel Destination',cat:'travel'},{e:'📚',t:'Literature Book',cat:'literature'}].map(d=>`<button class="btn demo-btn" data-cat="${d.cat}" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%"><div style="width:44px;height:44px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${d.e}</div><div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${d.t}</div><div style="color:#666;font-size:11px">Run Scout AI on this category</div></div><div style="padding:4px 10px;border-radius:14px;background:#EC489922;color:#EC4899;font-size:10px;font-weight:600">✦ Test</div></button>`).join('')}
   </div>`,
 
 analyzing:()=>`${sbar()}
-  <div style="height:780px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px">
-    <div style="position:relative;margin-bottom:32px">
-      <div style="width:180px;height:180px;border-radius:24px;border:2px solid #9333EA44;background:#111;display:flex;align-items:center;justify-content:center;font-size:80px;overflow:hidden;position:relative">
+  <div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">
+    <div style="position:relative;margin-bottom:28px">
+      <div style="width:170px;height:170px;border-radius:24px;border:2px solid #9333EA66;background:#111;display:flex;align-items:center;justify-content:center;font-size:70px;overflow:hidden;position:relative">
         ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : (mockData[currentCat]?.emoji || '👗')}
-        <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 2s linear infinite;top:0"></div>
+        <div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.8s linear infinite;top:0"></div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
-      <span style="font-size:18px;font-weight:700;color:#fff">Instagram</span>${grad('<span style="font-size:18px;font-weight:700">Scout</span>')}<span style="color:#666;font-size:14px">is analysing</span>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px">
+      <span style="font-size:16px;font-weight:700;color:#fff">Instagram</span>${grad('<span style="font-size:16px;font-weight:700">Scout</span>')}
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px;width:240px;margin-bottom:24px" id="steps">
-      ${['Scanning visual elements...','Identifying context and intent...','Matching to Scout database...','Building your results...'].map((s,i)=>`<div class="step-item" data-idx="${i}" style="display:flex;align-items:center;gap:10px;opacity:${i===0?1:0.25};transition:opacity 0.4s"><div class="step-dot" style="width:16px;height:16px;border-radius:50%;background:${i===0?'linear-gradient(135deg,#9333EA,#EC4899)':'#222'};display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0"></div><span style="font-size:12px;color:${i===0?'#ccc':'#444'}">${s}</span></div>`).join('')}
+    <div style="display:flex;flex-direction:column;gap:8px;width:230px;margin-bottom:20px" id="steps">
+      ${['Scanning visual patterns...','Identifying context & objects...','Grounding with Google Lens...','Generating store & venue matches...'].map((s,i)=>`<div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:${i===0?1:0.3}"><div style="width:12px;height:12px;border-radius:50%;background:${i===0?'#EC4899':'#333'}"></div><span style="font-size:11px;color:#ccc">${s}</span></div>`).join('')}
     </div>
-    <div style="width:240px;height:4px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div id="progbar" style="height:100%;width:0%;background:linear-gradient(90deg,#9333EA,#EC4899,#F59E0B);border-radius:4px;transition:width 0.1s"></div></div>
-    <div id="prognum" style="color:#444;font-size:11px;margin-top:6px">0%</div>
+    <div style="width:220px;height:4px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div id="progbar" style="height:100%;width:0%;background:linear-gradient(90deg,#9333EA,#EC4899,#F59E0B);transition:width 0.1s"></div></div>
+    <div id="prognum" style="color:#666;font-size:11px;margin-top:6px">0%</div>
   </div>`,
 
 results:()=>{
   const d = mockData[currentCat] || mockData.fashion;
   const ai = activeResult?.aiAnalysis;
   const displayLabel = ai?.summary || d.label;
-  const buyUrl = ai?.externalBuyUrl || '[https://www.google.com/search?tbm=shop&q=minimalist+white+linen+set](https://www.google.com/search?tbm=shop&q=minimalist+white+linen+set)';
+  const searchQ = encodeURIComponent(ai?.searchQuery || displayLabel);
+  
+  let buyUrl = ai?.externalBuyUrl;
+  if (!buyUrl || buyUrl.includes('[https')) {
+    if (currentCat === 'literature') {
+      buyUrl = `https://www.amazon.com/s?k=${searchQ}`;
+    } else if (currentCat === 'food') {
+      buyUrl = `https://www.google.com/search?q=${searchQ}+restaurant+menu`;
+    } else if (currentCat === 'fashion') {
+      buyUrl = `https://www.google.com/search?tbm=shop&q=${searchQ}`;
+    } else {
+      buyUrl = `https://www.google.com/search?q=${searchQ}+travel+guide`;
+    }
+  }
 
   return `${sbar()}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px">
     <div style="display:flex;align-items:center;gap:8px">
       <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
       <span style="font-size:13px;color:#9333EA">✦</span>
-      <span style="font-weight:600;font-size:15px">Scout Results</span>
+      <span style="font-weight:600;font-size:15px">Scout AI Match</span>
     </div>
-    <div style="background:#9333EA22;color:#9333EA;font-size:10px;padding:4px 10px;border-radius:20px;font-weight:600">AI Powered</div>
+    <div style="background:#9333EA22;color:#a855f7;font-size:10px;padding:3px 8px;border-radius:12px;font-weight:600">94% Match</div>
   </div>
 
-  <div style="padding:12px 16px">
-    <div style="border-radius:20px;overflow:hidden;border:1px solid #9333EA33;position:relative">
-      <div style="height:200px;background:${d.bg};display:flex;align-items:center;justify-content:center;overflow:hidden">
-        ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:90px">${d.emoji}</div>`}
+  <div style="padding:10px 16px">
+    <div style="border-radius:18px;overflow:hidden;border:1px solid #9333EA44;position:relative;background:#111">
+      <div style="height:220px;background:${d.bg};display:flex;align-items:center;justify-content:center;overflow:hidden">
+        ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:80px">${d.emoji}</div>`}
       </div>
-      <div style="position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(transparent,rgba(0,0,0,0.95))">
+      <div style="padding:12px 14px;background:linear-gradient(transparent,rgba(0,0,0,0.95))">
         <div style="display:flex;align-items:flex-start;gap:8px">
-          <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px">✦</div>
-          <p style="color:#fff;font-size:12px;line-height:1.4;margin:0">${displayLabel}</p>
+          <span style="color:#9333EA;font-size:14px;margin-top:1px">✦</span>
+          <p style="color:#fff;font-size:13px;line-height:1.4;margin:0;font-weight:500">${displayLabel}</p>
         </div>
       </div>
     </div>
-  </div>
-
-  <div style="margin:0 16px 14px;padding:10px 14px;border-radius:14px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:12px">
-    <div style="flex:1">
-      <div style="color:#444;font-size:10px;margin-bottom:4px">Scout Confidence</div>
-      <div style="height:4px;background:#222;border-radius:4px;overflow:hidden">
-        <div style="width:94%;height:100%;background:linear-gradient(90deg,#9333EA,#EC4899);border-radius:4px"></div>
-      </div>
-    </div>
-    <div style="font-size:13px;font-weight:700;color:#9333EA">94%</div>
-    <div style="font-size:10px;color:#444;text-transform:capitalize">${currentCat}</div>
   </div>
 
   <div style="padding:0 16px 14px">
-    <div style="color:#444;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Take Action</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn fadeup" onclick="openExternalLink('${buyUrl}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #EC489933;width:100%">
-        <div style="width:42px;height:42px;border-radius:10px;background:#EC489922;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🛍️</div>
-        <div style="text-align:left;flex:1">
-          <div style="font-weight:600;color:#fff;font-size:13px">Shop / Explore Online</div>
-          <div style="font-size:11px;margin-top:1px;color:#EC4899">View matching store results</div>
-        </div>
-        <span style="color:#333;font-size:18px">›</span>
-      </button>
-    </div>
+    <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Actions & Search</div>
+    <button class="btn fadeup" onclick="openExternalLink('${buyUrl}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #EC489944;width:100%">
+      <div style="width:40px;height:40px;border-radius:10px;background:#EC489922;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🛍️</div>
+      <div style="text-align:left;flex:1">
+        <div style="font-weight:600;color:#fff;font-size:13px">Shop / Explore Matches</div>
+        <div style="font-size:10px;color:#EC4899;margin-top:1px">Open verified Google / Store search results</div>
+      </div>
+      <span style="color:#666;font-size:18px">›</span>
+    </button>
   </div>
 
   <div style="padding:0 16px 8px">
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
       <span style="color:#F59E0B;font-size:12px">🔖</span>
-      <span style="color:#444;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px">From Your Saves</span>
+      <span style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px">Related Bookmarks</span>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       ${d.saves.map(s=>`
-        <div style="background:#111;border-radius:12px;padding:10px;border:1px solid #1a1a1a">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
-            <div style="width:14px;height:14px;border-radius:3px;background:${s.t==='reel'?'#EC489922':'#9333EA22'};display:flex;align-items:center;justify-content:center;font-size:7px;color:${s.t==='reel'?'#EC4899':'#9333EA'}">${s.t==='reel'?'▶':'◼'}</div>
-            <span style="font-size:9px;color:#555;text-transform:capitalize">${s.t}</span>
-          </div>
-          <div style="font-size:10px;color:#ccc;line-height:1.3;margin-bottom:4px">${s.l}</div>
-          <div style="font-size:9px;color:#444">${s.u}</div>
+        <div style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f">
+          <div style="font-size:10px;color:#eee;font-weight:600;margin-bottom:4px">${s.l}</div>
+          <div style="font-size:9px;color:#888">${s.u}</div>
         </div>
       `).join('')}
     </div>
   </div>
-  ${sponsored(currentCat==='food'?'🍽️':currentCat==='fashion'?'👜':'✈️',currentCat==='food'?'Swiggy Dineout':currentCat==='fashion'?'Myntra':'MakeMyTrip',currentCat==='food'?'Book a table & get 25% off':currentCat==='fashion'?'Shop the look':'Plan your trip','View')}`;
+  ${sponsored(currentCat==='food'?'🍽️':currentCat==='fashion'?'👜':'✈️',currentCat==='food'?'Dineout Special':currentCat==='fashion'?'Zara Collections':'Booking.com',currentCat==='food'?'Reserve a table with 20% discount':currentCat==='fashion'?'Trending seasonal wear':'Compare top hotel deals','View Deal',`https://www.google.com/search?q=${d.buyQuery}`)}`;
 },
 
 saved:()=>{
@@ -371,13 +387,13 @@ saved:()=>{
         <button class="btn" onclick="currentSavedCategory=null;go('saved')" style="font-size:22px;color:#fff">‹</button>
         <span style="font-weight:600;font-size:15px">${currentSavedCategory} Collection</span>
       </div>
-      <div style="padding:12px 16px">
-        ${catItems.length === 0 ? `<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">No items saved in ${currentSavedCategory} yet.<br>Go to Home Feed and tap 🏷️ on any post!</div>` : `
+      <div style="padding:10px 16px">
+        ${catItems.length === 0 ? `<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">No items saved in ${currentSavedCategory} yet.<br>Tap 🏷️ on any feed post to bookmark it!</div>` : `
           <div class="grid-container">
             ${catItems.map(item => `
               <div class="thumb-card" onclick="triggerScoutOnItem(${item.id})">
                 <img src="${item.mediaImg}"/>
-                <div style="padding:8px"><div style="font-size:11px;font-weight:600">${item.caption}</div></div>
+                <div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">${item.caption}</div></div>
               </div>
             `).join('')}
           </div>
@@ -392,7 +408,7 @@ saved:()=>{
       <span style="font-weight:600;font-size:15px">Saved Collections</span>
     </div>
   </div>
-  <div style="padding:12px 16px">
+  <div style="padding:10px 14px">
     <div class="grid-container">
       ${categories.map(cat => {
         const count = savedList.filter(p => p.category.toLowerCase() === cat.toLowerCase()).length;
@@ -402,7 +418,7 @@ saved:()=>{
             <img src="${coverImg}"/>
             <div style="padding:8px">
               <div style="font-size:12px;font-weight:700;color:#fff">${cat}</div>
-              <div style="font-size:9px;color:#9333EA;margin-top:2px;font-weight:600">${count} Bookmarks</div>
+              <div style="font-size:10px;color:#a855f7;margin-top:2px;font-weight:600">${count} Saved</div>
             </div>
           </div>
         `;
@@ -416,20 +432,15 @@ function renderSearchResults(val) {
   const container = document.getElementById('searchResultsArea');
   if (!container) return;
   if (!val.trim()) {
-    container.innerHTML = `
-      <div style="text-align:center;padding:32px 24px 24px">
-        <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 16px;position:relative">✦<div style="position:absolute;top:-6px;right:-6px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid #9333EA44">AI</div></div>
-        <div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:4px">Instagram ${grad('Scout')}</div>
-        <div style="color:#666;font-size:13px">Show me anything. I'll find it for you.</div>
-      </div>`;
+    go('scout-landing');
     return;
   }
 
   const matches = initialPosts.filter(p => p.tags.some(t => t.toLowerCase().includes(val.toLowerCase())) || p.caption.toLowerCase().includes(val.toLowerCase()));
   container.innerHTML = `
-    <div style="font-size:11px;color:#888;margin-bottom:10px">Found ${matches.length} matches for "${val}":</div>
+    <div style="padding:0 16px;margin-bottom:10px;font-size:11px;color:#888">Found ${matches.length} matches for "${val}":</div>
     <div class="grid-container">
-      ${matches.map(p => `
+      ${matches.length === 0 ? `<div style="grid-column:1/span 2;color:#666;font-size:12px;text-align:center;padding:20px">No matching posts found. Try "blazer", "sushi", or "paris".</div>` : matches.map(p => `
         <div class="thumb-card" onclick="triggerScoutOnItem(${p.id})">
           <img src="${p.mediaImg}"/>
           <div style="padding:8px"><div style="font-size:11px;font-weight:600">${p.caption}</div></div>
@@ -448,35 +459,31 @@ function attachEvents(s){
     const sb=document.getElementById('scoutBtn');
     if(sb) sb.onclick=()=>go('scout-landing');
   }
-  if(s==='scout-landing'){
-    document.querySelectorAll('.action-btn').forEach(btn=>{
-      btn.onclick=()=>go('upload',btn.dataset.cat);
-    });
-  }
   if(s==='upload'){
     document.querySelectorAll('.demo-btn').forEach(btn=>{
-      btn.onclick=()=>{ userUploadedImage=null; currentCat=btn.dataset.cat; go('analyzing'); };
+      btn.onclick=()=>{ userUploadedImage=null; currentCat=btn.dataset.cat; go('analyzing'); executeScoutAnalysis(null); };
     });
   }
   if(s==='analyzing'){
     let p=0;
     const bar=document.getElementById('progbar'),num=document.getElementById('prognum'),items=document.querySelectorAll('.step-item');
     const iv=setInterval(()=>{
-      p=Math.min(p+4,95);
+      p=Math.min(p+5,95);
       if(bar)bar.style.width=p+'%';
       if(num)num.textContent=p+'%';
       const si=Math.floor(p/25);
       items.forEach((it,i)=>{if(i<=si)it.style.opacity='1';});
-    },60);
+    },50);
     setTimeout(()=>{
       clearInterval(iv);
       if(bar)bar.style.width='100%';
       if(num)num.textContent='100%';
-      setTimeout(()=>go('results'),300);
-    },2200);
+      setTimeout(()=>go('results'),250);
+    },1800);
   }
 }
 
+// Initial render
 go('home');
 </script>
 </body>
