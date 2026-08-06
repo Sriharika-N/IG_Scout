@@ -29,21 +29,18 @@ export default async function handler(req, res) {
     // 2. Query Gemini 1.5 Flash Vision (Supports Fashion, Food, Travel, Sneakers, Outfits, etc.)
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const prompt = `Analyze this image for an Instagram AI Visual Search tool.
-    Detect if this image is related to: "fashion" (clothing, shoes, outfits, luxury items, style), "food" (dishes, cafes, drinks), or "travel" (landmarks, scenery, spots).
+const prompt = `You are a precise computer vision and geolocation AI for Instagram Scout.
+Analyze this image and identify its exact location, landmarks, establishment, or fashion style.
 
-    Return ONLY a valid JSON object without markdown fences:
-    {
-      "category": "fashion" | "food" | "travel",
-      "summary": "1 sentence describing the visual item or outfit",
-      "fashionDetails": {
-        "style": "Minimalist / Streetwear / Formal / Y2K / Casual",
-        "keyItems": ["List item names like 'White Linen Blazer', 'Cargo Pants', 'Loafers'"]
-      },
-      "city": "Inferred city (e.g. Paris, Milan, Tokyo, New York, London) or 'Global'",
-      "country": "Inferred country or 'Global'",
-      "confidence": 96
-    }`;
+Return ONLY a raw JSON object with this exact structure:
+{
+  "category": "fashion" | "food" | "travel",
+  "summary": "Specific 1-sentence identification (e.g., 'A classic Roman Cacio e Pepe at Trattoria Da Enzo' or 'Eiffel Tower viewed from Avenue de Camoëns')",
+  "exactLocation": "Specific venue name, street, or landmark (e.g., 'Trattoria Da Enzo 29, Via dei Vascellari')",
+  "city": "Exact City Name (e.g. Rome, Paris, Tokyo, New York)",
+  "country": "Country Name",
+  "confidence": 98
+}`;
 
     const result = await model.generateContent([
       prompt,
