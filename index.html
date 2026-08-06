@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram Scout — AI Visual Search</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+body{background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff}
+#phone{width:390px;height:844px;background:#000;border-radius:44px;overflow:hidden;box-shadow:0 0 0 12px #1a1a1a,0 0 0 14px #333,0 40px 100px rgba(147,51,234,0.3);position:relative}
+#screen{width:100%;height:100%;overflow-y:auto;scrollbar-width:none}
+#screen::-webkit-scrollbar{display:none}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-size:12px;font-weight:600;background:#000;position:sticky;top:0;z-index:50}
+.btn{cursor:pointer;background:none;border:none;color:inherit;font-family:inherit}
+.tag{display:inline-block;padding:4px 8px;border-radius:12px;font-size:10px;background:#9333EA22;color:#ec4899;border:1px solid #9333EA44;margin-right:4px;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div id="phone"><div id="screen"></div></div>
+
+<script>
+// --- YOUR SUPABASE CONFIG ---
+const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_REF.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const screen = document.getElementById('screen');
+let activeResult = null;
+
+function sbar(){return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`;}
+
+async function handleUpload(file) {
+  if (!file) return;
+  render('analyzing');
+
+  try {
+    // 1. Upload file to Supabase Storage bucket 'scout-uploads'
+    const fileName = `scout_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+    const { error: uploadErr } = await supabaseClient.storage.from('scout-uploads').upload(fileName, file);
+    if (uploadErr) throw uploadErr;
+
+    // 2. Get Public Image URL
+    const { data: { publicUrl } } = supabaseClient.storage.from('scout-uploads').getPublicUrl(fileName);
+
+    // 3. Request Gemini AI Visual Search via Serverless API
+    const res = await fetch('/api/scout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl: publicUrl })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    activeResult = { ...data, uploadedImageUrl: publicUrl };
+    render('results');
+
+  } catch (err) {
+    alert('Scout Error: ' + err.message);
+    render('home');
+  }
+}
+
+function render(s) {
+  if (s === 'home') {
+    screen.innerHTML = `${sbar()}
+    <div style="padding:24px;text-align:center">
+      <div style="font-size:28px;font-weight:800;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:40px">Instagram Scout</div>
+      <p style="color:#666;font-size:13px;margin-top:8px">Visual AI Search for Fashion, Food & Travel</p>
+
+      <div style="margin-top:60px;border:2px dashed #333;padding:40px 20px;border-radius:24px;background:#111">
+        <div style="font-size:40px;margin-bottom:12px">👗 🍝 ✈️</div>
+        <p style="font-size:14px;font-weight:600;margin-bottom:6px">Take a Photo or Upload</p>
+        <p style="color:#666;font-size:11px;margin-bottom:20px">Snap outfits, clothing tags, meals, or places</p>
+        <input type="file" id="fileInp" accept="image/*" style="display:none" onchange="handleUpload(this.files[0])">
+        <button class="btn" onclick="document.getElementById('fileInp').click()" style="background:linear-gradient(135deg,#9333EA,#EC4899);padding:12px 24px;border-radius:20px;font-weight:600;font-size:13px">Choose Image</button>
+      </div>
+    </div>`;
+  }
+  else if (s === 'analyzing') {
+    screen.innerHTML = `${sbar()}
+    <div style="height:700px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px">
+      <div style="font-size:48px;animation:pulse 1s infinite">✦</div>
+      <p style="font-size:16px;font-weight:700;margin-top:16px">Scout AI is Analyzing...</p>
+      <p style="color:#666;font-size:12px;margin-top:6px">Identifying Fashion styles, Outfits & Locations</p>
+    </div>`;
+  }
+  else if (s === 'results') {
+    const ai = activeResult.aiAnalysis;
+    const fashion = ai.fashionDetails;
+    const isFashion = ai.category === 'fashion';
+
+    screen.innerHTML = `${sbar()}
+    <div style="padding:16px">
+      <!-- Uploaded Image Preview -->
+      <div style="border-radius:20px;overflow:hidden;max-height:220px;margin-bottom:14px;border:1px solid #333">
+        <img src="${activeResult.uploadedImageUrl}" style="width:100%;height:100%;object-fit:cover" />
+      </div>
+
+      <!-- AI Detection Banner -->
+      <div style="background:#111;border:1px solid #9333EA44;border-radius:16px;padding:14px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="color:#9333EA;font-size:11px;font-weight:700">✦ SCOUT VISION · ${ai.category.toUpperCase()}</span>
+          <span style="background:#4ade8022;color:#4ade80;font-size:10px;padding:2px 8px;border-radius:10px">${ai.confidence}% Match</span>
+        </div>
+        <p style="font-size:13px;font-weight:600;margin-top:6px">${ai.summary}</p>
+        <p style="color:#666;font-size:11px;margin-top:2px">📍 ${ai.city}, ${ai.country}</p>
+
+        ${isFashion && fashion ? `
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid #222">
+            <p style="font-size:11px;color:#888;margin-bottom:4px">Style Vibe: <b style="color:#fff">${fashion.style}</b></p>
+            <div>${(fashion.keyItems || []).map(item => `<span class="tag">👗 ${item}</span>`).join('')}</div>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Action Button -->
+      <button class="btn" style="width:100%;background:linear-gradient(135deg,#9333EA,#EC4899);padding:12px;border-radius:14px;font-weight:700;font-size:13px;margin-bottom:16px">
+        ${isFashion ? '🛍️ Shop Similar Look & Outfits' : ai.category === 'food' ? '🍝 Reserve Table Nearby' : '✈️ Plan Trip Itinerary'}
+      </button>
+
+      <!-- Saved Items Matching Category -->
+      <p style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">From Saved Collection</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+        ${activeResult.savedPosts.map(p => `
+          <div style="background:#111;border:1px solid #222;padding:10px;border-radius:12px">
+            <div style="font-size:11px;font-weight:600">${p.title}</div>
+            <div style="font-size:9px;color:#666;margin-top:4px">${p.username} · ${p.city}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Nearby Stores or Places -->
+      <p style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">${isFashion ? 'Recommended Boutiques & Stores' : 'Recommended Venues'}</p>
+      ${activeResult.venues.map(v => `
+        <div style="background:#111;border:1px solid #222;padding:12px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:12px;font-weight:600">${v.icon || '🛍️'} ${v.name}</div>
+            <div style="font-size:10px;color:#666">${v.description}</div>
+          </div>
+          <span style="color:#f59e0b;font-size:11px;font-weight:700">⭐ ${v.rating}</span>
+        </div>
+      `).join('')}
+
+      <button class="btn" onclick="render('home')" style="margin-top:12px;width:100%;color:#888;font-size:12px">← Scout Another Image</button>
+    </div>`;
+  }
+}
+
+render('home');
+</script>
+</body>
+</html>
