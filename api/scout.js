@@ -8,7 +8,6 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -17,47 +16,46 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { imageUrl } = req.body;
-    if (!imageUrl) return res.status(400).json({ error: 'imageUrl is required' });
+    const { base64Data, userIntent } = req.body;
+    if (!base64Data) return res.status(400).json({ error: 'base64Data is required' });
 
-    // 1. Download image from Supabase Storage for Gemini
-    const imageResp = await fetch(imageUrl);
-    const imageBuffer = await imageResp.arrayBuffer();
-    const base64Image = Buffer.from(imageBuffer).toString('base64');
-    const mimeType = imageResp.headers.get('content-type') || 'image/jpeg';
+    const matches = base64Data.match(/^data:(.+);base64,(.+)$/);
+    const mimeType = matches ? matches[1] : 'image/jpeg';
+    const rawBase64 = matches ? matches[2] : base64Data;
 
-    // 2. Query Gemini 1.5 Flash Vision (Supports Fashion, Food, Travel, Sneakers, Outfits, etc.)
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-const prompt = `You are a precise computer vision and geolocation AI for Instagram Scout.
-Analyze this image and identify its exact location, landmarks, establishment, or fashion style.
+    const prompt = `You are a high-precision computer vision model for an Instagram Visual Search tool called Scout.
+    Analyze this image with high geographic and contextual accuracy.
+    Pay close attention to architecture, signage, vegetation, interior decor, regional food styles (e.g. Goa, India vs Mediterranean/Europe).
+    User Goal: "${userIntent || 'general_search'}"
 
-Return ONLY a raw JSON object with this exact structure:
-{
-  "category": "fashion" | "food" | "travel",
-  "summary": "Specific 1-sentence identification (e.g., 'A classic Roman Cacio e Pepe at Trattoria Da Enzo' or 'Eiffel Tower viewed from Avenue de Camoëns')",
-  "exactLocation": "Specific venue name, street, or landmark (e.g., 'Trattoria Da Enzo 29, Via dei Vascellari')",
-  "city": "Exact City Name (e.g. Rome, Paris, Tokyo, New York)",
-  "country": "Country Name",
-  "confidence": 98
-}`;
+    Return ONLY a JSON object (no markdown tags):
+    {
+      "category": "food" | "fashion" | "travel",
+      "summary": "Specific description of what is in the image",
+      "exactLocation": "Exact or most likely venue/landmark and neighborhood/city (e.g., 'Thalassa, Vagator, Goa' or 'Antares, Anjuna')",
+      "city": "Detected City or State (e.g., Goa, Mumbai, Rome, Paris, Tokyo)",
+      "country": "Detected Country (e.g., India, Italy, France)",
+      "confidence": 98
+    }`;
 
     const result = await model.generateContent([
       prompt,
-      { inlineData: { data: base64Image, mimeType } }
+      { inlineData: { data: rawBase64, mimeType } }
     ]);
 
     const rawText = result.response.text().replace(/```json|```/g, '').trim();
     const aiData = JSON.parse(rawText);
 
-    // 3. Query Supabase for matching Saved Posts
+    // Query Supabase for Saved Posts matching Category or Location
     const { data: savedPosts } = await supabase
       .from('saved_items')
       .select('*')
       .or(`category.eq.${aiData.category},city.ilike.%${aiData.city}%`)
       .limit(4);
 
-    // 4. Query Supabase for matching Stores / Venues / Brands
+    // Query Supabase for Venues
     const { data: venues } = await supabase
       .from('venues')
       .select('*')
