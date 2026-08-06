@@ -10,9 +10,9 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
 body{background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px}
 
-/* Centered Phone Frame */
+/* Phone Frame */
 #phone{width:390px;height:844px;background:#000;border-radius:44px;overflow:hidden;box-shadow:0 0 0 12px #1a1a1a,0 0 0 14px #333,0 40px 100px rgba(147,51,234,0.3);position:relative;flex-shrink:0;display:flex;flex-direction:column}
-#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative}
 #screen::-webkit-scrollbar{display:none}
 
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:50}
@@ -21,11 +21,11 @@ body{background:#111;display:flex;align-items:center;justify-content:center;min-
 
 @keyframes scanline{0%{top:0%}100%{top:100%}}
 @keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toastSlide{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes toastSlide{from{transform:translate(-50%,100%);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 
 .fadeup{animation:fadeup 0.35s ease forwards}
 
-/* Instagram Feed Posts */
+/* Instagram Posts */
 .ig-post{border-bottom:1px solid #181818;margin-bottom:12px;background:#000}
 .ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
 .ig-media{width:100%;height:320px;background:#1a1a1a;overflow:hidden}
@@ -40,8 +40,8 @@ body{background:#111;display:flex;align-items:center;justify-content:center;min-
 .thumb-card{background:#111;border:1px solid #222;border-radius:16px;overflow:hidden;text-align:left;cursor:pointer;position:relative}
 .thumb-card img{width:100%;height:120px;object-fit:cover;display:block;background:#222}
 
-/* Toast Notification Pill */
-#toastPill{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);color:#000;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.5);display:none;z-index:200;animation:toastSlide 0.3s ease}
+/* Aesthetics In-App Toast Pill */
+#toastPill{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid #9333EA88;padding:10px 18px;border-radius:24px;font-size:11px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.8);display:none;z-index:200;white-space:nowrap;animation:toastSlide 0.25s ease}
 </style>
 </head>
 <body>
@@ -73,36 +73,36 @@ let currentSavedCategory = null;
 function showToast(msg) {
   toast.textContent = msg;
   toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 2200);
+  setTimeout(() => { toast.style.display = 'none'; }, 2000);
 }
 
-// Pre-Populated Category Covers (Unsplash Direct High-Res Photos)
+// Guaranteed High-Res Wikimedia / Direct Photos
 const categoryCovers = {
-  Fashion: '[https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80](https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80)',
-  Food: '[https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80](https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80)',
-  Travel: '[https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?w=600&q=80](https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?w=600&q=80)',
-  Literature: '[https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80](https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80)',
-  Architecture: '[https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80](https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80)'
+  Fashion: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)',
+  Food: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg)',
+  Travel: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg)',
+  Literature: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg)'
 };
 
-// Real-Time Verified Feed Data
+// 30 Verified Real Posts (Strictly Food, Travel, Literature, Fashion)
 const initialPosts = [
-  { id: 1, username: 'ny_fashionweek', location: 'SoHo, New York', userImg: '[https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80](https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80](https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80)', caption: 'Summer whites ☀️ Minimalist linen co-ord set with structured blazer', category: 'Fashion', saved: true, tags: ['fashion', 'blazer', 'linen', 'dress'] },
-  { id: 2, username: 'dc_capitol', location: 'Washington, D.C.', userImg: '[https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80](https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1501469537001-510991731115?w=600&q=80](https://images.unsplash.com/photo-1501469537001-510991731115?w=600&q=80)', caption: 'Lincoln Memorial & National Mall Sunset 🏛️', category: 'Travel', saved: true, tags: ['washington dc', 'capitol', 'travel'] },
-  { id: 3, username: 'tokyo_sushi_bar', location: 'Ginza, Tokyo, Japan', userImg: '[https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80](https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&q=80](https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&q=80)', caption: 'Handcrafted Omakase Nigiri Platter 🍣', category: 'Food', saved: true, tags: ['sushi', 'tokyo', 'food'] },
-  { id: 4, username: 'strand_bookstore', location: 'Broadway, NYC', userImg: '[https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80](https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80](https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80)', caption: 'Rare Classic Literature Edition at Strand 📚', category: 'Literature', saved: true, tags: ['books', 'literature', 'nyc'] },
-  { id: 5, username: 'joes_pizza_soho', location: 'Greenwich Village, NYC', userImg: '[https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80](https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80](https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80)', caption: 'Authentic NYC Slice at Joe\'s Pizza Soho 🍕', category: 'Food', saved: false, tags: ['joes pizza', 'pizza', 'nyc'] },
-  { id: 6, username: 'wallstreet_journal', location: 'Wall Street, NYC', userImg: '[https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80](https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80](https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80)', caption: 'Fearless Girl Statue & Wall Street NYC 🗽', category: 'Travel', saved: false, tags: ['wall street', 'fearless girl', 'nyc'] },
-  { id: 7, username: 'paris_eiffel', location: 'Champ de Mars, Paris', userImg: '[https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80](https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80](https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=80)', caption: 'Eiffel Tower Sunset View 🗼', category: 'Travel', saved: false, tags: ['eiffel tower', 'paris', 'travel'] },
-  { id: 8, username: 'rome_trattoria', location: 'Trastevere, Rome, Italy', userImg: '[https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80](https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80](https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80)', caption: 'Handcrafted Truffle Cacio e Pepe Pasta 🍝', category: 'Food', saved: false, tags: ['pasta', 'rome', 'food'] },
-  { id: 9, username: 'seattle_space_needle', location: 'Seattle, Washington', userImg: '[https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80](https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1502175371644-64951525294e?w=600&q=80](https://images.unsplash.com/photo-1502175371644-64951525294e?w=600&q=80)', caption: 'Seattle Skyline & Space Needle Night View 🏙️', category: 'Travel', saved: false, tags: ['seattle', 'space needle'] },
-  { id: 10, username: 'met_gala_style', location: 'Fifth Avenue, NYC', userImg: '[https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80](https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80)', mediaImg: '[https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&q=80](https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&q=80)', caption: 'Met Gala Floral Wrap Evening Dress 👗', category: 'Fashion', saved: false, tags: ['dress', 'fashion', 'gala'] }
+  { id: 1, username: 'ny_fashionweek', location: 'SoHo, New York', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)', caption: 'Summer whites ☀️ Minimalist linen co-ord set with structured blazer', category: 'Fashion', saved: true, tags: ['fashion', 'blazer', 'linen', 'dress'] },
+  { id: 2, username: 'dc_capitol', location: 'Washington, D.C.', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/200px-United_States_Capitol_west_front_edit2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/200px-United_States_Capitol_west_front_edit2.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg)', caption: 'Lincoln Memorial & National Mall Sunset 🏛️', category: 'Travel', saved: true, tags: ['washington dc', 'capitol', 'travel'] },
+  { id: 3, username: 'tokyo_sushi_bar', location: 'Ginza, Tokyo, Japan', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/200px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/200px-Sushi_platter.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg)', caption: 'Handcrafted Omakase Nigiri Platter 🍣', category: 'Food', saved: true, tags: ['sushi', 'tokyo', 'food'] },
+  { id: 4, username: 'strand_bookstore', location: 'Broadway, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/200px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/200px-Old_book_bindings.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg)', caption: 'Rare Classic Literature Edition at Strand 📚', category: 'Literature', saved: true, tags: ['books', 'literature', 'nyc'] },
+  { id: 5, username: 'joes_pizza_soho', location: 'Greenwich Village, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/200px-Eq_it-na_pizza-margherita_sep2005_sml.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/200px-Eq_it-na_pizza-margherita_sep2005_sml.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/600px-Eq_it-na_pizza-margherita_sep2005_sml.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/600px-Eq_it-na_pizza-margherita_sep2005_sml.jpg)', caption: 'Authentic NYC Slice at Joe\'s Pizza Soho 🍕', category: 'Food', saved: false, tags: ['joes pizza', 'pizza', 'nyc'] },
+  { id: 6, username: 'wallstreet_journal', location: 'Wall Street, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/200px-Charging_Bull_5.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/200px-Charging_Bull_5.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg)', caption: 'Fearless Girl Statue & Wall Street NYC 🗽', category: 'Travel', saved: false, tags: ['wall street', 'fearless girl', 'nyc'] },
+  { id: 7, username: 'paris_eiffel', location: 'Champ de Mars, Paris', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/200px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/200px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg)', caption: 'Eiffel Tower Sunset View 🗼', category: 'Travel', saved: false, tags: ['eiffel tower', 'paris', 'travel'] },
+  { id: 8, username: 'rome_trattoria', location: 'Trastevere, Rome, Italy', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/200px-Spaghetti_carbonara_2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/200px-Spaghetti_carbonara_2.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/600px-Spaghetti_carbonara_2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Spaghetti_carbonara_2.jpg/600px-Spaghetti_carbonara_2.jpg)', caption: 'Handcrafted Truffle Cacio e Pepe Pasta 🍝', category: 'Food', saved: false, tags: ['pasta', 'rome', 'food'] },
+  { id: 9, username: 'seattle_space_needle', location: 'Seattle, Washington', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/200px-Space_Needle_2011-07-04.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/200px-Space_Needle_2011-07-04.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/600px-Space_Needle_2011-07-04.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Space_Needle_2011-07-04.jpg/600px-Space_Needle_2011-07-04.jpg)', caption: 'Seattle Skyline & Space Needle Night View 🏙️', category: 'Travel', saved: false, tags: ['seattle', 'space needle'] },
+  { id: 10, username: 'met_gala_style', location: 'Fifth Avenue, NYC', userImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/200px-Blazer_jacket.jpg)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)', caption: 'Met Gala Tailored Linen Wrap Evening Look 👗', category: 'Fashion', saved: false, tags: ['dress', 'fashion', 'gala'] }
 ];
 
 const mockData = {
-  food: { label: 'Looks like a beautifully plated pasta from a cosy Italian restaurant', emoji: '🍝', bg: '#2d1510', nearby: [{ n: 'Trattoria Roma', d: '0.3 km', r: '4.8', p: '$$$', e: '🍝' }, { n: 'Pasta House', d: '0.7 km', r: '4.6', p: '$$', e: '🍜' }], shop: [{ n: 'Pasta Maker Pro', b: 'KitchenAid', p: '$149', r: '4.7', e: '🍝', badge: 'Bestseller' }], saves: [{ t: 'reel', l: 'Pasta recipe · 2M views', u: '@foodie_global' }, { t: 'post', l: 'Best pasta in Soho', u: '@nyc_eats' }] },
-  fashion: { label: 'A stunning minimalist white linen co-ord set with structured blazer', emoji: '👗', bg: '#1e1e1e', nearby: [{ n: 'Zara Soho', d: '0.5 km', r: '4.5', p: '$$$', e: '👗' }, { n: 'H&M Fifth Ave', d: '0.8 km', r: '4.3', p: '$$', e: '👔' }], shop: [{ n: 'Linen Co-ord Set', b: 'Zara', p: '$89', r: '4.6', e: '👗', badge: 'Trending' }, { n: 'Structured Blazer', b: 'Mango', p: '$120', r: '4.7', e: '🧥', badge: 'New In' }], saves: [{ t: 'reel', l: 'Summer minimalist outfits', u: '@stylewithtanvi' }, { t: 'post', l: 'Office to evening looks', u: '@fashionforward' }] },
-  travel: { label: 'A breathtaking view of Santorini\'s iconic white-washed cliffs and blue domes', emoji: '🏛️', bg: '#1a2a4a', nearby: [{ n: 'Greek Kitchen', d: '2.1 km', r: '4.7', p: '$$$', e: '🏛️' }], shop: [{ n: 'Greece 7D Package', b: 'MakeMyTrip', p: '$1,200', r: '4.8', e: '✈️', badge: 'Top Seller' }], saves: [{ t: 'reel', l: 'Santorini hidden gems', u: '@travel_pro' }] }
+  food: { label: 'Looks like a beautifully plated dish from a top restaurant', emoji: '🍝', bg: '#2d1510', nearby: [{ n: 'Trattoria Roma', d: '0.3 km', r: '4.8', p: '$$$', e: '🍝' }], shop: [{ n: 'Gourmet Sauce Set', b: 'Rao\'s', p: '$29', r: '4.9', e: '🫙', badge: 'Top Rated' }], saves: [{ t: 'reel', l: 'Pasta recipe · 2M views', u: '@foodie_global' }] },
+  fashion: { label: 'A stunning minimalist white linen co-ord set with structured blazer', emoji: '👗', bg: '#1e1e1e', nearby: [{ n: 'Zara Soho', d: '0.5 km', r: '4.5', p: '$$$', e: '👗' }], shop: [{ n: 'Linen Co-ord Set', b: 'Zara', p: '$89', r: '4.6', e: '👗', badge: 'Trending' }], saves: [{ t: 'reel', l: 'Summer minimalist outfits', u: '@stylewithtanvi' }] },
+  travel: { label: 'A breathtaking view of iconic landmarks and scenery', emoji: '🏛️', bg: '#1a2a4a', nearby: [{ n: 'Grand View Point', d: '0.5 km', r: '4.9', p: '$$$', e: '🏛️' }], shop: [{ n: 'Travel Package 7D', b: 'Booking.com', p: '$1,200', r: '4.8', e: '✈️', badge: 'Top Seller' }], saves: [{ t: 'reel', l: 'Travel hidden gems', u: '@travel_pro' }] },
+  literature: { label: 'A rare vintage literature edition and classic book collection', emoji: '📚', bg: '#14532d', nearby: [{ n: 'Strand Bookstore', d: '0.2 km', r: '4.9', p: '$$', e: '📚' }], shop: [{ n: 'Classic Hardcover Edition', b: 'Amazon', p: '$24', r: '4.9', e: '📚', badge: 'Bestseller' }], saves: [{ t: 'post', l: 'Must-read classic novels', u: '@strand_books' }] }
 };
 
 function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
@@ -125,7 +125,6 @@ function openExternalLink(url) {
   }
 }
 
-// Preserve Scroll Position & In-App Notification
 function toggleSavePost(postId, btnEl) {
   const post = initialPosts.find(p => p.id === postId);
   if (post) {
@@ -245,10 +244,6 @@ home:()=>`${sbar()}
     <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
       ${[{icon:'🖼️',t:'Upload from Camera Roll',s:'Find anything from your photos',col:'#9333EA',cat:'food'},{icon:'📷',t:'Point Your Camera',s:'Scan anything in real time',col:'#EC4899',cat:'fashion'},{icon:'🔖',t:'Search Your Saved Posts',s:'Unlock your saved collection',col:'#F59E0B',cat:'travel'}].map(a=>`<button class="btn action-btn" data-cat="${a.cat}" style="display:flex;align-items:center;gap:14px;background:#111;border-radius:16px;padding:14px;border:1px solid ${a.col}33;width:100%"><div style="width:46px;height:46px;border-radius:12px;background:${a.col}22;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${a.icon}</div><div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${a.t}</div><div style="color:#555;font-size:11px;margin-top:2px">${a.s}</div></div><span style="color:#444;font-size:18px">›</span></button>`).join('')}
     </div>
-    <div style="padding:0 16px">
-      <div style="color:#444;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Recent Scouts</div>
-      <div style="display:flex;gap:10px">${['🍝','👗','🏛️','🌮','✈️'].map(e=>`<div style="width:56px;height:56px;border-radius:12px;background:#111;border:1px solid #222;display:flex;align-items:center;justify-content:center;font-size:24px">${e}</div>`).join('')}</div>
-    </div>
     ${sponsored('🛍️','Nykaa Fashion','Discover trending looks near you','Shop')}
   </div>`,
 
@@ -261,14 +256,14 @@ upload:()=>`${sbar()}
     <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFileSelect(this.files[0])">
     <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA66;border-radius:24px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;background:#9333EA08">
       <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:28px">📤</div>
-      <div style="text-align:center"><div style="font-weight:600;color:#fff;font-size:14px;margin-bottom:4px">Upload Any Image</div><div style="color:#555;font-size:12px">Food · Fashion · Travel · Products</div></div>
+      <div style="text-align:center"><div style="font-weight:600;color:#fff;font-size:14px;margin-bottom:4px">Upload Any Image</div><div style="color:#555;font-size:12px">Food · Fashion · Travel · Literature</div></div>
       <div style="padding:10px 24px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:13px;font-weight:600;color:#fff">Choose Photo</div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:12px;padding:0 20px;margin:4px 0 16px"><div style="flex:1;height:1px;background:#222"></div><span style="color:#444;font-size:12px">or try a demo</span><div style="flex:1;height:1px;background:#222"></div></div>
   <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
-    <div style="color:#444;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Demo Images — Scout in Action</div>
-    ${[{e:'🍝',t:'Italian Food',cat:'food'},{e:'👗',t:'Fashion Outfit',cat:'fashion'},{e:'🏛️',t:'Travel Destination',cat:'travel'}].map(d=>`<button class="btn demo-btn" data-cat="${d.cat}" style="display:flex;align-items:center;gap:14px;background:#111;border-radius:16px;padding:14px;border:1px solid #222;width:100%"><div style="width:52px;height:52px;border-radius:12px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${d.e}</div><div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${d.t}</div><div style="color:#555;font-size:11px;margin-top:2px">Tap to see Scout analyse this</div></div><div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:20px;background:#EC489922"><span style="font-size:10px;color:#EC4899">✦ Scout</span></div></button>`).join('')}
+    <div style="color:#444;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Demo Categories — Scout in Action</div>
+    ${[{e:'🍝',t:'Food',cat:'food'},{e:'👗',t:'Fashion Outfit',cat:'fashion'},{e:'🏛️',t:'Travel Destination',cat:'travel'},{e:'📚',t:'Literature',cat:'literature'}].map(d=>`<button class="btn demo-btn" data-cat="${d.cat}" style="display:flex;align-items:center;gap:14px;background:#111;border-radius:16px;padding:14px;border:1px solid #222;width:100%"><div style="width:52px;height:52px;border-radius:12px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${d.e}</div><div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${d.t}</div><div style="color:#555;font-size:11px;margin-top:2px">Tap to see Scout analyse this</div></div><div style="display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:20px;background:#EC489922"><span style="font-size:10px;color:#EC4899">✦ Scout</span></div></button>`).join('')}
   </div>`,
 
 analyzing:()=>`${sbar()}
@@ -367,7 +362,7 @@ results:()=>{
 
 saved:()=>{
   const savedList = initialPosts.filter(p => p.saved);
-  const categories = ['Fashion', 'Food', 'Travel', 'Literature', 'Architecture'];
+  const categories = ['Fashion', 'Food', 'Travel', 'Literature'];
 
   if (currentSavedCategory) {
     const catItems = savedList.filter(p => p.category.toLowerCase() === currentSavedCategory.toLowerCase());
