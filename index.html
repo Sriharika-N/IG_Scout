@@ -27,7 +27,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .stories-container::-webkit-scrollbar{display:none}
 .story-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
 .story-avatar{width:56px;height:56px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center}
-.story-avatar-inner{width:100%;height:100%;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #000}
+.story-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000}
 
 /* Feed Scroll Container */
 .feed-container{flex:1;overflow-y:auto;scrollbar-width:none}
@@ -36,9 +36,8 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 /* Instagram Post Layout */
 .ig-post{border-bottom:1px solid #181818;margin-bottom:12px;background:#000}
 .ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-.ig-media{width:100%;height:320px;background:linear-gradient(135deg,#1c1c1e,#2c2c2e);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.ig-media-icon{font-size:72px;margin-bottom:8px}
-.ig-media-badge{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.75);padding:4px 10px;border-radius:12px;font-size:11px;border:1px solid #333}
+.ig-media{width:100%;height:340px;background:#141414;overflow:hidden;position:relative}
+.ig-media img{width:100%;height:100%;object-fit:cover;display:block}
 
 .ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px;font-size:20px}
 .ig-caption{padding:0 14px 12px;font-size:13px;line-height:1.4}
@@ -47,9 +46,10 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .ad-card{background:linear-gradient(135deg,#1c1917,#2e1065);border:1px solid #9333EA66;padding:12px;border-radius:14px;margin-top:12px;display:flex;align-items:center;justify-content:space-between}
 .search-input{width:100%;background:#1c1c1e;border:1px solid #333;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
 
-/* Grid Thumbnails for Saved Collections */
-.category-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 0}
-.cat-thumb-card{background:#141414;border:1px solid #222;border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:130px;position:relative;cursor:pointer}
+/* Thumbnail Cards for Collections */
+.grid-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 0}
+.thumb-card{background:#141414;border:1px solid #222;border-radius:14px;overflow:hidden;text-align:left;cursor:pointer}
+.thumb-card img{width:100%;height:110px;object-fit:cover;display:block;background:#222}
 </style>
 </head>
 <body>
@@ -74,47 +74,47 @@ let userUploadedImage = null;
 let activeResult = null;
 let currentSavedCategory = null;
 
-// Category Thumbnail Themes (Pure CSS Graphics)
-const categoryThemes = {
-  Fashion: { bg: 'linear-gradient(135deg,#2e1065,#3b0764)', icon: '👗', color: '#ec4899' },
-  Food: { bg: 'linear-gradient(135deg,#451a03,#7c2d12)', icon: '🍕', color: '#f59e0b' },
-  Travel: { bg: 'linear-gradient(135deg,#0c4a6e,#1e3a8a)', icon: '🌆', color: '#38bdf8' },
-  Literature: { bg: 'linear-gradient(135deg,#14532d,#064e3b)', icon: '📚', color: '#4ade80' },
-  Architecture: { bg: 'linear-gradient(135deg,#262626,#171717)', icon: '🏛️', color: '#a855f7' }
+// Category Thumbnail Covers (Real Photos)
+const categoryCovers = {
+  Fashion: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=400',
+  Food: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=400',
+  Travel: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400',
+  Literature: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=400',
+  Architecture: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=400'
 };
 
-// 30 US-Centric Posts (Zero external image dependency)
+// 30 US-Centric Posts (Real High-Res Photos across Travel, Food, Fashion, Literature, Architecture)
 const initialPosts = [
-  { id: 1, username: 'nyc_eats', avatarIcon: '🌆', location: 'Times Square, NYC', icon: '🌆', caption: 'Times Square lights & late night energy 🌇', category: 'Travel', saved: false, tags: ['times square', 'nyc', 'travel'] },
-  { id: 2, username: 'wallstreet_journal', avatarIcon: '🗽', location: 'Wall Street, Financial District, NYC', icon: '🗽', caption: 'Fearless Girl Statue at Wall Street NYC 🗽', category: 'Travel', saved: false, tags: ['fearless girl', 'wall street', 'financial district'] },
-  { id: 3, username: 'joes_pizza_official', avatarIcon: '🍕', location: 'Greenwich Village, NYC', icon: '🍕', caption: 'Classic NYC Slice at Joe\'s Pizza Soho 🍕', category: 'Food', saved: false, tags: ['joes pizza', 'pizza', 'nyc', 'food'] },
-  { id: 4, username: 'seattle_insider', avatarIcon: '🏙️', location: 'Seattle, Washington', icon: '🏙️', caption: 'Space Needle skyline views in Seattle 🏙️', category: 'Travel', saved: false, tags: ['seattle', 'space needle', 'washington'] },
-  { id: 5, username: 'dc_capitol', avatarIcon: '🏛️', location: 'Washington, D.C.', icon: '🏛️', caption: 'Lincoln Memorial & National Mall Sunset 🏛️', category: 'Travel', saved: false, tags: ['washington dc', 'dc', 'capitol'] },
-  { id: 6, username: 'katzs_delicatessen', avatarIcon: '🥪', location: 'Lower East Side, NYC', icon: '🥪', caption: 'Iconic Pastrami Sandwich at Katz\'s Deli 🥪', category: 'Food', saved: false, tags: ['katzs', 'deli', 'nyc', 'food'] },
-  { id: 7, username: 'ny_fashionweek', avatarIcon: '🧥', location: 'SoHo, New York', icon: '🧥', caption: 'Tailored Corporate Chic for Wall Street 🧥', category: 'Fashion', saved: false, tags: ['suit', 'blazer', 'wall street', 'fashion'] },
-  { id: 8, username: 'seattle_bites', avatarIcon: '🍲', location: 'Pike Place Market, Seattle', icon: '🍲', caption: 'Pike Place Chowder bowl in Seattle 🍲', category: 'Food', saved: false, tags: ['chowder', 'seattle', 'food'] },
-  { id: 9, username: 'strand_books', avatarIcon: '📚', location: 'Broadway, NYC', icon: '📚', caption: 'Rare Classics at Strand Book Store 📚', category: 'Literature', saved: false, tags: ['books', 'strand', 'nyc', 'literature'] },
-  { id: 10, username: 'brooklyn_bridge', avatarIcon: '🌉', location: 'DUMBO, Brooklyn', icon: '🌉', caption: 'Brooklyn Bridge Walk at Dawn 🌉', category: 'Travel', saved: false, tags: ['brooklyn bridge', 'nyc', 'travel'] },
-  { id: 11, username: 'met_museum', avatarIcon: '🏛️', location: 'Fifth Avenue, NYC', icon: '🏛️', caption: 'Gala & Art Architecture at The Met 🏛️', category: 'Architecture', saved: false, tags: ['met', 'museum', 'nyc'] },
-  { id: 12, username: 'soho_style', avatarIcon: '👗', location: 'Manhattan, NYC', icon: '👗', caption: 'Floral Gala Wrap Dress for Evening Events 👗', category: 'Fashion', saved: false, tags: ['dress', 'dresses', 'gala', 'fashion'] },
-  { id: 13, username: 'le_bernardin', avatarIcon: '🍷', location: 'Midtown, NYC', icon: '🍷', caption: 'Michelin Seafood Dining at Le Bernardin 🍷', category: 'Food', saved: false, tags: ['michelin', 'fine dining', 'nyc'] },
-  { id: 14, username: 'dc_literature', avatarIcon: '📚', location: 'Library of Congress, DC', icon: '📚', caption: 'Reading Room at Library of Congress 📚', category: 'Literature', saved: false, tags: ['library', 'dc', 'literature'] },
-  { id: 15, username: 'fifth_ave_chic', avatarIcon: '🧥', location: 'Fifth Ave, NYC', icon: '🧥', caption: 'Autumn Trench Coat Outfit Inspiration 🧥', category: 'Fashion', saved: false, tags: ['coat', 'trench', 'fashion'] },
-  { id: 16, username: 'central_park_life', avatarIcon: '🍂', location: 'Central Park, NYC', icon: '🍂', caption: 'Autumn foliage at Bethesda Terrace 🍂', category: 'Travel', saved: false, tags: ['central park', 'nyc', 'travel'] },
-  { id: 17, username: 'gramercy_tavern', avatarIcon: '🍺', location: 'Gramercy, NYC', icon: '🍺', caption: 'Rustic Tavern Burger & Craft Ale 🍺', category: 'Food', saved: false, tags: ['burger', 'nyc', 'food'] },
-  { id: 18, username: 'vogue_us', avatarIcon: '👗', location: 'Tribeca, NYC', icon: '👗', caption: 'Silk Evening Cocktail Gown 👗', category: 'Fashion', saved: false, tags: ['dress', 'gala', 'fashion'] },
-  { id: 19, username: 'seattle_arch', avatarIcon: '🏛️', location: 'Seattle, Washington', icon: '🏛️', caption: 'Modern Glass Architecture in Downtown Seattle 🏛️', category: 'Architecture', saved: false, tags: ['seattle', 'architecture'] },
-  { id: 20, username: 'ny_public_library', avatarIcon: '📚', location: 'Bryant Park, NYC', icon: '📚', caption: 'Rose Main Reading Room at NYPL 📚', category: 'Literature', saved: false, tags: ['nypl', 'nyc', 'books'] },
-  { id: 21, username: 'grand_central', avatarIcon: '🏛️', location: 'Midtown East, NYC', icon: '🏛️', caption: 'Celestial Ceiling at Grand Central Terminal 🏛️', category: 'Architecture', saved: false, tags: ['grand central', 'nyc', 'architecture'] },
-  { id: 22, username: 'chelsea_market', avatarIcon: '🦞', location: 'Meatpacking, NYC', icon: '🦞', caption: 'Fresh Maine Lobster Roll at Chelsea Market 🦞', category: 'Food', saved: false, tags: ['lobster', 'nyc', 'food'] },
-  { id: 23, username: 'highline_nyc', avatarIcon: '🌿', location: 'Chelsea, NYC', icon: '🌿', caption: 'High Line Elevated Park Sunset Walk 🌿', category: 'Travel', saved: false, tags: ['high line', 'nyc', 'travel'] },
-  { id: 24, username: 'manhattan_couture', avatarIcon: '👗', location: 'Upper East Side, NYC', icon: '👗', caption: 'Casual Summer Linen Set 👗', category: 'Fashion', saved: false, tags: ['linen', 'fashion', 'dress'] },
-  { id: 25, username: 'washington_monument', avatarIcon: '🇺🇸', location: 'Washington, D.C.', icon: '🇺🇸', caption: 'Washington Monument Reflecting Pool 🇺🇸', category: 'Travel', saved: false, tags: ['dc', 'travel', 'monument'] },
-  { id: 26, username: 'seattle_coffee_roasters', avatarIcon: '☕', location: 'Capitol Hill, Seattle', icon: '☕', caption: 'Pour-Over Coffee & Pastry in Seattle ☕', category: 'Food', saved: false, tags: ['coffee', 'seattle', 'food'] },
-  { id: 27, username: 'hudson_yards', avatarIcon: '🏙️', location: 'Hudson Yards, NYC', icon: '🏙️', caption: 'The Vessel & Modernist Architecture 🏙️', category: 'Architecture', saved: false, tags: ['hudson yards', 'architecture'] },
-  { id: 28, username: 'classic_fiction', avatarIcon: '📚', location: 'Greenwich, Connecticut', icon: '📚', caption: 'First Edition Fiction Masterpieces 📚', category: 'Literature', saved: false, tags: ['fiction', 'books', 'literature'] },
-  { id: 29, username: 'broadway_shows', avatarIcon: '🎭', location: 'Theater District, NYC', icon: '🎭', caption: 'Broadway Marquee Lights Night 🎭', category: 'Travel', saved: false, tags: ['broadway', 'nyc', 'travel'] },
-  { id: 30, username: 'tribeca_loft', avatarIcon: '🧱', location: 'Tribeca, NYC', icon: '🧱', caption: 'Industrial Exposed Brick Loft Architecture 🧱', category: 'Architecture', saved: false, tags: ['tribeca', 'architecture', 'loft'] }
+  { id: 1, username: 'nyc_eats', location: 'Times Square, NYC', userImg: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Times Square lights & late night NYC energy 🌆', category: 'Travel', saved: false, tags: ['times square', 'nyc', 'travel'] },
+  { id: 2, username: 'wallstreet_journal', location: 'Wall Street, Financial District, NYC', userImg: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Fearless Girl Statue at Wall Street NYC 🗽', category: 'Travel', saved: false, tags: ['fearless girl', 'wall street', 'financial district'] },
+  { id: 3, username: 'joes_pizza_official', location: 'Greenwich Village, NYC', userImg: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Classic NYC Slice at Joe\'s Pizza Soho 🍕', category: 'Food', saved: false, tags: ['joes pizza', 'pizza', 'nyc', 'food'] },
+  { id: 4, username: 'seattle_insider', location: 'Seattle, Washington', userImg: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/63332/science-world-vancouver-night-63332.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Space Needle skyline views in Seattle 🏙️', category: 'Travel', saved: false, tags: ['seattle', 'space needle', 'washington'] },
+  { id: 5, username: 'dc_capitol', location: 'Washington, D.C.', userImg: 'https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/208701/pexels-photo-208701.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Lincoln Memorial & National Mall Sunset 🏛️', category: 'Travel', saved: false, tags: ['washington dc', 'dc', 'capitol'] },
+  { id: 6, username: 'katzs_delicatessen', location: 'Lower East Side, NYC', userImg: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1603901/pexels-photo-1603901.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Iconic Pastrami Sandwich at Katz\'s Deli 🥪', category: 'Food', saved: false, tags: ['katzs', 'deli', 'nyc', 'food'] },
+  { id: 7, username: 'ny_fashionweek', location: 'SoHo, New York', userImg: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Tailored Corporate Chic for Wall Street 🧥', category: 'Fashion', saved: false, tags: ['suit', 'blazer', 'wall street', 'fashion'] },
+  { id: 8, username: 'seattle_bites', location: 'Pike Place Market, Seattle', userImg: 'https://images.pexels.com/photos/834863/pexels-photo-834863.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/699953/pexels-photo-699953.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Pike Place Chowder bowl in Seattle 🍲', category: 'Food', saved: false, tags: ['chowder', 'seattle', 'food'] },
+  { id: 9, username: 'strand_books', location: 'Broadway, NYC', userImg: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Rare Classics at Strand Book Store 📚', category: 'Literature', saved: false, tags: ['books', 'strand', 'nyc', 'literature'] },
+  { id: 10, username: 'brooklyn_bridge', location: 'DUMBO, Brooklyn', userImg: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Brooklyn Bridge Walk at Dawn 🌉', category: 'Travel', saved: false, tags: ['brooklyn bridge', 'nyc', 'travel'] },
+  { id: 11, username: 'met_museum', location: 'Fifth Avenue, NYC', userImg: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Gala & Art Architecture at The Met 🏛️', category: 'Architecture', saved: false, tags: ['met', 'museum', 'nyc'] },
+  { id: 12, username: 'soho_style', location: 'Manhattan, NYC', userImg: 'https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Floral Gala Wrap Dress for Evening Events 👗', category: 'Fashion', saved: false, tags: ['dress', 'dresses', 'gala', 'fashion'] },
+  { id: 13, username: 'le_bernardin', location: 'Midtown, NYC', userImg: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Michelin Seafood Dining at Le Bernardin 🍷', category: 'Food', saved: false, tags: ['michelin', 'fine dining', 'nyc'] },
+  { id: 14, username: 'dc_literature', location: 'Library of Congress, DC', userImg: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Reading Room at Library of Congress 📚', category: 'Literature', saved: false, tags: ['library', 'dc', 'literature'] },
+  { id: 15, username: 'fifth_ave_chic', location: 'Fifth Ave, NYC', userImg: 'https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Autumn Trench Coat Outfit Inspiration 🧥', category: 'Fashion', saved: false, tags: ['coat', 'trench', 'fashion'] },
+  { id: 16, username: 'central_park_life', location: 'Central Park, NYC', userImg: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Autumn foliage at Bethesda Terrace 🍂', category: 'Travel', saved: false, tags: ['central park', 'nyc', 'travel'] },
+  { id: 17, username: 'gramercy_tavern', location: 'Gramercy, NYC', userImg: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Rustic Tavern Burger & Craft Ale 🍺', category: 'Food', saved: false, tags: ['burger', 'nyc', 'food'] },
+  { id: 18, username: 'vogue_us', location: 'Tribeca, NYC', userImg: 'https://images.pexels.com/photos/1755428/pexels-photo-1755428.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1755428/pexels-photo-1755428.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Silk Evening Cocktail Gown 👗', category: 'Fashion', saved: false, tags: ['dress', 'gala', 'fashion'] },
+  { id: 19, username: 'seattle_arch', location: 'Seattle, Washington', userImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Modern Glass Architecture in Downtown Seattle 🏛️', category: 'Architecture', saved: false, tags: ['seattle', 'architecture'] },
+  { id: 20, username: 'ny_public_library', location: 'Bryant Park, NYC', userImg: 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Rose Main Reading Room at NYPL 📚', category: 'Literature', saved: false, tags: ['nypl', 'nyc', 'books'] },
+  { id: 21, username: 'grand_central', location: 'Midtown East, NYC', userImg: 'https://images.pexels.com/photos/1125212/pexels-photo-1125212.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1125212/pexels-photo-1125212.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Celestial Ceiling at Grand Central Terminal 🏛️', category: 'Architecture', saved: false, tags: ['grand central', 'nyc', 'architecture'] },
+  { id: 22, username: 'chelsea_market', location: 'Meatpacking, NYC', userImg: 'https://images.pexels.com/photos/566345/pexels-photo-566345.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/566345/pexels-photo-566345.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Fresh Maine Lobster Roll at Chelsea Market 🦞', category: 'Food', saved: false, tags: ['lobster', 'nyc', 'food'] },
+  { id: 23, username: 'highline_nyc', location: 'Chelsea, NYC', userImg: 'https://images.pexels.com/photos/1105766/pexels-photo-1105766.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1105766/pexels-photo-1105766.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'High Line Elevated Park Sunset Walk 🌿', category: 'Travel', saved: false, tags: ['high line', 'nyc', 'travel'] },
+  { id: 24, username: 'manhattan_couture', location: 'Upper East Side, NYC', userImg: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Casual Summer Linen Set 👗', category: 'Fashion', saved: false, tags: ['linen', 'fashion', 'dress'] },
+  { id: 25, username: 'washington_monument', location: 'Washington, D.C.', userImg: 'https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Washington Monument Reflecting Pool 🇺🇸', category: 'Travel', saved: false, tags: ['dc', 'travel', 'monument'] },
+  { id: 26, username: 'seattle_coffee_roasters', location: 'Capitol Hill, Seattle', userImg: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Pour-Over Coffee & Pastry in Seattle ☕', category: 'Food', saved: false, tags: ['coffee', 'seattle', 'food'] },
+  { id: 27, username: 'hudson_yards', location: 'Hudson Yards, NYC', userImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'The Vessel & Modernist Architecture 🏙️', category: 'Architecture', saved: false, tags: ['hudson yards', 'architecture'] },
+  { id: 28, username: 'classic_fiction', location: 'Greenwich, Connecticut', userImg: 'https://images.pexels.com/photos/1018136/pexels-photo-1018136.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1018136/pexels-photo-1018136.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'First Edition Fiction Masterpieces 📚', category: 'Literature', saved: false, tags: ['fiction', 'books', 'literature'] },
+  { id: 29, username: 'broadway_shows', location: 'Theater District, NYC', userImg: 'https://images.pexels.com/photos/109669/pexels-photo-109669.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/109669/pexels-photo-109669.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Broadway Marquee Lights Night 🎭', category: 'Travel', saved: false, tags: ['broadway', 'nyc', 'travel'] },
+  { id: 30, username: 'tribeca_loft', location: 'Tribeca, NYC', userImg: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Industrial Exposed Brick Loft Architecture 🧱', category: 'Architecture', saved: false, tags: ['tribeca', 'architecture', 'loft'] }
 ];
 
 function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
@@ -127,7 +127,6 @@ function go(s){
   }
 }
 
-// Preserve Scroll Position When Bookmarking
 function toggleSavePost(postId, btnEl) {
   const post = initialPosts.find(p => p.id === postId);
   if (post) {
@@ -140,11 +139,9 @@ function triggerScoutOnItem(postId) {
   const post = initialPosts.find(p => p.id === postId);
   if (!post) return;
   
-  userUploadedImage = null;
+  userUploadedImage = post.mediaImg;
   go('analyzing');
-
-  // Trigger Backend Analysis with Local Search Query
-  executeScoutAnalysis(post.caption, post.category);
+  executeScoutAnalysis(post.mediaImg, post.caption, post.category);
 }
 
 function handleFileSelect(file) {
@@ -161,16 +158,16 @@ function handleFileSelect(file) {
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     userUploadedImage = canvas.toDataURL('image/jpeg', 0.8);
     go('analyzing');
-    executeScoutAnalysis('Custom Image', 'Fashion');
+    executeScoutAnalysis(null, 'Custom Upload', 'Fashion');
   };
 }
 
-async function executeScoutAnalysis(searchQuery, categoryHint) {
+async function executeScoutAnalysis(imgUrl, searchQuery, categoryHint) {
   try {
     const res = await fetch('/api/scout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ base64Data: userUploadedImage, imageUrl: searchQuery })
+      body: JSON.stringify({ base64Data: userUploadedImage, imageUrl: imgUrl || searchQuery })
     });
 
     const data = await res.json();
@@ -213,7 +210,7 @@ home:()=>`${sbar()}
     </div>
     ${initialPosts.slice(0, 7).map(p => `
       <div class="story-item">
-        <div class="story-avatar"><div class="story-avatar-inner">${p.avatarIcon}</div></div>
+        <div class="story-avatar"><img src="${p.userImg}" crossorigin="anonymous" /></div>
         <span style="font-size:10px;color:#888">${p.username}</span>
       </div>
     `).join('')}
@@ -224,7 +221,7 @@ home:()=>`${sbar()}
       <div class="ig-post">
         <div class="ig-post-header">
           <div style="display:flex;align-items:center;gap:10px">
-            <div class="story-avatar" style="width:32px;height:32px"><div class="story-avatar-inner" style="font-size:14px">${p.avatarIcon}</div></div>
+            <div class="story-avatar" style="width:32px;height:32px"><img src="${p.userImg}" crossorigin="anonymous"/></div>
             <div>
               <div style="font-size:12px;font-weight:600">${p.username}</div>
               <div style="font-size:10px;color:#888">${p.location}</div>
@@ -232,8 +229,7 @@ home:()=>`${sbar()}
           </div>
         </div>
         <div class="ig-media" onclick="triggerScoutOnItem(${p.id})" style="cursor:pointer">
-          <div class="ig-media-icon">${p.icon}</div>
-          <div class="ig-media-badge">📍 ${p.location}</div>
+          <img src="${p.mediaImg}" crossorigin="anonymous"/>
         </div>
         <div class="ig-actions">
           <div style="display:flex;gap:14px"><span>♥</span><span>💬</span><span>↗</span></div>
@@ -290,7 +286,7 @@ upload:()=>`${sbar()}
 
 analyzing:()=>`${sbar()}
   <div style="height:580px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center">
-    <div style="width:150px;height:150px;border-radius:20px;background:linear-gradient(135deg,#2e1065,#3b0764);display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;margin-bottom:16px">
+    <div style="width:150px;height:150px;border-radius:20px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;margin-bottom:16px;overflow:hidden">
       ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : '✦'}
       <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.5s linear infinite;top:0"></div>
     </div>
@@ -311,7 +307,7 @@ results:()=>{
     <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">${ai.confidence}% MATCH</span>
   </div>
   <div style="padding:14px;overflow-y:auto;flex:1">
-    <div style="border-radius:16px;height:180px;background:linear-gradient(135deg,#1c1c1e,#2c2c2e);display:flex;align-items:center;justify-content:center;font-size:72px;margin-bottom:10px;overflow:hidden">
+    <div style="border-radius:16px;height:180px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:72px;margin-bottom:10px;overflow:hidden">
       ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : '✦'}
     </div>
 
@@ -354,12 +350,11 @@ saved:()=>{
       </div>
       <div style="padding:12px 16px;flex:1;overflow-y:auto">
         ${catItems.length === 0 ? `<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">No items saved in ${currentSavedCategory} yet.<br>Go to Home Feed and tap 🏷️ on any post!</div>` : `
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="grid-container">
             ${catItems.map(item => `
-              <div class="btn" onclick="triggerScoutOnItem(${item.id})" style="background:#141414;border:1px solid #222;border-radius:12px;padding:12px;text-align:left">
-                <div style="font-size:36px;text-align:center;margin-bottom:6px">${item.icon}</div>
-                <div style="font-size:11px;font-weight:600;color:#fff">${item.caption}</div>
-                <div style="font-size:9px;color:#9333EA;margin-top:4px">✦ Scout & Shop</div>
+              <div class="thumb-card" onclick="triggerScoutOnItem(${item.id})">
+                <img src="${item.mediaImg}" crossorigin="anonymous"/>
+                <div style="padding:8px"><div style="font-size:11px;font-weight:600">${item.caption}</div></div>
               </div>
             `).join('')}
           </div>
@@ -373,15 +368,17 @@ saved:()=>{
     <span style="font-weight:600;font-size:15px">Saved Collections</span>
   </div>
   <div style="padding:12px 16px;flex:1;overflow-y:auto">
-    <div class="category-grid">
+    <div class="grid-container">
       ${categories.map(cat => {
         const count = savedList.filter(p => p.category.toLowerCase() === cat.toLowerCase()).length;
-        const theme = categoryThemes[cat];
+        const coverImg = categoryCovers[cat];
         return `
-          <div class="cat-thumb-card btn" onclick="currentSavedCategory='${cat}';go('saved')" style="background:${theme.bg}">
-            <div style="font-size:32px;margin-bottom:4px">${theme.icon}</div>
-            <div style="font-size:13px;font-weight:700;color:#fff">${cat}</div>
-            <div style="font-size:10px;color:${theme.color};margin-top:2px;font-weight:600">${count} Bookmarks</div>
+          <div class="thumb-card" onclick="currentSavedCategory='${cat}';go('saved')">
+            <img src="${coverImg}" crossorigin="anonymous"/>
+            <div style="padding:8px">
+              <div style="font-size:12px;font-weight:700;color:#fff">${cat}</div>
+              <div style="font-size:9px;color:#9333EA;margin-top:2px;font-weight:600">${count} Bookmarks</div>
+            </div>
           </div>
         `;
       }).join('')}
@@ -405,11 +402,11 @@ function renderSearchResults(val) {
   const matches = initialPosts.filter(p => p.tags.some(t => t.toLowerCase().includes(val.toLowerCase())) || p.caption.toLowerCase().includes(val.toLowerCase()));
   container.innerHTML = `
     <div style="font-size:11px;color:#888;margin-bottom:10px">Found ${matches.length} matches for "${val}":</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="grid-container">
       ${matches.map(p => `
-        <div class="btn" onclick="triggerScoutOnItem(${p.id})" style="background:#141414;border:1px solid #222;border-radius:12px;padding:12px;text-align:left">
-          <div style="font-size:32px;text-align:center;margin-bottom:4px">${p.icon}</div>
-          <div style="font-size:11px;font-weight:600">${p.caption}</div>
+        <div class="thumb-card" onclick="triggerScoutOnItem(${p.id})">
+          <img src="${p.mediaImg}" crossorigin="anonymous"/>
+          <div style="padding:8px"><div style="font-size:11px;font-weight:600">${p.caption}</div></div>
         </div>
       `).join('')}
     </div>`;
