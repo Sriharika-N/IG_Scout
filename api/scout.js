@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const { base64Data, imageUrl } = req.body;
     let googleLensTitle = '';
 
-    // 1. SerpApi Google Lens lookup (if key is set)
+    // 1. SerpApi Search
     if (SERPAPI_KEY && imageUrl && imageUrl.startsWith('http')) {
       try {
         const serpResp = await fetch(
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 2. Process Image Base64
+    // 2. Call Gemini 1.5 Flash Vision
     const matches = base64Data ? base64Data.match(/^data:(.+);base64,(.+)$/) : null;
     const mimeType = matches ? matches[1] : 'image/jpeg';
     const rawBase64 = matches ? matches[2] : '';
@@ -46,7 +46,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3. Gemini Vision Processing
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const prompt = `Analyze this image for Instagram Scout Visual Search.
     Google Lens Title: ${googleLensTitle || 'None'}.
@@ -70,9 +69,15 @@ export default async function handler(req, res) {
     const aiData = JSON.parse(rawText);
 
     const query = encodeURIComponent(aiData.searchQuery || googleLensTitle || aiData.summary);
-    aiData.externalBuyUrl = aiData.category === 'Fashion'
-      ? `[https://www.google.com/search?tbm=shop&q=$](https://www.google.com/search?tbm=shop&q=$){query}`
-      : `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){query}`;
+    if (aiData.category === 'Literature') {
+      aiData.externalBuyUrl = `[https://www.amazon.com/s?k=$](https://www.amazon.com/s?k=$){query}`;
+    } else if (aiData.category === 'Food') {
+      aiData.externalBuyUrl = `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){query}+restaurant+menu+reservation`;
+    } else if (aiData.category === 'Fashion') {
+      aiData.externalBuyUrl = `[https://www.google.com/search?tbm=shop&q=$](https://www.google.com/search?tbm=shop&q=$){query}`;
+    } else {
+      aiData.externalBuyUrl = `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){query}+travel+guide`;
+    }
 
     return res.status(200).json({ aiAnalysis: aiData });
 
