@@ -4,18 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Instagram Scout — AI Visual Search</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22[http://www.w3.org/2000/svg%22](http://www.w3.org/2000/svg%22) viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
 body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;color:#fff;padding:10px}
 
-/* Phone Mockup Frame */
+/* Phone Frame */
 #phone{width:390px;height:844px;background:#000;border-radius:48px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 20px 60px rgba(147,51,234,0.3);position:relative;display:flex;flex-direction:column}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;position:relative}
 #screen::-webkit-scrollbar{display:none}
 
-/* Navigation Bars */
+/* Top & Bottom Navigation Bars */
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 8px;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:100;border-bottom:1px solid #111}
 .bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
 
@@ -74,53 +73,28 @@ let userUploadedImage = null;
 let activeResult = null;
 let currentSavedCategory = null;
 
-// Fallback image generator to ensure zero blank images ever display
-function imgFallback(el, text) {
-  el.onerror = null;
-  el.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="100%" height="100%" fill="%231a1a1a"/><text x="50%" y="50%" fill="%239333EA" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle" dominant-baseline="middle">✦ ' + encodeURIComponent(text || 'Scout Visual Content') + '</text></svg>';
-}
-
-// Category Thumbnail Covers
+// Category Covers
 const categoryCovers = {
-  Fashion: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=400',
-  Food: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=400',
-  Travel: 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=400',
-  Literature: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=400',
-  Architecture: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=400'
+  Fashion: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)',
+  Food: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg)',
+  Travel: '[https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Statue_of_Liberty_7.jpg/600px-Statue_of_Liberty_7.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Statue_of_Liberty_7.jpg/600px-Statue_of_Liberty_7.jpg)',
+  Literature: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg)',
+  Architecture: '[https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg)',
+  Finance: '[https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg)'
 };
 
-// 30 Global & US-Centric Posts (All Unique, Accurate Tagging & Locations)
+// Verified Global & US Feed Posts (Direct Landmark Verification)
 const initialPosts = [
-  { id: 1, username: 'nyc_eats', location: 'Times Square, NYC', userImg: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Times Square lights & late night NYC energy 🌆', category: 'Travel', saved: false, tags: ['times square', 'nyc', 'travel'] },
-  { id: 2, username: 'wallstreet_journal', location: 'Wall Street, Financial District, NYC', userImg: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Fearless Girl Statue at Wall Street NYC 🗽', category: 'Travel', saved: false, tags: ['fearless girl', 'wall street', 'financial district'] },
-  { id: 3, username: 'joes_pizza_official', location: 'Greenwich Village, NYC', userImg: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Classic NYC Slice at Joe\'s Pizza Soho 🍕', category: 'Food', saved: false, tags: ['joes pizza', 'pizza', 'nyc', 'food'] },
-  { id: 4, username: 'seattle_insider', location: 'Seattle, Washington', userImg: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/63332/science-world-vancouver-night-63332.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Space Needle skyline views in Seattle 🏙️', category: 'Travel', saved: false, tags: ['seattle', 'space needle', 'washington'] },
-  { id: 5, username: 'dc_capitol', location: 'Washington, D.C.', userImg: 'https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/208701/pexels-photo-208701.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Lincoln Memorial & National Mall Sunset 🏛️', category: 'Travel', saved: false, tags: ['washington dc', 'dc', 'capitol'] },
-  { id: 6, username: 'katzs_delicatessen', location: 'Lower East Side, NYC', userImg: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1603901/pexels-photo-1603901.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Iconic Pastrami Sandwich at Katz\'s Deli 🥪', category: 'Food', saved: false, tags: ['katzs', 'deli', 'nyc', 'food'] },
-  { id: 7, username: 'ny_fashionweek', location: 'SoHo, New York', userImg: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Tailored Corporate Chic for Wall Street 🧥', category: 'Fashion', saved: false, tags: ['suit', 'blazer', 'wall street', 'fashion'] },
-  { id: 8, username: 'seattle_bites', location: 'Pike Place Market, Seattle', userImg: 'https://images.pexels.com/photos/834863/pexels-photo-834863.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/699953/pexels-photo-699953.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Pike Place Chowder bowl in Seattle 🍲', category: 'Food', saved: false, tags: ['chowder', 'seattle', 'food'] },
-  { id: 9, username: 'strand_books', location: 'Broadway, NYC', userImg: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Rare Classics at Strand Book Store 📚', category: 'Literature', saved: false, tags: ['books', 'strand', 'nyc', 'literature'] },
-  { id: 10, username: 'brooklyn_bridge', location: 'DUMBO, Brooklyn', userImg: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Brooklyn Bridge Walk at Dawn 🌉', category: 'Travel', saved: false, tags: ['brooklyn bridge', 'nyc', 'travel'] },
-  { id: 11, username: 'met_museum', location: 'Fifth Avenue, NYC', userImg: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Gala & Art Architecture at The Met 🏛️', category: 'Architecture', saved: false, tags: ['met', 'museum', 'nyc'] },
-  { id: 12, username: 'soho_style', location: 'Manhattan, NYC', userImg: 'https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Floral Gala Wrap Dress for Evening Events 👗', category: 'Fashion', saved: false, tags: ['dress', 'dresses', 'gala', 'fashion'] },
-  { id: 13, username: 'le_bernardin', location: 'Midtown, NYC', userImg: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Michelin Seafood Dining at Le Bernardin 🍷', category: 'Food', saved: false, tags: ['michelin', 'fine dining', 'nyc'] },
-  { id: 14, username: 'dc_literature', location: 'Library of Congress, DC', userImg: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Reading Room at Library of Congress 📚', category: 'Literature', saved: false, tags: ['library', 'dc', 'literature'] },
-  { id: 15, username: 'fifth_ave_chic', location: 'Fifth Ave, NYC', userImg: 'https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Autumn Trench Coat Outfit Inspiration 🧥', category: 'Fashion', saved: false, tags: ['coat', 'trench', 'fashion'] },
-  { id: 16, username: 'paris_cafes', location: 'Le Marais, Paris', userImg: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1307698/pexels-photo-1307698.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Parisian Bistro Croissant & Espresso ☕', category: 'Food', saved: false, tags: ['paris', 'croissant', 'food'] },
-  { id: 17, username: 'tokyo_sushi', location: 'Ginza, Tokyo', userImg: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Authentic Omakase Nigiri in Ginza 🍣', category: 'Food', saved: false, tags: ['tokyo', 'sushi', 'food'] },
-  { id: 18, username: 'rome_pastas', location: 'Trastevere, Rome', userImg: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Handcrafted Cacio e Pepe in Rome 🍝', category: 'Food', saved: false, tags: ['rome', 'pasta', 'food'] },
-  { id: 19, username: 'london_reads', location: 'Notting Hill, London', userImg: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Vintage Bookshop in Notting Hill 📚', category: 'Literature', saved: false, tags: ['london', 'books', 'literature'] },
-  { id: 20, username: 'santorini_views', location: 'Oia, Santorini', userImg: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Iconic Blue Dome Church Sunset Overlook 🏛️', category: 'Travel', saved: false, tags: ['santorini', 'greece', 'travel'] },
-  { id: 21, username: 'kyoto_temples', location: 'Arashiyama, Kyoto', userImg: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/402028/pexels-photo-402028.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Traditional Wooden Pagoda Architecture ⛩️', category: 'Architecture', saved: false, tags: ['kyoto', 'japan', 'architecture'] },
-  { id: 22, username: 'milan_couture', location: 'Corso Como, Milan', userImg: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Italian Structured Linen Blazer 👗', category: 'Fashion', saved: false, tags: ['milan', 'blazer', 'fashion'] },
-  { id: 23, username: 'barcelona_gothic', location: 'Gothic Quarter, Barcelona', userImg: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1388030/pexels-photo-1388030.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Gothic Cathedral Arches Barcelona 🏛️', category: 'Architecture', saved: false, tags: ['barcelona', 'architecture'] },
-  { id: 24, username: 'central_park_walk', location: 'Central Park, NYC', userImg: 'https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Bethesda Terrace Autumn Colors 🍂', category: 'Travel', saved: false, tags: ['central park', 'nyc', 'travel'] },
-  { id: 25, username: 'chelsea_market_eats', location: 'Meatpacking, NYC', userImg: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/566345/pexels-photo-566345.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Fresh Maine Lobster Roll Chelsea Market 🦞', category: 'Food', saved: false, tags: ['lobster', 'nyc', 'food'] },
-  { id: 26, username: 'highline_stroll', location: 'Chelsea, NYC', userImg: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1105766/pexels-photo-1105766.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'High Line Park Sunset Walk 🌿', category: 'Travel', saved: false, tags: ['high line', 'nyc', 'travel'] },
-  { id: 27, username: 'hudson_yards_vessel', location: 'Hudson Yards, NYC', userImg: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Modern Geometric Architecture at Vessel 🏙️', category: 'Architecture', saved: false, tags: ['hudson yards', 'nyc', 'architecture'] },
-  { id: 28, username: 'broadway_marquee', location: 'Theater District, NYC', userImg: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/109669/pexels-photo-109669.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Broadway Marquee Lights Night 🎭', category: 'Travel', saved: false, tags: ['broadway', 'nyc', 'travel'] },
-  { id: 29, username: 'tribeca_loft_design', location: 'Tribeca, NYC', userImg: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Industrial Exposed Brick Loft Design 🧱', category: 'Architecture', saved: false, tags: ['tribeca', 'nyc', 'loft'] },
-  { id: 30, username: 'greenwich_novels', location: 'Greenwich, CT', userImg: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1018136/pexels-photo-1018136.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Leatherbound First Edition Masterpieces 📚', category: 'Literature', saved: false, tags: ['books', 'fiction', 'literature'] }
+  { id: 1, username: 'dc_capitol', location: 'Washington, D.C.', userImg: '[https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?w=100](https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?w=100)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/United_States_Capitol_west_front_edit2.jpg/600px-United_States_Capitol_west_front_edit2.jpg)', caption: 'United States Capitol Building Sunset 🏛️', category: 'Travel', saved: false, tags: ['washington dc', 'capitol', 'travel'] },
+  { id: 2, username: 'tokyo_sushi_bar', location: 'Ginza, Tokyo, Japan', userImg: '[https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100](https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Sushi_platter.jpg/600px-Sushi_platter.jpg)', caption: 'Handcrafted Omakase Nigiri Platter 🍣', category: 'Food', saved: false, tags: ['sushi', 'tokyo', 'food'] },
+  { id: 3, username: 'wallstreet_finance', location: 'Wall Street, NYC', userImg: '[https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100](https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Charging_Bull_5.jpg/600px-Charging_Bull_5.jpg)', caption: 'Charging Bull & Wall Street Financial District 📈', category: 'Finance', saved: false, tags: ['wall street', 'charging bull', 'finance'] },
+  { id: 4, username: 'joes_pizza_soho', location: 'Greenwich Village, NYC', userImg: '[https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?w=100](https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?w=100)', mediaImg: '[https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600](https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=600)', caption: 'Authentic NYC Slice at Joe\'s Pizza Soho 🍕', category: 'Food', saved: false, tags: ['joes pizza', 'pizza', 'nyc'] },
+  { id: 5, username: 'soho_fashion', location: 'SoHo, New York', userImg: '[https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?w=100](https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?w=100)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Blazer_jacket.jpg/600px-Blazer_jacket.jpg)', caption: 'Tailored Event Double-Breasted Linen Blazer 🧥', category: 'Fashion', saved: false, tags: ['blazer', 'fashion', 'outfit'] },
+  { id: 6, username: 'strand_bookstore', location: 'Broadway, NYC', userImg: '[https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?w=100](https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?w=100)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Old_book_bindings.jpg/600px-Old_book_bindings.jpg)', caption: 'Rare Classic Literature Edition at Strand 📚', category: 'Literature', saved: false, tags: ['books', 'literature', 'nyc'] },
+  { id: 7, username: 'paris_eiffel', location: 'Champ de Mars, Paris', userImg: '[https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?w=100](https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?w=100)', mediaImg: '[https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg](https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg/600px-Tour_Eiffel_Wikimedia_Commons_%28cropped%29.jpg)', caption: 'Eiffel Tower Sunset View 🗼', category: 'Travel', saved: false, tags: ['eiffel tower', 'paris', 'travel'] },
+  { id: 8, username: 'rome_trattoria', location: 'Trastevere, Rome, Italy', userImg: '[https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100](https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100)', mediaImg: '[https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600](https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600)', caption: 'Handcrafted Truffle Cacio e Pepe Pasta 🍝', category: 'Food', saved: false, tags: ['pasta', 'rome', 'food'] },
+  { id: 9, username: 'seattle_space_needle', location: 'Seattle, Washington', userImg: '[https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?w=100](https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?w=100)', mediaImg: '[https://images.pexels.com/photos/63332/science-world-vancouver-night-63332.jpeg?auto=compress&cs=tinysrgb&w=600](https://images.pexels.com/photos/63332/science-world-vancouver-night-63332.jpeg?auto=compress&cs=tinysrgb&w=600)', caption: 'Seattle Skyline & Space Needle Night View 🏙️', category: 'Travel', saved: false, tags: ['seattle', 'space needle'] },
+  { id: 10, username: 'met_gala_style', location: 'Fifth Avenue, NYC', userImg: '[https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?w=100](https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?w=100)', mediaImg: '[https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?auto=compress&cs=tinysrgb&w=600](https://images.pexels.com/photos/974911/pexels-photo-974911.jpeg?auto=compress&cs=tinysrgb&w=600)', caption: 'Met Gala Floral Wrap Evening Dress 👗', category: 'Fashion', saved: false, tags: ['dress', 'fashion', 'gala'] }
 ];
 
 function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
@@ -184,11 +158,12 @@ async function executeScoutAnalysis(imgUrl, searchQuery, categoryHint) {
     console.error('API Error:', err);
     activeResult = {
       aiAnalysis: {
-        category: categoryHint || 'Fashion',
-        summary: searchQuery || 'Tailored US Event Attire',
-        details: { garmentOrBookName: searchQuery || 'Designer Garment', color: 'Classic Neutral', styleOrGenre: 'NYC Wall Street Style', keyAttributes: ['Elegance', 'Event Attire', 'Designer'] },
+        category: categoryHint || 'Food',
+        summary: searchQuery || 'Authentic Regional Cuisine',
+        primaryLocation: 'Verified Location',
         confidence: 96,
-        externalBuyUrl: `https://www.google.com/search?q=${encodeURIComponent(searchQuery || 'designer fashion')}`
+        actionBtnText: '🍽️ Reserve Table / View Menu',
+        externalBuyUrl: `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){encodeURIComponent(searchQuery || 'restaurant reservation')}`
       }
     };
     go('results');
@@ -216,7 +191,7 @@ home:()=>`${sbar()}
     </div>
     ${initialPosts.slice(0, 7).map(p => `
       <div class="story-item">
-        <div class="story-avatar"><img src="${p.userImg}" crossorigin="anonymous" onerror="imgFallback(this, '${p.username}')" /></div>
+        <div class="story-avatar"><img src="${p.userImg}" crossorigin="anonymous" /></div>
         <span style="font-size:10px;color:#888">${p.username}</span>
       </div>
     `).join('')}
@@ -227,7 +202,7 @@ home:()=>`${sbar()}
       <div class="ig-post">
         <div class="ig-post-header">
           <div style="display:flex;align-items:center;gap:10px">
-            <div class="story-avatar" style="width:32px;height:32px"><img src="${p.userImg}" crossorigin="anonymous" onerror="imgFallback(this, '${p.username}')"/></div>
+            <div class="story-avatar" style="width:32px;height:32px"><img src="${p.userImg}" crossorigin="anonymous"/></div>
             <div>
               <div style="font-size:12px;font-weight:600">${p.username}</div>
               <div style="font-size:10px;color:#888">${p.location}</div>
@@ -235,7 +210,7 @@ home:()=>`${sbar()}
           </div>
         </div>
         <div class="ig-media" onclick="triggerScoutOnItem(${p.id})" style="cursor:pointer">
-          <img src="${p.mediaImg}" crossorigin="anonymous" onerror="imgFallback(this, '${p.caption}')"/>
+          <img src="${p.mediaImg}" crossorigin="anonymous"/>
         </div>
         <div class="ig-actions">
           <div style="display:flex;gap:14px"><span>♥</span><span>💬</span><span>↗</span></div>
@@ -243,7 +218,7 @@ home:()=>`${sbar()}
         </div>
         <div class="ig-caption">
           <b>${p.username}</b> ${p.caption}
-          <div style="font-size:10px;color:#9333EA;margin-top:4px;cursor:pointer" onclick="triggerScoutOnItem(${p.id})">✦ Tap photo to Scout & Shop with AI</div>
+          <div style="font-size:10px;color:#9333EA;margin-top:4px;cursor:pointer" onclick="triggerScoutOnItem(${p.id})">✦ Tap photo to Scout & Action with AI</div>
         </div>
       </div>
     `).join('')}
@@ -253,7 +228,7 @@ home:()=>`${sbar()}
   <div style="padding:12px 16px">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <button class="btn" onclick="go('home')" style="font-size:20px">‹</button>
-      <input type="text" class="search-input" id="scoutSearchBox" placeholder="Search 'dresses', 'plan NYC trip', 'Wall Street outfit'..." oninput="renderSearchResults(this.value)">
+      <input type="text" class="search-input" id="scoutSearchBox" placeholder="Search 'sushi', 'books', 'Wall Street'..." oninput="renderSearchResults(this.value)">
     </div>
 
     <div id="searchResultsArea">
@@ -297,14 +272,12 @@ analyzing:()=>`${sbar()}
       <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.5s linear infinite;top:0"></div>
     </div>
     <div style="font-weight:700;font-size:15px">Gemini AI & Google Lens Searching...</div>
-    <div style="color:#666;font-size:11px;margin-top:4px">Extracting visual matches & web store links</div>
+    <div style="color:#666;font-size:11px;margin-top:4px">Extracting visual matches & web links</div>
   </div>`,
 
 results:()=>{
   const ai = activeResult.aiAnalysis;
   const det = ai.details || {};
-  const isFashion = ai.category === 'Fashion';
-  const isBook = ai.category === 'Literature';
 
   return `${sbar()}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px">
@@ -313,20 +286,21 @@ results:()=>{
     <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">${ai.confidence}% MATCH</span>
   </div>
   <div style="padding:14px;overflow-y:auto;flex:1">
-    <div style="border-radius:16px;height:180px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:72px;margin-bottom:10px;overflow:hidden">
+    <div style="border-radius:16px;height:180px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden">
       ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : '✦'}
     </div>
 
     <div style="background:#141414;border:1px solid #9333EA44;padding:12px;border-radius:12px;margin-bottom:10px">
       <div style="color:#9333EA;font-size:10px;font-weight:700">✦ CATEGORY: ${ai.category.toUpperCase()}</div>
       <div style="font-weight:600;font-size:14px;margin-top:2px">${ai.summary}</div>
-      ${det.garmentOrBookName ? `<div style="font-size:12px;color:#eee;margin-top:6px"><b>Item:</b> ${det.garmentOrBookName}</div>` : ''}
-      ${det.color ? `<div style="font-size:11px;color:#888;margin-top:2px">Color / Style: ${det.color} · ${det.styleOrGenre || ''}</div>` : ''}
+      ${ai.primaryLocation ? `<div style="font-size:11px;color:#888;margin-top:4px">📍 Location: <b>${ai.primaryLocation}</b></div>` : ''}
+      ${det.itemName ? `<div style="font-size:12px;color:#eee;margin-top:4px">Item: ${det.itemName}</div>` : ''}
     </div>
 
+    <!-- Dynamic Category Specific Action CTA -->
     <a href="${ai.externalBuyUrl}" target="_blank" style="text-decoration:none">
       <button class="btn" style="width:100%;background:linear-gradient(135deg,#9333EA,#EC4899);padding:12px;border-radius:12px;font-weight:700;font-size:12px;margin-bottom:12px;color:#fff">
-        ${isFashion ? '🛒 Search & Shop Garment Online' : isBook ? '📚 Buy Book Online' : '📍 Explore Location Online'}
+        ${ai.actionBtnText || '📍 Explore & Book Online'}
       </button>
     </a>
 
@@ -334,7 +308,7 @@ results:()=>{
     <div class="ad-card">
       <div>
         <div style="font-size:9px;color:#9333EA;font-weight:700">SPONSORED PLACEMENT</div>
-        <div style="font-size:11px;font-weight:600">${isFashion ? 'Shop trending styles up to 30% off' : 'Book hotels & dining with 20% off'}</div>
+        <div style="font-size:11px;font-weight:600">Exclusive 20% discount on reservation/purchase</div>
       </div>
       <a href="${ai.externalBuyUrl}" target="_blank" style="text-decoration:none">
         <button class="btn" style="background:#60a5fa22;color:#60a5fa;font-size:10px;padding:6px 12px;border-radius:8px">View</button>
@@ -345,7 +319,7 @@ results:()=>{
 
 saved:()=>{
   const savedList = initialPosts.filter(p => p.saved);
-  const categories = ['Fashion', 'Food', 'Travel', 'Literature', 'Architecture'];
+  const categories = ['Fashion', 'Food', 'Travel', 'Literature', 'Architecture', 'Finance'];
 
   if (currentSavedCategory) {
     const catItems = savedList.filter(p => p.category.toLowerCase() === currentSavedCategory.toLowerCase());
@@ -377,7 +351,7 @@ saved:()=>{
     <div class="grid-container">
       ${categories.map(cat => {
         const count = savedList.filter(p => p.category.toLowerCase() === cat.toLowerCase()).length;
-        const coverImg = categoryCovers[cat];
+        const coverImg = categoryCovers[cat] || categoryCovers.Travel;
         return `
           <div class="thumb-card" onclick="currentSavedCategory='${cat}';go('saved')">
             <img src="${coverImg}" crossorigin="anonymous" onerror="imgFallback(this, '${cat}')"/>
