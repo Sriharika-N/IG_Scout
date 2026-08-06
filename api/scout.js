@@ -25,19 +25,18 @@ export default async function handler(req, res) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const prompt = `You are a high-precision computer vision model for an Instagram Visual Search tool called Scout.
-    Analyze this image with high geographic and contextual accuracy.
-    Pay close attention to architecture, signage, vegetation, interior decor, regional food styles (e.g. Goa, India vs Mediterranean/Europe).
-    User Goal: "${userIntent || 'general_search'}"
+    const prompt = `Analyze this image for Instagram Scout AI Visual Search.
+    Categorize into one of: "Food", "Fashion", "Travel", "Literature", "Architecture".
+    Be strictly honest about location certainty. If you aren't 100% sure of the exact venue name, provide top probable venue guesses.
 
-    Return ONLY a JSON object (no markdown tags):
+    Return ONLY a raw JSON object:
     {
-      "category": "food" | "fashion" | "travel",
-      "summary": "Specific description of what is in the image",
-      "exactLocation": "Exact or most likely venue/landmark and neighborhood/city (e.g., 'Thalassa, Vagator, Goa' or 'Antares, Anjuna')",
-      "city": "Detected City or State (e.g., Goa, Mumbai, Rome, Paris, Tokyo)",
-      "country": "Detected Country (e.g., India, Italy, France)",
-      "confidence": 98
+      "category": "Food" | "Fashion" | "Travel" | "Literature" | "Architecture",
+      "summary": "1 sentence describing the visual item, food, or place",
+      "primaryLocation": "Best estimated venue/location name or region",
+      "confidence": 88,
+      "alternativeGuesses": ["Probable Venue/Location 1", "Probable Venue/Location 2"],
+      "suggestedAction": "Reserve Table | Shop Look | Plan Trip | Buy Book"
     }`;
 
     const result = await model.generateContent([
@@ -48,24 +47,25 @@ export default async function handler(req, res) {
     const rawText = result.response.text().replace(/```json|```/g, '').trim();
     const aiData = JSON.parse(rawText);
 
-    // Query Supabase for Saved Posts matching Category or Location
+    // Auto-save analyzed item to Supabase table
+    await supabase.from('saved_items').insert([{
+      title: aiData.summary,
+      username: '@scout_auto_saved',
+      type: 'post',
+      category: aiData.category.toLowerCase(),
+      city: aiData.primaryLocation,
+      country: 'Global'
+    }]);
+
     const { data: savedPosts } = await supabase
       .from('saved_items')
       .select('*')
-      .or(`category.eq.${aiData.category},city.ilike.%${aiData.city}%`)
-      .limit(4);
-
-    // Query Supabase for Venues
-    const { data: venues } = await supabase
-      .from('venues')
-      .select('*')
-      .or(`category.eq.${aiData.category},city.ilike.%${aiData.city}%`)
+      .eq('category', aiData.category.toLowerCase())
       .limit(4);
 
     return res.status(200).json({
       aiAnalysis: aiData,
-      savedPosts: savedPosts || [],
-      venues: venues || []
+      savedPosts: savedPosts || []
     });
 
   } catch (err) {
