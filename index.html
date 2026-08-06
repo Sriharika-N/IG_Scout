@@ -8,9 +8,9 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;color:#fff;padding:10px}
+body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;color:#fff;padding:10px}
 
-/* Phone Frame */
+/* Phone Mockup Frame */
 #phone{width:390px;height:844px;background:#000;border-radius:48px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 20px 60px rgba(147,51,234,0.3);position:relative;display:flex;flex-direction:column}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;position:relative}
 #screen::-webkit-scrollbar{display:none}
@@ -41,9 +41,9 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 .ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px;font-size:20px}
 .ig-caption{padding:0 14px 12px;font-size:13px;line-height:1.4}
 
-/* Cards */
-.card{background:#141414;border:1px solid #222;border-radius:14px;padding:12px;margin-bottom:10px}
+.tag{display:inline-block;padding:4px 8px;border-radius:8px;font-size:10px;background:#9333EA22;color:#ec4899;border:1px solid #9333EA44;margin:4px 4px 0 0}
 .ad-badge{background:linear-gradient(135deg,#1c1917,#2e1065);border:1px solid #9333EA66;padding:12px;border-radius:14px;margin-top:12px;display:flex;align-items:center;justify-content:space-between}
+.search-input{width:100%;background:#1c1c1e;border:1px solid #333;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;outline:none;margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -66,60 +66,30 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 const screen = document.getElementById('screen');
 let userUploadedImage = null;
 let activeResult = null;
-let selectedSavedCategory = 'All';
+let searchQuery = '';
 
-// Demo High-Quality Posts Pre-loaded in Feed & Saved Collection
+// 20 Diversified Feed Posts (All start unsaved)
 const initialPosts = [
-  {
-    id: 1,
-    username: 'chef_marco',
-    location: 'Fontainhas, Panjim, Goa',
-    userImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
-    mediaImg: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80',
-    caption: 'Authentic Goan Portuguese Cafe Vibes ☕',
-    category: 'Food',
-    saved: false
-  },
-  {
-    id: 2,
-    username: 'paris_reads',
-    location: 'Latin Quarter, Paris',
-    userImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80',
-    mediaImg: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80',
-    caption: 'Rare vintage literature collection in Paris 📖',
-    category: 'Literature',
-    saved: true
-  },
-  {
-    id: 3,
-    username: 'style_milan',
-    location: 'Milan, Italy',
-    userImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
-    mediaImg: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80',
-    caption: 'Minimalist tailored linen streetwear set 👗',
-    category: 'Fashion',
-    saved: true
-  },
-  {
-    id: 4,
-    username: 'arch_digest',
-    location: 'Kyoto, Japan',
-    userImg: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80',
-    mediaImg: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80',
-    caption: 'Traditional wooden architecture in Arashiyama 🏛️',
-    category: 'Architecture',
-    saved: false
-  },
-  {
-    id: 5,
-    username: 'travel_philippe',
-    location: 'Santorini, Greece',
-    userImg: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80',
-    mediaImg: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600&q=80',
-    caption: 'Blue dome views overlooking Oia cliffs 🏛️',
-    category: 'Travel',
-    saved: true
-  }
+  { id: 1, username: 'style_edit', location: 'Paris, France', userImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&q=80', caption: 'Floral Summer Wrap Dress 👗', category: 'Fashion', saved: false, tags: ['dress', 'dresses', 'fashion', 'floral'] },
+  { id: 2, username: 'chef_marco', location: 'Rome, Italy', userImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&q=80', caption: 'Fresh Artisanal Truffle Pasta 🍝', category: 'Food', saved: false, tags: ['pasta', 'food', 'italian'] },
+  { id: 3, username: 'paris_reads', location: 'Paris, France', userImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80', caption: 'Vintage French Literature Collection 📚', category: 'Literature', saved: false, tags: ['book', 'books', 'literature', 'reading'] },
+  { id: 4, username: 'travel_pro', location: 'Santorini, Greece', userImg: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=600&q=80', caption: 'Blue Dome Views in Oia 🏛️', category: 'Travel', saved: false, tags: ['travel', 'santorini', 'greece'] },
+  { id: 5, username: 'vogue_tokyo', location: 'Tokyo, Japan', userImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80', caption: 'Minimalist White Linen Blazer 🧥', category: 'Fashion', saved: false, tags: ['blazer', 'fashion', 'linen', 'outfit'] },
+  { id: 6, username: 'sushi_master', location: 'Kyoto, Japan', userImg: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&q=80', caption: 'Traditional Omakase Platter 🍣', category: 'Food', saved: false, tags: ['sushi', 'food', 'japan'] },
+  { id: 7, username: 'arch_digest', location: 'Kyoto, Japan', userImg: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80', caption: 'Arashiyama Bamboo Shrine 🏛️', category: 'Architecture', saved: false, tags: ['architecture', 'kyoto', 'japan'] },
+  { id: 8, username: 'couture_edit', location: 'Milan, Italy', userImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600&q=80', caption: 'Evening Silk Cocktail Dress 👗', category: 'Fashion', saved: false, tags: ['dress', 'dresses', 'fashion', 'silk'] },
+  { id: 9, username: 'bookish_vibes', location: 'London, UK', userImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80', caption: 'Classic Hardcover Novel 📖', category: 'Literature', saved: false, tags: ['book', 'books', 'literature'] },
+  { id: 10, username: 'pizza_lab', location: 'Naples, Italy', userImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80', caption: 'Woodfired Neapolitan Margherita 🍕', category: 'Food', saved: false, tags: ['pizza', 'food', 'italy'] },
+  { id: 11, username: 'street_look', location: 'New York, USA', userImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80', caption: 'NYC Denim & Oversized Coat 🧥', category: 'Fashion', saved: false, tags: ['coat', 'fashion', 'denim'] },
+  { id: 12, username: 'wanderer_kate', location: 'Amalfi, Italy', userImg: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=600&q=80', caption: 'Positano Coastal Cliffs 🌊', category: 'Travel', saved: false, tags: ['travel', 'amalfi', 'italy'] },
+  { id: 13, username: 'coffee_art', location: 'Melbourne, Australia', userImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=80', caption: 'Artisanal Espresso & Croissant 🥐', category: 'Food', saved: false, tags: ['coffee', 'croissant', 'food'] },
+  { id: 14, username: 'design_journal', location: 'Barcelona, Spain', userImg: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1511527656417-089565a5e8ce?w=600&q=80', caption: 'Gothic Quarter Architecture 🏛️', category: 'Architecture', saved: false, tags: ['architecture', 'spain'] },
+  { id: 15, username: 'boho_chic', location: 'Bali, Indonesia', userImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600&q=80', caption: 'Linen Summer Maxi Dress 👗', category: 'Fashion', saved: false, tags: ['dress', 'dresses', 'fashion', 'maxi'] },
+  { id: 16, username: 'poetry_daily', location: 'Oxford, UK', userImg: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=600&q=80', caption: 'Vintage Leather Poetry Edition 📚', category: 'Literature', saved: false, tags: ['book', 'books', 'literature'] },
+  { id: 17, username: 'taco_fiesta', location: 'Mexico City, Mexico', userImg: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80', caption: 'Street Style Birria Tacos 🌮', category: 'Food', saved: false, tags: ['tacos', 'food', 'mexico'] },
+  { id: 18, username: 'nordic_living', location: 'Copenhagen, Denmark', userImg: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80', caption: 'Scandinavian Minimalist Interior 🛋️', category: 'Architecture', saved: false, tags: ['architecture', 'interior'] },
+  { id: 19, username: 'sunset_chaser', location: 'Reykjavik, Iceland', userImg: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=600&q=80', caption: 'Icelandic Waterfalls & Landscapes 🏔️', category: 'Travel', saved: false, tags: ['travel', 'iceland'] },
+  { id: 20, username: 'haute_couture', location: 'Paris, France', userImg: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80', mediaImg: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80', caption: 'Parisian Designer Trench Coat 🧥', category: 'Fashion', saved: false, tags: ['coat', 'fashion', 'trench'] }
 ];
 
 function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
@@ -137,15 +107,15 @@ function toggleSavePost(postId) {
   const post = initialPosts.find(p => p.id === postId);
   if (post) {
     post.saved = !post.saved;
-    alert(post.saved ? `✨ Saved to "${post.category}" Collection!` : 'Removed from Saved Items');
+    alert(post.saved ? `✨ Bookmarked & Saved to "${post.category}" Collection!` : 'Removed from Saved Items');
     go('home');
   }
 }
 
-function triggerScoutOnImage(imageUrl, category) {
+function triggerScoutOnImage(imageUrl) {
   userUploadedImage = imageUrl;
   go('analyzing');
-  executeScoutAnalysis(category);
+  executeScoutAnalysis();
 }
 
 function handleFileSelect(file) {
@@ -159,7 +129,7 @@ function handleFileSelect(file) {
   reader.readAsDataURL(file);
 }
 
-async function executeScoutAnalysis(overrideCategory) {
+async function executeScoutAnalysis() {
   try {
     const res = await fetch('/api/scout', {
       method: 'POST',
@@ -174,26 +144,9 @@ async function executeScoutAnalysis(overrideCategory) {
     go('results');
 
   } catch (err) {
-    // Intelligent Fallback with Location Guesses & % Match
-    activeResult = {
-      aiAnalysis: {
-        category: overrideCategory || 'Food & Dining',
-        summary: 'Portuguese Heritage Courtyard Cafe',
-        primaryLocation: 'Fontainhas Heritage Quarter, Panjim, Goa',
-        confidence: 82,
-        alternativeGuesses: [
-          'Verandah Cafe (Panjim, Goa)',
-          'Viva Panjim (Heritage Area, Goa)',
-          'Cafe Bodega (Altinho, Goa)'
-        ],
-        suggestedAction: '📍 Reserve Table / View Directions'
-      },
-      venues: [
-        { name: 'Viva Panjim', distance: '0.2 km', rating: '4.7', price_level: '₹₹', icon: '🍷' },
-        { name: 'Cafe Bodega', distance: '0.8 km', rating: '4.6', price_level: '₹₹', icon: '☕' }
-      ]
-    };
-    go('results');
+    console.error('API Error:', err);
+    alert('Analysis failed. Check your Gemini API key in Vercel settings.');
+    go('home');
   }
 }
 
@@ -208,17 +161,15 @@ home:()=>`${sbar()}
     </div>
   </div>
 
-  <!-- Stories Bar -->
   <div class="stories-container">
-    ${initialPosts.map(p => `
+    ${initialPosts.slice(0, 8).map(p => `
       <div class="story-item">
         <div class="story-avatar"><img src="${p.userImg}" /></div>
-        <span style="font-size:10px;color:#888;width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.username}</span>
+        <span style="font-size:10px;color:#888">${p.username}</span>
       </div>
     `).join('')}
   </div>
 
-  <!-- Scrollable Feed -->
   <div class="feed-container">
     ${initialPosts.map(p => `
       <div class="ig-post">
@@ -226,13 +177,12 @@ home:()=>`${sbar()}
           <div style="display:flex;align-items:center;gap:10px">
             <div class="story-avatar" style="width:32px;height:32px"><img src="${p.userImg}"/></div>
             <div>
-              <div style="font-size:12px;font-weight:600">${p.username} <span style="color:#60a5fa">✓</span></div>
+              <div style="font-size:12px;font-weight:600">${p.username}</div>
               <div style="font-size:10px;color:#888">${p.location}</div>
             </div>
           </div>
-          <span style="color:#888">•••</span>
         </div>
-        <div class="ig-media" onclick="triggerScoutOnImage('${p.mediaImg}', '${p.category}')" style="cursor:pointer">
+        <div class="ig-media" onclick="triggerScoutOnImage('${p.mediaImg}')" style="cursor:pointer">
           <img src="${p.mediaImg}"/>
         </div>
         <div class="ig-actions">
@@ -241,7 +191,7 @@ home:()=>`${sbar()}
         </div>
         <div class="ig-caption">
           <b>${p.username}</b> ${p.caption}
-          <div style="font-size:10px;color:#9333EA;margin-top:4px;cursor:pointer" onclick="triggerScoutOnImage('${p.mediaImg}', '${p.category}')">✦ Tap photo to Scout with AI</div>
+          <div style="font-size:10px;color:#9333EA;margin-top:4px;cursor:pointer" onclick="triggerScoutOnImage('${p.mediaImg}')">✦ Tap photo to Scout & Shop with AI</div>
         </div>
       </div>
     `).join('')}
@@ -250,58 +200,80 @@ home:()=>`${sbar()}
 'scout-landing':()=>`${sbar()}
   <div style="display:flex;align-items:center;gap:10px;padding:8px 16px">
     <button class="btn" onclick="go('home')" style="font-size:20px">‹</button>
-    <div style="flex:1;background:#1c1c1e;border-radius:10px;padding:8px 12px;color:#666;font-size:13px">🔍 Search Scout...</div>
+    <div style="flex:1">
+      <input type="text" class="search-input" placeholder="🔍 Search 'dresses', 'books', 'pasta'..." value="${searchQuery}" oninput="searchQuery=this.value;go('scout-landing')">
+    </div>
   </div>
 
-  <div style="text-align:center;padding:24px 16px 16px">
-    <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px">✦</div>
-    <div style="font-size:22px;font-weight:800">Instagram ${grad('Scout')}</div>
-    <div style="color:#888;font-size:12px;margin-top:2px">Turn Any Photo Into Actions & Purchases</div>
-  </div>
+  ${searchQuery.trim() !== '' ? `
+    <div style="padding:0 16px 16px;flex:1;overflow-y:auto">
+      <div style="font-size:11px;color:#888;margin-bottom:10px">Search Results for "${searchQuery}":</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${initialPosts.filter(p => p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) || p.caption.toLowerCase().includes(searchQuery.toLowerCase())).map(p => `
+          <div class="btn" onclick="triggerScoutOnImage('${p.mediaImg}')" style="background:#141414;border:1px solid #222;border-radius:12px;overflow:hidden;text-align:left">
+            <div style="height:110px;background:#222"><img src="${p.mediaImg}" style="width:100%;height:100%;object-fit:cover"/></div>
+            <div style="padding:8px">
+              <div style="font-size:11px;font-weight:600">${p.caption}</div>
+              <div style="font-size:9px;color:#9333EA;margin-top:2px">✦ Scout Info & Links</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : `
+    <div style="text-align:center;padding:24px 16px">
+      <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px">✦</div>
+      <div style="font-size:22px;font-weight:800">Instagram ${grad('Scout')}</div>
+      <div style="color:#888;font-size:12px;margin-top:2px">Type above or upload an image</div>
+    </div>
 
-  <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
-    <button class="btn card" onclick="go('upload')" style="display:flex;align-items:center;gap:12px;text-align:left">
-      <span style="font-size:24px">📷</span>
-      <div><div style="font-weight:600;font-size:13px">Upload / Scan Image</div><div style="color:#666;font-size:11px">Identify dishes, locations, books & outfits</div></div>
-    </button>
-
-    <button class="btn card" onclick="go('saved')" style="display:flex;align-items:center;gap:12px;text-align:left;border-color:#9333EA66">
-      <span style="font-size:24px">🔖</span>
-      <div><div style="font-weight:600;font-size:13px;color:#fff">Search Your Saved Collection</div><div style="color:#9333EA;font-size:11px">Auto-indexed bookmarks ready for AI search</div></div>
-    </button>
-  </div>`,
+    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn" onclick="go('upload')" style="background:#141414;border:1px solid #282828;padding:14px;border-radius:14px;text-align:left;display:flex;gap:12px">
+        <span style="font-size:24px">📷</span>
+        <div><div style="font-weight:600;font-size:13px">Scan or Upload Photo</div><div style="color:#666;font-size:11px">Identify garments, book titles, or locations</div></div>
+      </button>
+      <button class="btn" onclick="go('saved')" style="background:#141414;border:1px solid #9333EA44;padding:14px;border-radius:14px;text-align:left;display:flex;gap:12px">
+        <span style="font-size:24px">🔖</span>
+        <div><div style="font-weight:600;font-size:13px">Search Saved Items</div><div style="color:#9333EA;font-size:11px">Browse & shop from your bookmarks</div></div>
+      </button>
+    </div>
+  `}`,
 
 upload:()=>`${sbar()}
   <div style="display:flex;align-items:center;gap:10px;padding:8px 16px">
     <button class="btn" onclick="go('scout-landing')" style="font-size:20px">‹</button>
-    <span style="font-weight:600;font-size:15px">Upload to Scout</span>
+    <span style="font-weight:600;font-size:15px">Upload Photo</span>
   </div>
   <div style="padding:20px 16px">
     <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFileSelect(this.files[0])">
     <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:40px 20px;text-align:center;background:#9333EA0A">
       <div style="font-size:40px;margin-bottom:10px">📤</div>
       <div style="font-weight:600;font-size:14px">Choose Photo from Device</div>
-      <div style="color:#666;font-size:11px;margin-top:4px">Scout auto-detects category & location</div>
+      <div style="color:#666;font-size:11px;margin-top:4px">Fashion · Literature · Food · Travel</div>
     </div>
   </div>`,
 
 analyzing:()=>`${sbar()}
   <div style="height:580px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center">
-    <div style="width:160px;height:160px;border-radius:20px;overflow:hidden;border:2px solid #9333EA;position:relative;margin-bottom:16px">
+    <div style="width:150px;height:150px;border-radius:20px;overflow:hidden;border:2px solid #9333EA;position:relative;margin-bottom:16px">
       <img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>
       <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.5s linear infinite;top:0"></div>
     </div>
-    <div style="font-weight:700;font-size:15px">Gemini Vision AI Pinpointing Location...</div>
-    <div style="color:#666;font-size:11px;margin-top:4px">Cross-checking regional features & database matches</div>
+    <div style="font-weight:700;font-size:15px">Gemini Vision AI Extracting Details...</div>
+    <div style="color:#666;font-size:11px;margin-top:4px">Identifying garments, style tags, titles & store links</div>
   </div>`,
 
 results:()=>{
   const ai = activeResult.aiAnalysis;
+  const det = ai.details || {};
+  const isFashion = ai.category === 'Fashion';
+  const isBook = ai.category === 'Literature';
+
   return `${sbar()}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px">
     <button class="btn" onclick="go('saved')" style="font-size:20px">‹</button>
     <span style="font-weight:600;font-size:14px">Scout Results</span>
-    <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">${ai.confidence}% MATCH CONFIDENCE</span>
+    <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">${ai.confidence}% MATCH</span>
   </div>
   <div style="padding:14px;overflow-y:auto;flex:1">
     <div style="border-radius:16px;overflow:hidden;height:180px;background:#181818;margin-bottom:10px">
@@ -311,27 +283,29 @@ results:()=>{
     <div style="background:#141414;border:1px solid #9333EA44;padding:12px;border-radius:12px;margin-bottom:10px">
       <div style="color:#9333EA;font-size:10px;font-weight:700">✦ CATEGORY: ${ai.category.toUpperCase()}</div>
       <div style="font-weight:600;font-size:14px;margin-top:2px">${ai.summary}</div>
-      <div style="color:#888;font-size:11px;margin-top:2px">Primary Location: <b>${ai.primaryLocation}</b></div>
+      
+      ${det.garmentOrBookName ? `<div style="font-size:12px;color:#eee;margin-top:6px"><b>Item:</b> ${det.garmentOrBookName}</div>` : ''}
+      ${det.color ? `<div style="font-size:11px;color:#888;margin-top:2px">Color / Style: ${det.color} · ${det.styleOrGenre || ''}</div>` : ''}
+      
+      ${det.keyAttributes ? `
+        <div style="margin-top:8px">${det.keyAttributes.map(a => `<span class="tag">${a}</span>`).join('')}</div>
+      ` : ''}
     </div>
 
-    ${ai.alternativeGuesses && ai.alternativeGuesses.length > 0 ? `
-      <div style="background:#111;border:1px solid #222;padding:10px;border-radius:10px;margin-bottom:10px">
-        <div style="font-size:10px;color:#888;margin-bottom:4px">Probable Location Matches:</div>
-        ${ai.alternativeGuesses.map(g=>`<div style="font-size:11px;color:#ccc;margin-top:2px;cursor:pointer">📍 ${g}</div>`).join('')}
-      </div>
-    ` : ''}
+    <a href="${ai.externalBuyUrl}" target="_blank" style="text-decoration:none">
+      <button class="btn" style="width:100%;background:linear-gradient(135deg,#9333EA,#EC4899);padding:12px;border-radius:12px;font-weight:700;font-size:12px;margin-bottom:12px;color:#fff">
+        ${isFashion ? '🛒 Search & Shop Garment Online' : isBook ? '📚 Buy Book Online' : '📍 Explore Location Online'}
+      </button>
+    </a>
 
-    <button class="btn" style="width:100%;background:linear-gradient(135deg,#9333EA,#EC4899);padding:12px;border-radius:12px;font-weight:700;font-size:12px;margin-bottom:12px;color:#fff">
-      ${ai.suggestedAction || '📍 Reserve / View Location'}
-    </button>
-
-    <!-- Sponsored Ad Integration -->
     <div class="ad-badge">
       <div>
         <div style="font-size:9px;color:#9333EA;font-weight:700">SPONSORED PLACEMENT</div>
-        <div style="font-size:11px;font-weight:600">Reserve now & get 20% off</div>
+        <div style="font-size:11px;font-weight:600">${isFashion ? 'Trending styles up to 30% off' : 'Get fast delivery on books'}</div>
       </div>
-      <button class="btn" style="background:#60a5fa22;color:#60a5fa;font-size:10px;padding:6px 12px;border-radius:8px">Book</button>
+      <a href="${ai.externalBuyUrl}" target="_blank" style="text-decoration:none">
+        <button class="btn" style="background:#60a5fa22;color:#60a5fa;font-size:10px;padding:6px 12px;border-radius:8px">View</button>
+      </a>
     </div>
   </div>`;
 },
@@ -341,23 +315,27 @@ saved:()=>{
   return `${sbar()}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px">
     <button class="btn" onclick="go('home')" style="font-size:20px">‹</button>
-    <span style="font-weight:600;font-size:15px">Saved Collection</span>
-    <span style="font-size:16px">➕</span>
+    <span style="font-weight:600;font-size:15px">Saved Items (${savedList.length})</span>
   </div>
   <div style="padding:12px 16px;flex:1;overflow-y:auto">
-    <div style="color:#888;font-size:11px;margin-bottom:12px">Tap any saved item below to run AI Scout Visual Search on it!</div>
-    
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      ${savedList.map(item => `
-        <div class="btn" onclick="triggerScoutOnImage('${item.mediaImg}', '${item.category}')" style="background:#141414;border:1px solid #222;border-radius:12px;overflow:hidden;text-align:left">
-          <div style="height:110px;background:#222"><img src="${item.mediaImg}" style="width:100%;height:100%;object-fit:cover"/></div>
-          <div style="padding:8px">
-            <div style="font-size:11px;font-weight:600">${item.caption}</div>
-            <div style="font-size:9px;color:#9333EA;margin-top:2px">✦ Scout This</div>
+    ${savedList.length === 0 ? `
+      <div style="text-align:center;color:#666;font-size:12px;margin-top:40px">
+        No saved items yet!<br>Go to the Home Feed and tap 🏷️ to bookmark posts.
+      </div>
+    ` : `
+      <div style="color:#888;font-size:11px;margin-bottom:12px">Tap any saved item below to run Scout AI analysis & get shopping links!</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${savedList.map(item => `
+          <div class="btn" onclick="triggerScoutOnImage('${item.mediaImg}')" style="background:#141414;border:1px solid #222;border-radius:12px;overflow:hidden;text-align:left">
+            <div style="height:110px;background:#222"><img src="${item.mediaImg}" style="width:100%;height:100%;object-fit:cover"/></div>
+            <div style="padding:8px">
+              <div style="font-size:11px;font-weight:600">${item.caption}</div>
+              <div style="font-size:9px;color:#9333EA;margin-top:2px">✦ Scout & Shop</div>
+            </div>
           </div>
-        </div>
-      `).join('')}
-    </div>
+        `).join('')}
+      </div>
+    `}
   </div>`;
 }
 };
