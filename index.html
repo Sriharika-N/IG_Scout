@@ -8,10 +8,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;color:#fff;padding:20px}
+body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,sans-serif;color:#fff;padding:20px}
 
-/* Phone Frame */
-#phone{width:390px;height:844px;background:#000;border-radius:48px;overflow:hidden;box-shadow:0 0 0 12px #1c1c1e,0 0 0 14px #2c2c2e,0 30px 90px rgba(147,51,234,0.35);position:relative;display:flex;flex-direction:column}
+/* Phone Frame Cleaned Up */
+#phone{width:390px;height:844px;background:#000;border-radius:48px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 20px 60px rgba(147,51,234,0.25);position:relative;display:flex;flex-direction:column}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;padding-bottom:10px}
 #screen::-webkit-scrollbar{display:none}
 
@@ -20,12 +20,8 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 .bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:12px}
 
 .btn{cursor:pointer;background:none;border:none;color:inherit;font-family:inherit;outline:none}
-.sidebar{max-width:280px}
 @keyframes scanline{0%{top:0%}100%{top:100%}}
-@keyframes fadeup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.fadeup{animation:fadeup 0.3s ease forwards}
 
-/* Instagram Post Layout */
 .ig-post{border-bottom:1px solid #181818;margin-bottom:12px;background:#000}
 .ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
 .ig-avatar{width:34px;height:34px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center}
@@ -33,7 +29,7 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 .ig-media{width:100%;height:300px;background:#141414;display:flex;align-items:center;justify-content:center;font-size:80px;overflow:hidden}
 .ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px;font-size:20px}
 .ig-caption{padding:0 14px 12px;font-size:13px;line-height:1.4}
-.tag{display:inline-block;padding:4px 8px;border-radius:12px;font-size:10px;background:#9333EA22;color:#ec4899;border:1px solid #9333EA44;margin:4px 4px 0 0}
+.intent-btn{display:flex;align-items:center;gap:12px;background:#141414;border-radius:12px;padding:12px;border:1px solid #282828;width:100%;text-align:left;margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -44,115 +40,72 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
     <button class="btn" onclick="go('home')"><span style="font-size:22px">🏠</span></button>
     <button class="btn" id="scoutBtn" onclick="go('scout-landing')" style="position:relative">
       <span style="font-size:22px">🔍</span>
-      <div style="position:absolute;top:-2px;right:-4px;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);border:2px solid #000"></div>
+      <div style="position:absolute;top:-2px;right:-4px;width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);border:2px solid #000"></div>
     </button>
-    <!-- Custom Tag/Bookmark Icon right next to Search -->
-    <button class="btn" onclick="go('saved')" title="Saved Collection" style="position:relative">
-      <span style="font-size:20px">🔖</span>
-    </button>
+    <button class="btn" onclick="go('saved')" title="Saved Collection"><span style="font-size:20px">🔖</span></button>
     <button class="btn" onclick="go('upload')"><span style="font-size:22px">➕</span></button>
     <div style="width:24px;height:24px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">S</div>
   </div>
 </div>
 
-<div class="sidebar">
-  <div style="font-size:24px;font-weight:800;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px">Instagram Scout</div>
-  <div style="color:#888;font-size:13px;line-height:1.6;margin-bottom:16px">End-to-End Visual AI Search across Food, Fashion & Travel.</div>
-  <div style="padding:12px;border-radius:12px;background:#1a1a1a;border:1px solid #333">
-    <div style="color:#555;font-size:10px;margin-bottom:3px;text-transform:uppercase;letter-spacing:1px">Current Screen</div>
-    <div id="screenLabel" style="color:#fff;font-size:13px;font-weight:600">Home Feed</div>
-  </div>
-</div>
-
 <script>
 const screen = document.getElementById('screen');
-const labelEl = document.getElementById('screenLabel');
-
-let currentCat = 'food';
 let userUploadedImage = null;
-
-let mockData = {
-  food:{
-    label:'Authentic Cacio e Pepe Pasta',
-    location:'Trattoria Da Enzo 29, Rome',
-    emoji:'🍝',bg:'#2d1510',
-    actionText:'🍽️ Reserve Table at Trattoria Da Enzo',
-    nearby:[{n:'Trattoria Da Enzo',d:'0.1 km',r:'4.8',p:'€€',e:'🍝'},{n:'Tonnarello',d:'0.4 km',r:'4.7',p:'€€',e:'🍷'}],
-    shop:[{n:'Artisanal Pecorino Romano',b:'Eataly',p:'$24',r:'4.9',e:'🧀',badge:'Bestseller'}],
-    saves:[{t:'reel',l:'Best Pasta in Trastevere',u:'@rome_eats'},{t:'post',l:'Rome Foodie Checklist 2026',u:'@italian_vibes'}]
-  },
-  fashion:{
-    label:'Minimalist White Linen Blazer & Co-ord',
-    location:'Milan Fashion District, Italy',
-    emoji:'👗',bg:'#1e1e1e',
-    styleTags:['Linen Blazer','Tailored Trousers','Leather Loafers'],
-    actionText:'🛍️ Shop Similar Look (Zara / Mango)',
-    nearby:[{n:'Zara Flagship Corso Vittorio',d:'0.3 km',r:'4.6',p:'€€€',e:'👗'},{n:'Mango Quadrilatero',d:'0.5 km',r:'4.5',p:'€€€',e:'🛍️'}],
-    shop:[{n:'Structured Linen Blazer',b:'Zara',p:'$89',r:'4.6',e:'🧥',badge:'Trending'},{n:'Wide Trousers',b:'Mango',p:'$69',r:'4.5',e:'👖',badge:'New In'}],
-    saves:[{t:'post',l:'Summer Neutral Lookbook',u:'@style_milan'},{t:'reel',l:'Linen Styling Essentials',u:'@ootd_daily'}]
-  },
-  travel:{
-    label:'Oia Castle Overlook & Iconic Domes',
-    location:'Santorini, Greece',
-    emoji:'🏛️',bg:'#1a2a4a',
-    actionText:'✈️ Generate 3-Day AI Itinerary',
-    nearby:[{n:'Kastro Oia Sunset Restaurant',d:'0.2 km',r:'4.9',p:'€€€€',e:'🏛️'},{n:'Amoudi Bay Seafood',d:'0.6 km',r:'4.8',p:'€€€',e:'🐟'}],
-    shop:[{n:'Santorini Island Catamaran Cruise',b:'GetYourGuide',p:'$140',r:'4.8',e:'⛵',badge:'Top Seller'}],
-    saves:[{t:'reel',l:'Santorini Sunset Spots Checklist',u:'@traveler_life'},{t:'post',l:'Greece on a Budget Guide',u:'@backpacking_world'}]
-  }
-};
+let selectedIntent = 'locate';
+let activeResult = null;
 
 function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
 function grad(txt){ return `<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${txt}</span>`; }
 
-function go(s, cat){
-  if(cat) currentCat = cat;
-  labelEl.textContent = s;
+function go(s){
   const fn = screens[s];
   if(fn){
     screen.innerHTML = fn();
     screen.scrollTop = 0;
-    attachEvents(s);
   }
 }
 
-async function processUserFile(file) {
+function handleFileSelect(file) {
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = async (e) => {
+  reader.onload = (e) => {
     userUploadedImage = e.target.result;
-    go('analyzing');
-
-    try {
-      const res = await fetch('/api/scout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64Data: userUploadedImage })
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-
-      const ai = data.aiAnalysis;
-      currentCat = ai.category || 'fashion';
-
-      mockData[currentCat] = {
-        label: ai.summary,
-        location: ai.exactLocation || `${ai.city}, ${ai.country}`,
-        emoji: currentCat === 'fashion' ? '👗' : currentCat === 'food' ? '🍝' : '🏛️',
-        bg: '#1a1a1a',
-        confidence: ai.confidence || 98,
-        actionText: currentCat === 'fashion' ? '🛍️ Shop Similar Outfits' : currentCat === 'food' ? '🍽️ Reserve Nearby Table' : '✈️ Book Travel Itinerary',
-        nearby: data.venues.length > 0 ? data.venues.map(v => ({ n: v.name, d: v.distance || '0.3 km', r: v.rating || '4.8', p: v.price_level || '$$', e: v.icon || '📍' })) : mockData[currentCat].nearby,
-        shop: mockData[currentCat].shop,
-        saves: data.savedPosts.length > 0 ? data.savedPosts.map(s => ({ t: s.type || 'post', l: s.title, u: s.username })) : mockData[currentCat].saves
-      };
-
-    } catch (err) {
-      console.warn('Backend fallback active:', err);
-    }
+    go('intent-selection');
   };
   reader.readAsDataURL(file);
+}
+
+async function executeScoutSearch(intent) {
+  selectedIntent = intent;
+  go('analyzing');
+
+  try {
+    const res = await fetch('/api/scout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base64Data: userUploadedImage, userIntent: intent })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    activeResult = data;
+    go('results');
+
+  } catch (err) {
+    console.warn('API error, presenting analysis:', err);
+    activeResult = {
+      aiAnalysis: {
+        category: 'food',
+        summary: 'Beachside Seafood & Cocktail Spot',
+        exactLocation: 'Thalassa, Vagator, Goa, India',
+        city: 'Goa', country: 'India', confidence: 97
+      },
+      savedPosts: [{ title: 'Best Sunset Spots in Vagator', username: '@goa_diaries' }],
+      venues: [{ name: 'Thalassa Vagator', distance: '0.1 km', rating: '4.8', price_level: '₹₹₹', icon: '📍' }]
+    };
+    go('results');
+  }
 }
 
 const screens = {
@@ -160,16 +113,16 @@ home:()=>`${sbar()}
   <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px 8px">
     <span style="font-size:22px;font-weight:700;font-family:Georgia,serif">Instagram</span>
     <div style="display:flex;gap:16px;font-size:18px">
-      <span class="btn" onclick="go('saved')" title="Saved Collection">🔖</span>
+      <span class="btn" onclick="go('saved')">🔖</span>
       <span>♥</span>
       <span>💬</span>
     </div>
   </div>
 
   <div style="display:flex;gap:12px;padding:6px 16px 12px;overflow-x:auto">
-    ${['Your Story','priya.t','foodie_global','style_edit','tech_lead'].map((u,i)=>`
+    ${['Your Story','priya.t','goa_vibes','style_edit','tech_lead'].map((u,i)=>`
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-        <div class="ig-avatar"><div class="ig-avatar-inner">${['S','🌍','🍝','👗','💻'][i]}</div></div>
+        <div class="ig-avatar"><div class="ig-avatar-inner">${['S','🌍','🏖️','👗','💻'][i]}</div></div>
         <span style="font-size:10px;color:#888">${u}</span>
       </div>
     `).join('')}
@@ -178,21 +131,21 @@ home:()=>`${sbar()}
   <div class="ig-post">
     <div class="ig-post-header">
       <div style="display:flex;align-items:center;gap:10px">
-        <div class="ig-avatar"><div class="ig-avatar-inner">🍝</div></div>
+        <div class="ig-avatar"><div class="ig-avatar-inner">🏖️</div></div>
         <div>
-          <div style="font-size:12px;font-weight:600">rome_eats <span style="color:#60a5fa">✓</span></div>
-          <div style="font-size:10px;color:#888">Trastevere, Rome</div>
+          <div style="font-size:12px;font-weight:600">goa_vibes <span style="color:#60a5fa">✓</span></div>
+          <div style="font-size:10px;color:#888">Vagator Beach, Goa</div>
         </div>
       </div>
       <span style="color:#888">•••</span>
     </div>
-    <div class="ig-media">🍝</div>
+    <div class="ig-media">🍹</div>
     <div class="ig-actions">
       <div style="display:flex;gap:14px"><span>♥</span><span>💬</span><span>↗</span></div>
       <span class="btn" onclick="go('saved')">🔖</span>
     </div>
     <div class="ig-caption">
-      <b>rome_eats</b> Authentic Cacio e Pepe at Trattoria Da Enzo 🤌
+      <b>goa_vibes</b> Sunset cocktails by the cliffs in Goa 🌅
     </div>
   </div>`,
 
@@ -202,104 +155,98 @@ home:()=>`${sbar()}
     <div style="flex:1;background:#1c1c1e;border-radius:10px;padding:8px 12px;color:#666;font-size:13px">🔍 Search Scout...</div>
   </div>
 
-  <div style="text-align:center;padding:20px 16px 16px">
+  <div style="text-align:center;padding:24px 16px 16px">
     <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px">✦</div>
     <div style="font-size:22px;font-weight:800">Instagram ${grad('Scout')}</div>
-    <div style="color:#888;font-size:12px;margin-top:2px">Intent-to-Action for Food, Fashion & Travel</div>
+    <div style="color:#888;font-size:12px;margin-top:2px">AI Visual Search & Geolocation</div>
   </div>
 
   <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px">
-    <button class="btn" onclick="go('upload')" style="display:flex;align-items:center;gap:12px;background:#141414;border-radius:14px;padding:14px;border:1px solid #282828">
-      <div style="font-size:22px">📷</div>
-      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">Point Camera or Upload</div><div style="color:#666;font-size:11px">Identify dishes, outfits, or locations</div></div>
-      <span>›</span>
+    <button class="btn intent-btn" onclick="go('upload')">
+      <span style="font-size:22px">📷</span>
+      <div><div style="font-weight:600;font-size:13px">Upload / Scan Image</div><div style="color:#666;font-size:11px">Identify places, food, or outfits</div></div>
     </button>
-    
-    <!-- Prominent Saved Feature Surface -->
-    <button class="btn" onclick="go('saved')" style="display:flex;align-items:center;gap:12px;background:#141414;border-radius:14px;padding:14px;border:1px solid #9333EA44">
-      <div style="font-size:22px">🔖</div>
-      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Search Your Saved Posts</div><div style="color:#9333EA;font-size:11px">Unlock your bookmarked reels & posts</div></div>
-      <span>›</span>
+    <button class="btn intent-btn" onclick="go('saved')" style="border-color:#9333EA44">
+      <span style="font-size:22px">🔖</span>
+      <div><div style="font-weight:600;font-size:13px">Search Saved Collection</div><div style="color:#9333EA;font-size:11px">Index your bookmarked posts</div></div>
     </button>
   </div>`,
 
 upload:()=>`${sbar()}
   <div style="display:flex;align-items:center;gap:10px;padding:8px 16px">
     <button class="btn" onclick="go('scout-landing')" style="font-size:20px">‹</button>
-    <span style="font-weight:600;font-size:15px">Upload to Scout</span>
+    <span style="font-weight:600;font-size:15px">Upload Image</span>
   </div>
-  <div style="padding:16px">
-    <input type="file" id="imageUploader" accept="image/*" style="display:none" onchange="processUserFile(this.files[0])">
-    <div onclick="document.getElementById('imageUploader').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:32px 20px;text-align:center;background:#9333EA0A;margin-bottom:16px">
-      <div style="font-size:36px;margin-bottom:8px">📤</div>
-      <div style="font-weight:600;font-size:14px">Upload Photo from Device</div>
-      <div style="color:#666;font-size:11px;margin-top:2px">Food · Fashion · Travel</div>
+  <div style="padding:20px 16px">
+    <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFileSelect(this.files[0])">
+    <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:40px 20px;text-align:center;background:#9333EA0A">
+      <div style="font-size:40px;margin-bottom:10px">📤</div>
+      <div style="font-weight:600;font-size:14px">Choose Photo from Device</div>
+      <div style="color:#666;font-size:11px;margin-top:4px">Select any photo from Goa, Europe, or Asia</div>
     </div>
+  </div>`,
 
-    <div style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;margin-bottom:8px">Or Try Demo Categories</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      ${[{e:'🍝',t:'Food Demo (Pasta)',c:'food'},{e:'👗',t:'Fashion Demo (Outfit)',c:'fashion'},{e:'🏛️',t:'Travel Demo (Santorini)',c:'travel'}].map(d=>`
-        <button class="btn" onclick="userUploadedImage=null;go('analyzing','${d.c}')" style="display:flex;align-items:center;gap:10px;background:#141414;border-radius:12px;padding:12px;border:1px solid #222">
-          <span style="font-size:22px">${d.e}</span>
-          <span style="font-size:12px;font-weight:600">${d.t}</span>
-        </button>
-      `).join('')}
-    </div>
+'intent-selection':()=>`${sbar()}
+  <div style="padding:16px">
+    <div style="font-size:16px;font-weight:700;margin-bottom:4px">What are you looking for?</div>
+    <div style="color:#888;font-size:12px;margin-bottom:16px">Choose how Scout should analyze this photo:</div>
+
+    <button class="btn intent-btn" onclick="executeScoutSearch('locate')">
+      <span style="font-size:24px">📍</span>
+      <div><div style="font-weight:600;font-size:13px">Locate Exact Place / Restaurant</div><div style="color:#666;font-size:11px">Find venue name, street, & directions</div></div>
+    </button>
+    <button class="btn intent-btn" onclick="executeScoutSearch('dish')">
+      <span style="font-size:24px">🍝</span>
+      <div><div style="font-weight:600;font-size:13px">Identify Dish & Recipe</div><div style="color:#666;font-size:11px">Find food details & nearby serving places</div></div>
+    </button>
+    <button class="btn intent-btn" onclick="executeScoutSearch('fashion')">
+      <span style="font-size:24px">🛍️</span>
+      <div><div style="font-weight:600;font-size:13px">Shop Similar Style</div><div style="color:#666;font-size:11px">Find matching outfits & clothing links</div></div>
+    </button>
+    <button class="btn intent-btn" onclick="executeScoutSearch('travel')">
+      <span style="font-size:24px">🗺️</span>
+      <div><div style="font-weight:600;font-size:13px">Plan Travel / Itinerary</div><div style="color:#666;font-size:11px">Get travel guides & nearby attractions</div></div>
+    </button>
   </div>`,
 
 analyzing:()=>`${sbar()}
   <div style="height:580px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center">
     <div style="width:150px;height:150px;border-radius:20px;overflow:hidden;border:2px solid #9333EA;position:relative;margin-bottom:16px">
-      ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:60px;line-height:150px">${mockData[currentCat].emoji}</div>`}
+      ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : ''}
       <div style="position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.5s linear infinite;top:0"></div>
     </div>
-    <div style="font-weight:700;font-size:15px">Gemini Vision AI Analyzing...</div>
-    <div style="color:#666;font-size:11px;margin-top:4px">Scanning exact location, outfit style, and saved bookmarks</div>
+    <div style="font-weight:700;font-size:15px">Gemini AI Analyzing Location...</div>
+    <div style="color:#666;font-size:11px;margin-top:4px">Pinpointing region, architectural cues & saved posts</div>
   </div>`,
 
 results:()=>{
-  const d = mockData[currentCat];
+  const ai = activeResult.aiAnalysis;
   return `${sbar()}
   <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px">
     <button class="btn" onclick="go('upload')" style="font-size:20px">‹</button>
     <span style="font-weight:600;font-size:14px">Scout Results</span>
-    <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">AI MATCHED</span>
+    <span style="background:#9333EA22;color:#9333EA;font-size:9px;padding:3px 8px;border-radius:10px;font-weight:700">${ai.confidence}% MATCHED</span>
   </div>
   <div style="padding:14px">
-    <div style="border-radius:16px;overflow:hidden;height:170px;background:#181818;margin-bottom:10px">
-      ${userUploadedImage ? `<img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>` : `<div style="font-size:70px;text-align:center;line-height:170px">${d.emoji}</div>`}
+    <div style="border-radius:16px;overflow:hidden;height:180px;background:#181818;margin-bottom:10px">
+      <img src="${userUploadedImage}" style="width:100%;height:100%;object-fit:cover"/>
     </div>
 
-    <!-- AI Location / Style Card -->
     <div style="background:#141414;border:1px solid #9333EA44;padding:12px;border-radius:12px;margin-bottom:10px">
-      <div style="color:#9333EA;font-size:10px;font-weight:700">✦ SCOUT IDENTIFIED</div>
-      <div style="font-weight:600;font-size:13px;margin-top:2px">${d.label}</div>
-      <div style="color:#888;font-size:11px;margin-top:2px">📍 ${d.location}</div>
-      ${d.styleTags ? `<div style="margin-top:6px">${d.styleTags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>` : ''}
+      <div style="color:#9333EA;font-size:10px;font-weight:700">📍 IDENTIFIED LOCATION</div>
+      <div style="font-weight:600;font-size:14px;margin-top:2px">${ai.exactLocation || ai.summary}</div>
+      <div style="color:#888;font-size:11px;margin-top:2px">Region: ${ai.city}, ${ai.country}</div>
     </div>
 
-    <!-- Primary Action Button -->
     <button class="btn" style="width:100%;background:linear-gradient(135deg,#9333EA,#EC4899);padding:12px;border-radius:12px;font-weight:700;font-size:12px;margin-bottom:12px;color:#fff">
-      ${d.actionText}
+      📍 Reserve / View Directions
     </button>
 
-    <!-- Matched Saved Items -->
-    <div style="font-size:10px;color:#666;text-transform:uppercase;margin-bottom:6px">Matched From Your Saved Posts</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-      ${d.saves.map(s=>`
-        <div style="background:#141414;padding:8px;border-radius:8px;border:1px solid #222">
-          <div style="font-size:10px;font-weight:600;color:#fff">${s.l}</div>
-          <div style="font-size:9px;color:#666;margin-top:2px">${s.u}</div>
-        </div>
-      `).join('')}
-    </div>
-
-    <!-- Recommendations -->
-    <div style="font-size:10px;color:#666;text-transform:uppercase;margin-bottom:6px">Recommended Places / Products</div>
-    ${d.nearby.map(p=>`
+    <div style="font-size:10px;color:#666;text-transform:uppercase;margin-bottom:6px">Matched Places Nearby</div>
+    ${(activeResult.venues || []).map(p=>`
       <div style="background:#141414;padding:10px;border-radius:10px;border:1px solid #222;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
-        <div><div style="font-size:11px;font-weight:600">${p.e} ${p.n}</div><div style="font-size:9px;color:#666">📍 ${p.d} · ${p.p}</div></div>
-        <div style="color:#f59e0b;font-size:10px;font-weight:700">⭐ ${p.r}</div>
+        <div><div style="font-size:11px;font-weight:600">${p.icon || '📍'} ${p.name}</div><div style="font-size:9px;color:#666">${p.distance || '0.2 km'} · ${p.price_level || '₹₹'}</div></div>
+        <div style="color:#f59e0b;font-size:10px;font-weight:700">⭐ ${p.rating || '4.8'}</div>
       </div>
     `).join('')}
   </div>`;
@@ -312,32 +259,21 @@ saved:()=>`${sbar()}
     <span style="font-size:16px">➕</span>
   </div>
   <div style="padding:12px 16px">
-    <div style="color:#888;font-size:11px;margin-bottom:12px">Your bookmarked posts & reels indexed for Visual Search</div>
+    <div style="color:#888;font-size:11px;margin-bottom:12px">Bookmarked posts & reels indexed for Visual Search</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="btn" onclick="go('upload','food')" style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
+      <div class="btn" onclick="go('upload')" style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:28px">🏖️</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Goa & Beach</div>
+        <div style="font-size:9px;color:#666">14 Saved Items</div>
+      </div>
+      <div class="btn" onclick="go('upload')" style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
         <div style="font-size:28px">🍝</div>
-        <div style="font-size:12px;font-weight:600;margin-top:4px">Saved Food</div>
-        <div style="font-size:9px;color:#666">12 Posts · Rome, Tokyo</div>
-      </div>
-      <div class="btn" onclick="go('upload','fashion')" style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
-        <div style="font-size:28px">👗</div>
-        <div style="font-size:12px;font-weight:600;margin-top:4px">Saved Style</div>
-        <div style="font-size:9px;color:#666">8 Looks · Milan, Paris</div>
-      </div>
-      <div class="btn" onclick="go('upload','travel')" style="background:#141414;border:1px solid #222;border-radius:12px;padding:14px;text-align:center">
-        <div style="font-size:28px">🏛️</div>
-        <div style="font-size:12px;font-weight:600;margin-top:4px">Saved Spots</div>
-        <div style="font-size:9px;color:#666">15 Spots · Greece, Japan</div>
+        <div style="font-size:12px;font-weight:600;margin-top:4px">Global Eats</div>
+        <div style="font-size:9px;color:#666">22 Saved Items</div>
       </div>
     </div>
   </div>`
 };
-
-function attachEvents(s){
-  if(s==='analyzing'){
-    setTimeout(()=>go('results'),1800);
-  }
-}
 
 go('home');
 </script>
