@@ -15,7 +15,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;display:flex;flex-direction:column;position:relative}
 #screen::-webkit-scrollbar{display:none}
 
-/* Top & Bottom Navigation Bars */
+/* Navigation Bars */
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 8px;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:100;border-bottom:1px solid #111}
 .bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
 
@@ -46,7 +46,7 @@ body{background:#000;display:flex;align-items:center;justify-content:center;min-
 .ad-card{background:linear-gradient(135deg,#1c1917,#2e1065);border:1px solid #9333EA66;padding:12px;border-radius:14px;margin-top:12px;display:flex;align-items:center;justify-content:space-between}
 .search-input{width:100%;background:#1c1c1e;border:1px solid #333;border-radius:10px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
 
-/* Thumbnail Cards for Collections */
+/* Thumbnail Grid for Saved Collections */
 .grid-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 0}
 .thumb-card{background:#141414;border:1px solid #222;border-radius:14px;overflow:hidden;text-align:left;cursor:pointer}
 .thumb-card img{width:100%;height:110px;object-fit:cover;display:block;background:#222}
@@ -74,16 +74,22 @@ let userUploadedImage = null;
 let activeResult = null;
 let currentSavedCategory = null;
 
-// Category Thumbnail Covers (Real Photos)
+// Fallback image generator to ensure zero blank images ever display
+function imgFallback(el, text) {
+  el.onerror = null;
+  el.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340"><rect width="100%" height="100%" fill="%231a1a1a"/><text x="50%" y="50%" fill="%239333EA" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle" dominant-baseline="middle">✦ ' + encodeURIComponent(text || 'Scout Visual Content') + '</text></svg>';
+}
+
+// Category Thumbnail Covers
 const categoryCovers = {
   Fashion: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=400',
   Food: 'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=400',
-  Travel: 'https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg?auto=compress&cs=tinysrgb&w=400',
+  Travel: 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=400',
   Literature: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?auto=compress&cs=tinysrgb&w=400',
   Architecture: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=400'
 };
 
-// 30 US-Centric Posts (Real High-Res Photos across Travel, Food, Fashion, Literature, Architecture)
+// 30 Global & US-Centric Posts (All Unique, Accurate Tagging & Locations)
 const initialPosts = [
   { id: 1, username: 'nyc_eats', location: 'Times Square, NYC', userImg: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/378570/pexels-photo-378570.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Times Square lights & late night NYC energy 🌆', category: 'Travel', saved: false, tags: ['times square', 'nyc', 'travel'] },
   { id: 2, username: 'wallstreet_journal', location: 'Wall Street, Financial District, NYC', userImg: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Fearless Girl Statue at Wall Street NYC 🗽', category: 'Travel', saved: false, tags: ['fearless girl', 'wall street', 'financial district'] },
@@ -100,21 +106,21 @@ const initialPosts = [
   { id: 13, username: 'le_bernardin', location: 'Midtown, NYC', userImg: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Michelin Seafood Dining at Le Bernardin 🍷', category: 'Food', saved: false, tags: ['michelin', 'fine dining', 'nyc'] },
   { id: 14, username: 'dc_literature', location: 'Library of Congress, DC', userImg: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Reading Room at Library of Congress 📚', category: 'Literature', saved: false, tags: ['library', 'dc', 'literature'] },
   { id: 15, username: 'fifth_ave_chic', location: 'Fifth Ave, NYC', userImg: 'https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/837140/pexels-photo-837140.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Autumn Trench Coat Outfit Inspiration 🧥', category: 'Fashion', saved: false, tags: ['coat', 'trench', 'fashion'] },
-  { id: 16, username: 'central_park_life', location: 'Central Park, NYC', userImg: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Autumn foliage at Bethesda Terrace 🍂', category: 'Travel', saved: false, tags: ['central park', 'nyc', 'travel'] },
-  { id: 17, username: 'gramercy_tavern', location: 'Gramercy, NYC', userImg: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Rustic Tavern Burger & Craft Ale 🍺', category: 'Food', saved: false, tags: ['burger', 'nyc', 'food'] },
-  { id: 18, username: 'vogue_us', location: 'Tribeca, NYC', userImg: 'https://images.pexels.com/photos/1755428/pexels-photo-1755428.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1755428/pexels-photo-1755428.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Silk Evening Cocktail Gown 👗', category: 'Fashion', saved: false, tags: ['dress', 'gala', 'fashion'] },
-  { id: 19, username: 'seattle_arch', location: 'Seattle, Washington', userImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Modern Glass Architecture in Downtown Seattle 🏛️', category: 'Architecture', saved: false, tags: ['seattle', 'architecture'] },
-  { id: 20, username: 'ny_public_library', location: 'Bryant Park, NYC', userImg: 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Rose Main Reading Room at NYPL 📚', category: 'Literature', saved: false, tags: ['nypl', 'nyc', 'books'] },
-  { id: 21, username: 'grand_central', location: 'Midtown East, NYC', userImg: 'https://images.pexels.com/photos/1125212/pexels-photo-1125212.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1125212/pexels-photo-1125212.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Celestial Ceiling at Grand Central Terminal 🏛️', category: 'Architecture', saved: false, tags: ['grand central', 'nyc', 'architecture'] },
-  { id: 22, username: 'chelsea_market', location: 'Meatpacking, NYC', userImg: 'https://images.pexels.com/photos/566345/pexels-photo-566345.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/566345/pexels-photo-566345.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Fresh Maine Lobster Roll at Chelsea Market 🦞', category: 'Food', saved: false, tags: ['lobster', 'nyc', 'food'] },
-  { id: 23, username: 'highline_nyc', location: 'Chelsea, NYC', userImg: 'https://images.pexels.com/photos/1105766/pexels-photo-1105766.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1105766/pexels-photo-1105766.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'High Line Elevated Park Sunset Walk 🌿', category: 'Travel', saved: false, tags: ['high line', 'nyc', 'travel'] },
-  { id: 24, username: 'manhattan_couture', location: 'Upper East Side, NYC', userImg: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Casual Summer Linen Set 👗', category: 'Fashion', saved: false, tags: ['linen', 'fashion', 'dress'] },
-  { id: 25, username: 'washington_monument', location: 'Washington, D.C.', userImg: 'https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1486785/pexels-photo-1486785.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Washington Monument Reflecting Pool 🇺🇸', category: 'Travel', saved: false, tags: ['dc', 'travel', 'monument'] },
-  { id: 26, username: 'seattle_coffee_roasters', location: 'Capitol Hill, Seattle', userImg: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Pour-Over Coffee & Pastry in Seattle ☕', category: 'Food', saved: false, tags: ['coffee', 'seattle', 'food'] },
-  { id: 27, username: 'hudson_yards', location: 'Hudson Yards, NYC', userImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'The Vessel & Modernist Architecture 🏙️', category: 'Architecture', saved: false, tags: ['hudson yards', 'architecture'] },
-  { id: 28, username: 'classic_fiction', location: 'Greenwich, Connecticut', userImg: 'https://images.pexels.com/photos/1018136/pexels-photo-1018136.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1018136/pexels-photo-1018136.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'First Edition Fiction Masterpieces 📚', category: 'Literature', saved: false, tags: ['fiction', 'books', 'literature'] },
-  { id: 29, username: 'broadway_shows', location: 'Theater District, NYC', userImg: 'https://images.pexels.com/photos/109669/pexels-photo-109669.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/109669/pexels-photo-109669.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Broadway Marquee Lights Night 🎭', category: 'Travel', saved: false, tags: ['broadway', 'nyc', 'travel'] },
-  { id: 30, username: 'tribeca_loft', location: 'Tribeca, NYC', userImg: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Industrial Exposed Brick Loft Architecture 🧱', category: 'Architecture', saved: false, tags: ['tribeca', 'architecture', 'loft'] }
+  { id: 16, username: 'paris_cafes', location: 'Le Marais, Paris', userImg: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1307698/pexels-photo-1307698.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Parisian Bistro Croissant & Espresso ☕', category: 'Food', saved: false, tags: ['paris', 'croissant', 'food'] },
+  { id: 17, username: 'tokyo_sushi', location: 'Ginza, Tokyo', userImg: 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Authentic Omakase Nigiri in Ginza 🍣', category: 'Food', saved: false, tags: ['tokyo', 'sushi', 'food'] },
+  { id: 18, username: 'rome_pastas', location: 'Trastevere, Rome', userImg: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Handcrafted Cacio e Pepe in Rome 🍝', category: 'Food', saved: false, tags: ['rome', 'pasta', 'food'] },
+  { id: 19, username: 'london_reads', location: 'Notting Hill, London', userImg: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Vintage Bookshop in Notting Hill 📚', category: 'Literature', saved: false, tags: ['london', 'books', 'literature'] },
+  { id: 20, username: 'santorini_views', location: 'Oia, Santorini', userImg: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Iconic Blue Dome Church Sunset Overlook 🏛️', category: 'Travel', saved: false, tags: ['santorini', 'greece', 'travel'] },
+  { id: 21, username: 'kyoto_temples', location: 'Arashiyama, Kyoto', userImg: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/402028/pexels-photo-402028.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Traditional Wooden Pagoda Architecture ⛩️', category: 'Architecture', saved: false, tags: ['kyoto', 'japan', 'architecture'] },
+  { id: 22, username: 'milan_couture', location: 'Corso Como, Milan', userImg: 'https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Italian Structured Linen Blazer 👗', category: 'Fashion', saved: false, tags: ['milan', 'blazer', 'fashion'] },
+  { id: 23, username: 'barcelona_gothic', location: 'Gothic Quarter, Barcelona', userImg: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1388030/pexels-photo-1388030.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Gothic Cathedral Arches Barcelona 🏛️', category: 'Architecture', saved: false, tags: ['barcelona', 'architecture'] },
+  { id: 24, username: 'central_park_walk', location: 'Central Park, NYC', userImg: 'https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Bethesda Terrace Autumn Colors 🍂', category: 'Travel', saved: false, tags: ['central park', 'nyc', 'travel'] },
+  { id: 25, username: 'chelsea_market_eats', location: 'Meatpacking, NYC', userImg: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/566345/pexels-photo-566345.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Fresh Maine Lobster Roll Chelsea Market 🦞', category: 'Food', saved: false, tags: ['lobster', 'nyc', 'food'] },
+  { id: 26, username: 'highline_stroll', location: 'Chelsea, NYC', userImg: 'https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1105766/pexels-photo-1105766.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'High Line Park Sunset Walk 🌿', category: 'Travel', saved: false, tags: ['high line', 'nyc', 'travel'] },
+  { id: 27, username: 'hudson_yards_vessel', location: 'Hudson Yards, NYC', userImg: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/221502/pexels-photo-221502.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Modern Geometric Architecture at Vessel 🏙️', category: 'Architecture', saved: false, tags: ['hudson yards', 'nyc', 'architecture'] },
+  { id: 28, username: 'broadway_marquee', location: 'Theater District, NYC', userImg: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/109669/pexels-photo-109669.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Broadway Marquee Lights Night 🎭', category: 'Travel', saved: false, tags: ['broadway', 'nyc', 'travel'] },
+  { id: 29, username: 'tribeca_loft_design', location: 'Tribeca, NYC', userImg: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Industrial Exposed Brick Loft Design 🧱', category: 'Architecture', saved: false, tags: ['tribeca', 'nyc', 'loft'] },
+  { id: 30, username: 'greenwich_novels', location: 'Greenwich, CT', userImg: 'https://images.pexels.com/photos/159866/books-book-pages-read-literature-159866.jpeg?w=100', mediaImg: 'https://images.pexels.com/photos/1018136/pexels-photo-1018136.jpeg?auto=compress&cs=tinysrgb&w=600', caption: 'Leatherbound First Edition Masterpieces 📚', category: 'Literature', saved: false, tags: ['books', 'fiction', 'literature'] }
 ];
 
 function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:10px">●●●● WiFi 80%</span></div>`; }
@@ -210,7 +216,7 @@ home:()=>`${sbar()}
     </div>
     ${initialPosts.slice(0, 7).map(p => `
       <div class="story-item">
-        <div class="story-avatar"><img src="${p.userImg}" crossorigin="anonymous" /></div>
+        <div class="story-avatar"><img src="${p.userImg}" crossorigin="anonymous" onerror="imgFallback(this, '${p.username}')" /></div>
         <span style="font-size:10px;color:#888">${p.username}</span>
       </div>
     `).join('')}
@@ -221,7 +227,7 @@ home:()=>`${sbar()}
       <div class="ig-post">
         <div class="ig-post-header">
           <div style="display:flex;align-items:center;gap:10px">
-            <div class="story-avatar" style="width:32px;height:32px"><img src="${p.userImg}" crossorigin="anonymous"/></div>
+            <div class="story-avatar" style="width:32px;height:32px"><img src="${p.userImg}" crossorigin="anonymous" onerror="imgFallback(this, '${p.username}')"/></div>
             <div>
               <div style="font-size:12px;font-weight:600">${p.username}</div>
               <div style="font-size:10px;color:#888">${p.location}</div>
@@ -229,7 +235,7 @@ home:()=>`${sbar()}
           </div>
         </div>
         <div class="ig-media" onclick="triggerScoutOnItem(${p.id})" style="cursor:pointer">
-          <img src="${p.mediaImg}" crossorigin="anonymous"/>
+          <img src="${p.mediaImg}" crossorigin="anonymous" onerror="imgFallback(this, '${p.caption}')"/>
         </div>
         <div class="ig-actions">
           <div style="display:flex;gap:14px"><span>♥</span><span>💬</span><span>↗</span></div>
@@ -353,7 +359,7 @@ saved:()=>{
           <div class="grid-container">
             ${catItems.map(item => `
               <div class="thumb-card" onclick="triggerScoutOnItem(${item.id})">
-                <img src="${item.mediaImg}" crossorigin="anonymous"/>
+                <img src="${item.mediaImg}" crossorigin="anonymous" onerror="imgFallback(this, '${item.caption}')"/>
                 <div style="padding:8px"><div style="font-size:11px;font-weight:600">${item.caption}</div></div>
               </div>
             `).join('')}
@@ -374,7 +380,7 @@ saved:()=>{
         const coverImg = categoryCovers[cat];
         return `
           <div class="thumb-card" onclick="currentSavedCategory='${cat}';go('saved')">
-            <img src="${coverImg}" crossorigin="anonymous"/>
+            <img src="${coverImg}" crossorigin="anonymous" onerror="imgFallback(this, '${cat}')"/>
             <div style="padding:8px">
               <div style="font-size:12px;font-weight:700;color:#fff">${cat}</div>
               <div style="font-size:9px;color:#9333EA;margin-top:2px;font-weight:600">${count} Bookmarks</div>
@@ -405,7 +411,7 @@ function renderSearchResults(val) {
     <div class="grid-container">
       ${matches.map(p => `
         <div class="thumb-card" onclick="triggerScoutOnItem(${p.id})">
-          <img src="${p.mediaImg}" crossorigin="anonymous"/>
+          <img src="${p.mediaImg}" crossorigin="anonymous" onerror="imgFallback(this, '${p.caption}')"/>
           <div style="padding:8px"><div style="font-size:11px;font-weight:600">${p.caption}</div></div>
         </div>
       `).join('')}
