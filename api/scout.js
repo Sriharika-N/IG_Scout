@@ -15,7 +15,6 @@ export default async function handler(req, res) {
     const { base64Data, imageUrl } = req.body;
     let googleLensTitle = '';
 
-    // 1. SerpApi Search
     if (SERPAPI_KEY && imageUrl && imageUrl.startsWith('http')) {
       try {
         const serpResp = await fetch(
@@ -30,7 +29,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // 2. Call Gemini 1.5 Flash Vision
     const matches = base64Data ? base64Data.match(/^data:(.+);base64,(.+)$/) : null;
     const mimeType = matches ? matches[1] : 'image/jpeg';
     const rawBase64 = matches ? matches[2] : '';
@@ -39,9 +37,9 @@ export default async function handler(req, res) {
       return res.status(200).json({
         aiAnalysis: {
           category: 'Fashion',
-          summary: googleLensTitle || 'A stunning minimalist white linen co-ord set with structured blazer',
+          summary: googleLensTitle || 'Minimalist White Linen Blazer & Co-ord Set',
           confidence: 94,
-          externalBuyUrl: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(googleLensTitle || 'minimalist white linen set')}`
+          externalBuyUrl: `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(googleLensTitle || 'minimalist linen blazer')}`
         }
       });
     }
@@ -50,14 +48,14 @@ export default async function handler(req, res) {
     const prompt = `Analyze this image for Instagram Scout Visual Search.
     Google Lens Title: ${googleLensTitle || 'None'}.
 
-    Categorize into ONE of: "Fashion", "Literature", "Food", "Travel", "Architecture".
+    Categorize into EXACTLY ONE of: "Food", "Travel", "Literature", "Fashion".
 
     Return ONLY a valid JSON object without markdown formatting:
     {
-      "category": "Fashion" | "Literature" | "Food" | "Travel" | "Architecture",
-      "summary": "1-sentence identification describing the item, outfit, dish, book, or landmark",
+      "category": "Food" | "Travel" | "Literature" | "Fashion",
+      "summary": "Specific identification sentence",
       "confidence": 94,
-      "searchQuery": "Targeted search query string"
+      "searchQuery": "Targeted search query"
     }`;
 
     const contentPayload = rawBase64 
@@ -72,7 +70,7 @@ export default async function handler(req, res) {
     if (aiData.category === 'Literature') {
       aiData.externalBuyUrl = `[https://www.amazon.com/s?k=$](https://www.amazon.com/s?k=$){query}`;
     } else if (aiData.category === 'Food') {
-      aiData.externalBuyUrl = `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){query}+restaurant+menu+reservation`;
+      aiData.externalBuyUrl = `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){query}+restaurant+menu`;
     } else if (aiData.category === 'Fashion') {
       aiData.externalBuyUrl = `[https://www.google.com/search?tbm=shop&q=$](https://www.google.com/search?tbm=shop&q=$){query}`;
     } else {
@@ -86,9 +84,9 @@ export default async function handler(req, res) {
     return res.status(200).json({
       aiAnalysis: {
         category: 'Fashion',
-        summary: 'A stunning minimalist white linen co-ord set with structured blazer',
+        summary: 'Minimalist White Linen Blazer & Outfit',
         confidence: 94,
-        externalBuyUrl: '[https://www.google.com/search?tbm=shop&q=minimalist+white+linen+set](https://www.google.com/search?tbm=shop&q=minimalist+white+linen+set)'
+        externalBuyUrl: '[https://www.google.com/search?tbm=shop&q=minimalist+linen+blazer](https://www.google.com/search?tbm=shop&q=minimalist+linen+blazer)'
       }
     });
   }
