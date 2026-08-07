@@ -11,14 +11,14 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:#000}
 #screen::-webkit-scrollbar{display:none}
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:12px;font-weight:600;background:#000;position:sticky;top:0;z-index:50}
-.bnav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
+.bnav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
 .btn{cursor:pointer;background:none;border:none;color:#fff;padding:0;font-family:inherit;display:inline-flex;align-items:center;justify-content:center}
 @keyframes scanline{0%{top:0}100%{top:100%}}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .svi{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle}
 .igpost{border-bottom:1px solid #1a1a1a;background:#000}
 .igph{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-.igmedia{width:100%;height:350px;overflow:hidden;position:relative;cursor:pointer}
+.igmedia{width:100%;height:350px;overflow:hidden;position:relative;cursor:pointer;background:#141414}
 .igmedia img{width:100%;height:100%;object-fit:cover;display:block}
 .igmedia img.bkcover{object-fit:contain;background:#f8f4ef;padding:12px}
 .igact{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px}
@@ -76,48 +76,44 @@ function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function heartSVG(on){return on?'<svg class="svi" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>':'<svg class="svi" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'}
 function bookSVG(on){return on?'<svg class="svi" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>':'<svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'}
 
-// ── IMAGE URLS — Verified Unsplash IDs and Google Books API ──
-function usp(id,w){return 'https://images.unsplash.com/photo-'+id+'?w='+(w||800)+'&q=80&fit=crop&auto=format'}
-function gb(id){return 'https://books.google.com/books/content?id='+id+'&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api'}
 function prav(n){return 'https://i.pravatar.cc/150?img='+n}
 
-// Verified image URLs:
+// ── BULLETPROOF DIRECT IMAGE URLS (Wikimedia / Unsplash Source Direct) ──
 var IMG={
-  // Books - Google Books API
-  sapiens:      gb('FmyBAwAAQBAJ'),
-  stevejobs:    gb('8U2oAAAAQBAJ'),
-  atomichabits: gb('XfFmDwAAQBAJ'),
-  psychmoney:   gb('VhuzDwAAQBAJ'),
-  deepwork:     gb('n1eBCwAAQBAJ'),
+  // Books - OpenLibrary ISBN stable CDN
+  sapiens:      'https://covers.openlibrary.org/b/isbn/9780062316097-L.jpg',
+  stevejobs:    'https://covers.openlibrary.org/b/isbn/9781451648539-L.jpg',
+  atomichabits: 'https://covers.openlibrary.org/b/isbn/9780735224292-L.jpg',
+  psychmoney:   'https://covers.openlibrary.org/b/isbn/9780857197689-L.jpg',
+  deepwork:     'https://covers.openlibrary.org/b/isbn/9781455586691-L.jpg',
   // Travel
-  eiffel:       usp('1511739001486-6bfe61320473'),
-  eiffel2:      usp('1502602898657-3e91760cbb34'),
-  santorini:    usp('1570077188670-e3a8d69ac5ff'),
-  bali:         usp('1537996194471-e657df975ab4'),
-  kyoto:        usp('1493976040374-85c8e12f0c0e'),
-  venice:       usp('1514896856000-91cb6de818e0'),
+  eiffel:       'https://images.unsplash.com/photo-1511739001486-6bfe61320473?w=800&auto=format&fit=crop',
+  eiffel2:      'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&auto=format&fit=crop',
+  santorini:    'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=800&auto=format&fit=crop',
+  bali:         'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&auto=format&fit=crop',
+  kyoto:        'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop',
+  venice:       'https://images.unsplash.com/photo-1514896856000-91cb6de818e0?w=800&auto=format&fit=crop',
+  fira:         'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=800&auto=format&fit=crop',
+  stmarks:      'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&auto=format&fit=crop',
+  bamboo:       'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800&auto=format&fit=crop',
+  murano:       'https://images.unsplash.com/photo-1520106212299-d99c443e4568?w=800&auto=format&fit=crop',
+  montmartre:   'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=800&auto=format&fit=crop',
+  louvre:       'https://images.unsplash.com/photo-1499856845952-5e0d23be41d3?w=800&auto=format&fit=crop',
   // Food
-  pasta:        usp('1621996346565-e3d5d6281288'),
-  sushi:        usp('1579871494447-9811cf80d66c'),
-  pizza:        usp('1513104890138-7c749659a591'),
-  ramen:        usp('1569718212165-3a8278d5f624'),
-  pastry:       usp('1555507036-ab1f4038808a'),
+  pasta:        'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=800&auto=format&fit=crop',
+  sushi:        'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&auto=format&fit=crop',
+  pizza:        'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop',
+  ramen:        'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop',
+  pastry:       'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&auto=format&fit=crop',
   // Fashion
-  blazer:       usp('1591047139829-d91aecb6caea'),
-  camel:        usp('1539109136881-3be0616acf4b'),
-  trench:       usp('1544441893-675973e31985'),
-  denim:        usp('1541099649105-f69ad21f3246'),
-  bomber:       usp('1551028719-00167b16eac5'),
-  // Additional location-specific images
-  fira:         usp('1533105079780-92b9be482077'),
-  stmarks:      usp('1516483638261-f4dbaf036963'),
-  bamboo:       usp('1503899036084-c55cdd92da26'),
-  murano:       usp('1520106212299-d99c443e4568'),
-  montmartre:   usp('1502602898657-3e91760cbb34'),
-  louvre:       usp('1499856845952-5e0d23be41d3'),
+  blazer:       'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=800&auto=format&fit=crop',
+  camel:        'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&auto=format&fit=crop',
+  trench:       'https://images.unsplash.com/photo-1544441893-675973e31985?w=800&auto=format&fit=crop',
+  denim:        'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop',
+  bomber:       'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800&auto=format&fit=crop',
 };
 
-// ── POSTS — Jumbled mix with correct category/image alignment ──────────────────────────
+// ── POSTS DATA ──
 var posts=[
   {id:1,  u:'paris_views',       loc:'📍 Champ de Mars, Paris 🇫🇷', av:prav(16), img:IMG.eiffel,       bk:false, cap:'Eiffel Tower at golden hour — Paris never gets old. 🗼',                                             cat:'travel',    saved:false, liked:true,  tags:['eiffel tower','paris','france','travel'],               flow:'travel_paris'},
   {id:2,  u:'nonfiction_reads',  loc:'',                             av:prav(1),  img:IMG.sapiens,     bk:true,  cap:'Sapiens: A Brief History of Humankind — Yuval Noah Harari. 70,000 years of our story. 📚',            cat:'literature', saved:false, liked:true,  tags:['sapiens','harari','history','nonfiction'],              flow:'lit_sapiens'},
@@ -144,7 +140,7 @@ var posts=[
 // ── CATEGORY COVERS ──────────────────────────────────────────────────────────
 var catCovers={literature:IMG.sapiens,food:IMG.pasta,fashion:IMG.blazer,travel:IMG.eiffel};
 
-// ── SPONSORED ADS per category ───────────────────────────────────────────────
+// ── SPONSORED ADS ───────────────────────────────────────────────────────────
 var sponsoredAds={
   travel:[
     {tag:'Sponsored · Travel Insurance',  name:'Cover your Paris trip with Digit Travel Insurance', cta:'Get Quote →', link:'https://www.godigit.com/travel-insurance', color:'#3B82F6'},
@@ -695,7 +691,7 @@ lit_stevejobs:{label:'Steve Jobs — Walter Isaacson',conf:'95%',cat:'literature
 
 };
 
-// ── ROUTING ───────────────────────────────────────────────────────────────────
+// ── ROUTING ──
 function go(s,back){
   if(s==='saved'&&!back)savedCat=null;
   if(s==='home'){userImg2=null;var fks=Object.keys(flows);for(var i=0;i<fks.length;i++)delete flows[fks[i]]._lensLabel;}
@@ -722,7 +718,7 @@ function demoScout(flowKey){
   userImg2=null;activeFlow=flows[flowKey]||flows.travel_paris;go('analyzing');
 }
 
-// ── SCREENS ───────────────────────────────────────────────────────────────────
+// ── SCREENS ──
 var screens={
 
 home:function(){
@@ -733,7 +729,7 @@ home:function(){
   posts.slice(0,10).forEach(function(p){
     stories+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">'
       +'<div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)">'
-      +'<img src="'+p.av+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+p.av+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'</div>'
       +'<span style="font-size:10px;color:#ccc;width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.u+'</span>'
       +'</div>';
@@ -742,12 +738,12 @@ home:function(){
   posts.forEach(function(p){
     feed+='<div class="igpost">'
       +'<div class="igph"><div style="display:flex;align-items:center;gap:10px">'
-      +'<img src="'+p.av+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+p.av+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'<div><div style="font-size:13px;font-weight:600">'+p.u+' <span style="color:#60a5fa;font-size:11px">✓</span></div>'
       +(p.loc?'<div style="font-size:10px;color:#888">'+p.loc+'</div>':'')
       +'</div></div><span style="font-size:18px;color:#888">···</span></div>'
       +'<div class="igmedia" onclick="scoutPost('+p.id+')">'
-      +'<img src="'+p.img+'" class="'+(p.bk?'bkcover':'')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+p.img+'" class="'+(p.bk?'bkcover':'')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.15)">'
       +'<span style="color:#a855f7">✦</span> Tap to Scout</div>'
       +'</div>'
@@ -788,7 +784,7 @@ upload:function(){
   var dhtml='';
   demos.forEach(function(d){
     dhtml+='<button class="btn" onclick="demoScout(\''+d.fk+'\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:10px;border:1px solid #222;width:100%;margin-bottom:8px">'
-      +'<img src="'+d.img+'" style="width:44px;height:44px;border-radius:8px;object-fit:'+(d.bk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+d.img+'" style="width:44px;height:44px;border-radius:8px;object-fit:'+(d.bk?'contain;background:#f8f4ef':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:12px;color:#fff">'+d.t+'</div><div style="color:#666;font-size:10px">Run Scout AI Analysis</div></div>'
       +'<div style="padding:5px 12px;border-radius:14px;background:linear-gradient(135deg,#9333EA,#EC4899);color:#fff;font-size:11px;font-weight:700">✦ Scout</div>'
       +'</button>';
@@ -821,7 +817,7 @@ analyzing:function(){
   return sbar()
     +'<div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">'
     +'<div style="width:170px;height:170px;border-radius:24px;border:2px solid rgba(147,51,234,.4);overflow:hidden;position:relative;margin-bottom:28px;background:'+(isBk?'#f8f4ef':'#141414')+'">'
-    +'<img src="'+dispImg+'" style="width:100%;height:100%;object-fit:'+(isBk?'contain;padding:10px':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+    +'<img src="'+dispImg+'" style="width:100%;height:100%;object-fit:'+(isBk?'contain;padding:10px':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
     +'<div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.8s linear infinite;top:0"></div>'
     +'</div>'
     +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:16px">'
@@ -854,7 +850,7 @@ results:function(){
     +'<div style="padding:10px 16px">'
     +'<div style="border-radius:18px;overflow:hidden;border:1px solid rgba(147,51,234,.27);background:#111">'
     +'<div style="height:190px;overflow:hidden;background:'+(isBk?'#f8f4ef':'#141414')+'">'
-    +'<img src="'+dispImg+'" style="width:100%;height:100%;object-fit:'+(isBk?'contain;padding:10px':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+    +'<img src="'+dispImg+'" style="width:100%;height:100%;object-fit:'+(isBk?'contain;padding:10px':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
     +'</div>'
     +'<div style="padding:12px 14px;display:flex;gap:8px;align-items:flex-start">'
     +'<span style="color:#9333EA;font-size:14px;flex-shrink:0">✦</span>'
@@ -879,7 +875,6 @@ results:function(){
     +'<div style="flex:1"><div style="font-weight:600;font-size:13px">'+flow.planTitle+'</div><div style="font-size:11px;color:#F59E0B;margin-top:2px">3-part AI guide</div></div>'
     +'<span style="color:#555;font-size:18px;margin-left:auto">›</span></button>'
     +'</div>'
-    // Sponsored ads
     +sponsoredHTML(flow.cat)
     +'<div style="padding:10px 16px 16px">'
     +'<div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Explore More</div>'
@@ -894,9 +889,9 @@ nearby:function(){
     :'';
   var cards='';
   flow.nearby.forEach(function(item){
-    var isBk=item.img&&item.img.indexOf('books.google')>-1;
+    var isBk=item.img&&item.img.indexOf('openlibrary')>-1;
     cards+='<div class="scard" onclick="openLink(\''+esc(item.link)+'\')">'
-      +'<img src="'+item.img+'" style="object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+item.img+'" style="object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+item.name+'</div>'
       +'<div style="font-size:10px;color:#888;margin-top:2px">'+item.info+'</div></div>'
       +'<button class="abadge" onclick="event.stopPropagation();openLink(\''+esc(item.link)+'\')">Open →</button>'
@@ -913,9 +908,9 @@ shop:function(){
   if(!flow)return sbar()+'<div style="padding:30px;text-align:center;color:#888">No data.<br><button class="btn" onclick="goBack()" style="color:#a855f7">← Back</button></div>';
   var cards='';
   flow.shop.forEach(function(item){
-    var isBk=item.img&&item.img.indexOf('books.google')>-1;
+    var isBk=item.img&&item.img.indexOf('openlibrary')>-1;
     cards+='<div class="scard" onclick="openLink(\''+esc(item.link)+'\')">'
-      +'<img src="'+item.img+'" style="object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+item.img+'" style="object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'<div style="flex:1">'
       +'<div style="font-size:12px;font-weight:700">'+item.name+'</div>'
       +'<div style="font-size:10px;color:#888;margin-top:2px">'+item.brand+' · <span style="color:#EC4899;font-weight:600">'+item.price+'</span></div>'
@@ -938,9 +933,9 @@ plan:function(){
   var planImg=flow.planImgs&&flow.planImgs[dayTab]?flow.planImgs[dayTab]:null;
   var imgBlock='';
   if(planImg){
-    var isBk=planImg.indexOf('books.google')>-1;
+    var isBk=planImg.indexOf('openlibrary')>-1;
     imgBlock='<div style="height:160px;border-radius:14px;overflow:hidden;margin-bottom:14px;background:'+(isBk?'#f8f4ef':'#141414')+'">'
-      +'<img src="'+planImg+'" style="width:100%;height:100%;object-fit:'+(isBk?'contain;padding:10px':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+planImg+'" style="width:100%;height:100%;object-fit:'+(isBk?'contain;padding:10px':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'</div>';
   }
   var mapLink=flow.mapEmbed&&!isLit
@@ -979,7 +974,7 @@ saved:function(){
       items.forEach(function(it){
         var isBk=!!it.bk;
         inner+='<div class="tcard" onclick="scoutPost('+it.id+')">'
-          +'<img src="'+it.img+'" style="height:130px;object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+          +'<img src="'+it.img+'" style="height:130px;object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
           +'<div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">'+it.cap+'</div></div>'
           +'</div>';
       });
@@ -994,7 +989,7 @@ saved:function(){
     var count=savedList.filter(function(p){return p.cat===cat}).length;
     var isBk=cat==='literature';
     grid+='<div class="tcard" onclick="savedCat=\''+cat+'\';S.innerHTML=screens.saved();attachEvents(\'saved\')">'
-      +'<img src="'+covers[cat]+'" style="height:130px;object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<img src="'+covers[cat]+'" style="height:130px;object-fit:'+(isBk?'contain;background:#f8f4ef':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
       +'<div style="padding:8px"><div style="font-size:12px;font-weight:700">'+labels[cat]+'</div>'
       +'<div style="font-size:10px;color:#a855f7;margin-top:2px;font-weight:600">'+count+' Saved</div>'
       +'</div></div>';
@@ -1036,7 +1031,7 @@ function doSearch(val){
     h+='<div class="grid2">';
     matches.forEach(function(p){
       h+='<div class="tcard" onclick="scoutPost('+p.id+')">'
-        +'<img src="'+p.img+'" style="height:130px;object-fit:'+(p.bk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+        +'<img src="'+p.img+'" style="height:130px;object-fit:'+(p.bk?'contain;background:#f8f4ef':'cover')+'" crossorigin="anonymous" referrerpolicy="no-referrer"/>'
         +'<div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">'+p.cap+'</div>'
         +'<div style="font-size:9px;color:#a855f7;margin-top:3px">'+capFirst(p.cat)+'</div></div>'
         +'</div>';
@@ -1139,7 +1134,6 @@ function attachEvents(s){
     setTimeout(function(){
       clearInterval(iv);
       if(bar)bar.style.width='100%';if(num)num.textContent='100%';
-      // Mark all steps done
       items.forEach(function(it){
         var dot=it.querySelector('.sdot');var lbl=it.querySelector('.slbl');
         it.style.opacity='1';
