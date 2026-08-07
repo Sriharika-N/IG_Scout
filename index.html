@@ -89,7 +89,7 @@ function bookSVG(on){return on
 var posts = [
   // Post 1 — Travel: Eiffel Tower Paris (pex 699466 = Eiffel Tower confirmed)
   {id:1,  u:'paris_views',       loc:'📍 Champ de Mars, Paris 🇫🇷',
-   av:prav(16), img:pex(699466),
+   av:prav(16), img:pex(1461974),
    cap:'Eiffel Tower at golden hour — Paris never gets old. 🗼',
    cat:'travel', saved:false, liked:true,
    tags:['eiffel tower','paris','france','travel'],
@@ -185,7 +185,7 @@ var posts = [
 
   // Post 13 — Travel: Kyoto Fushimi Inari (pex 161401 = torii gates Kyoto)
   {id:13, u:'kyoto_trails',      loc:'📍 Fushimi Inari, Kyoto 🇯🇵',
-   av:prav(18), img:pex(161401),
+   av:prav(18), img:pex(3408354),
    cap:'Fushimi Inari torii gates at dawn — thousands of vermillion gates winding up the mountain. 🎍',
    cat:'travel', saved:false, liked:true,
    tags:['kyoto','japan','fushimi inari','shrine','torii'],
@@ -259,12 +259,12 @@ var flows={
     nearbyTitle:'Attractions Near Eiffel Tower',
     mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624!2d2.2945!3d48.8584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701f7f0a3c07%3A0x30340c49952e4b64!2sEiffel%20Tower!5e0!3m2!1sen!2sin!4v1699999999',
     nearby:[
-      {name:'Eiffel Tower Summit',   info:'Champ de Mars, Paris · ★ 4.9', img:pex(699466,200),  link:'https://www.google.com/maps/place/Eiffel+Tower/@48.8584,2.2945'},
+      {name:'Eiffel Tower Summit',   info:'Champ de Mars, Paris · ★ 4.9', img:pex(1461974,200),  link:'https://www.google.com/maps/place/Eiffel+Tower/@48.8584,2.2945'},
       {name:'Trocadéro Viewpoint',   info:'Free entry · ★ 4.8',           img:pex(338515,200),  link:'https://www.google.com/maps/place/Trocad%C3%A9ro/@48.8637,2.2888'},
     ],
     shopTitle:'Book Paris Experiences',
     shop:[
-      {name:'Eiffel Tower — Skip-the-Line', brand:'GetYourGuide', price:'₹3,500', badge:'Bestseller', img:pex(699466,200),  link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/'},
+      {name:'Eiffel Tower — Skip-the-Line', brand:'GetYourGuide', price:'₹3,500', badge:'Bestseller', img:pex(1461974,200),  link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/'},
       {name:'Seine River Sunset Cruise',    brand:'Viator',       price:'₹2,300', badge:'Top Rated',  img:pex(1796715,200), link:'https://www.viator.com/tours/Paris/Paris-Seine-River-Cruise/d479-2140SEINE'},
       {name:'Paris 3-Day Museum Pass',      brand:'ParisMPass',   price:'₹5,400', badge:'Best Value', img:pex(338515,200),  link:'https://www.parismuseumpass.fr/en/'},
     ],
@@ -926,7 +926,7 @@ upload:function(){
 
 analyzing:function(){
   var flow=activeFlow;
-  var cover=flow?pex(699466,400):pex(699466,400);
+  var cover=flow?pex(1461974,400):pex(1461974,400);
   if(flow){
     if(flow.cat==='literature') cover=OL('9780062316097');
     else if(flow.nearby&&flow.nearby[0]) cover=flow.nearby[0].img.replace(',200)','');
@@ -935,8 +935,8 @@ analyzing:function(){
   var sh='';
   steps.forEach(function(s,i){
     sh+='<div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:'+(i===0?1:0.3)+'">'
-      +'<div style="width:10px;height:10px;border-radius:50%;background:'+(i===0?'#EC4899':'#333')+'"></div>'
-      +'<span style="font-size:11px;color:#ccc">'+s+'</span></div>';
+      +'<div class="sdot" style="width:14px;height:14px;border-radius:50%;background:'+(i===0?'#EC4899':'#333')+';flex-shrink:0"></div>'
+      +'<span class="slbl" style="font-size:11px;color:'+(i===0?'#fff':'#ccc')+'">'+s+'</span></div>';
   });
   return sbar()
     +'<div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">'
@@ -958,7 +958,7 @@ analyzing:function(){
 results:function(){
   var flow=activeFlow;
   if(!flow){return sbar()+'<div style="padding:40px;text-align:center;color:#888">No result to show.<br><br><button class="btn" onclick="goBack()" style="color:#a855f7">← Go Back</button></div>'}
-  var dispImg=userImg2||(flow.nearby&&flow.nearby[0]?flow.nearby[0].img.replace(',200)',''):pex(699466));
+  var dispImg=userImg2||(flow.nearby&&flow.nearby[0]?flow.nearby[0].img.replace(',200)',''):pex(1461974));
   var svs='';
   flow.saves.forEach(function(s){
     svs+='<div class="xplore" onclick="openLink(\''+esc(s.link)+'\')">'
@@ -1072,7 +1072,7 @@ saved:function(){
     literature:OL('9780062316097'),
     food:pex(1279330,400),
     fashion:pex(1536619,400),
-    travel:pex(699466,400)
+    travel:pex(1461974,400)
   };
 
   // Inside a specific category
@@ -1176,7 +1176,22 @@ function attachEvents(s){
       p=Math.min(p+5,95);
       if(bar)bar.style.width=p+'%';
       if(num)num.textContent=p+'%';
-      items.forEach(function(it,i){if(i<=Math.floor(p/25))it.style.opacity='1'});
+      var doneIdx=Math.floor(p/25);
+      items.forEach(function(it,i){
+        var dot=it.querySelector('.sdot');
+        var lbl=it.querySelector('.slbl');
+        if(i<doneIdx){
+          it.style.opacity='1';
+          if(dot){dot.style.background='#22c55e';dot.innerHTML='<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';dot.style.display='flex';dot.style.alignItems='center';dot.style.justifyContent='center';}
+          if(lbl){lbl.style.color='#22c55e';}
+        } else if(i===doneIdx){
+          it.style.opacity='1';
+          if(dot){dot.style.background='#EC4899';}
+          if(lbl){lbl.style.color='#fff';}
+        } else {
+          it.style.opacity='0.3';
+        }
+      });
     },50);
     setTimeout(function(){
       clearInterval(iv);
