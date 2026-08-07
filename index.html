@@ -3,665 +3,598 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Instagram Scout — AI Visual Search Prototype</title>
+<title>Instagram Scout</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
-body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:20px;color:#fff}
-#phone{width:390px;height:844px;background:#000;border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 0 0 12px #2c2c2e,0 30px 90px rgba(147,51,234,0.35);position:relative;flex-shrink:0;display:flex;flex-direction:column}
-#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;background:#000}
+body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:20px;color:#fff}
+#phone{width:390px;height:844px;background:#000;border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 0 0 12px #2c2c2e,0 30px 90px rgba(147,51,234,0.35);flex-shrink:0;display:flex;flex-direction:column}
+#screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:#000}
 #screen::-webkit-scrollbar{display:none}
-.sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:50}
-.bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
-.btn{cursor:pointer;background:none;border:none;color:inherit;padding:0;font-family:inherit;font-size:inherit;display:inline-flex;align-items:center;justify-content:center}
-@keyframes scanline{0%{top:0%}100%{top:100%}}
-@keyframes toastSlide{from{transform:translate(-50%,100%);opacity:0}to{transform:translate(-50%,0);opacity:1}}
-.svg-icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle}
-.ig-post{border-bottom:1px solid #1a1a1a;background:#000}
-.ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-.ig-media{width:100%;height:340px;background:#141414;overflow:hidden;position:relative}
-.ig-media img{width:100%;height:100%;object-fit:cover;display:block}
-.ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px}
-.ig-caption{padding:0 14px 14px;font-size:13px;line-height:1.4}
-.search-input{width:100%;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
-.search-input::placeholder{color:#777}
-.grid-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 14px}
-.thumb-card{background:#121212;border:1px solid #222;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.15s ease}
-.thumb-card:active{transform:scale(0.97)}
-.thumb-card img{width:100%;height:130px;object-fit:cover;display:block}
-.sub-card{background:#111;border:1px solid #222;border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
-.sub-card img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0}
-.action-badge{padding:7px 14px;border-radius:20px;font-size:11px;font-weight:600;background:#9333EA;color:#fff;border:none;cursor:pointer;white-space:nowrap}
-#toastPill{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid #9333EAaa;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.8);display:none;z-index:200;white-space:nowrap}
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:12px;font-weight:600;background:#000;position:sticky;top:0;z-index:50}
+.bnav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
+.btn{cursor:pointer;background:none;border:none;color:#fff;padding:0;font-family:inherit;font-size:inherit;display:inline-flex;align-items:center;justify-content:center}
+@keyframes scanline{0%{top:0}100%{top:100%}}
+.svi{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle}
+.igpost{border-bottom:1px solid #1a1a1a;background:#000}
+.igph{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+.igmedia{width:100%;height:340px;background:#141414;overflow:hidden;position:relative;cursor:pointer}
+.igmedia img{width:100%;height:100%;object-fit:cover;display:block}
+.igact{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px}
+.igcap{padding:0 14px 14px;font-size:13px;line-height:1.4}
+.sinput{width:100%;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
+.sinput::placeholder{color:#777}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 14px}
+.tcard{background:#121212;border:1px solid #222;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s}
+.tcard:active{transform:scale(.97)}
+.tcard img{width:100%;height:130px;object-fit:cover;display:block}
+.scard{background:#111;border:1px solid #222;border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.scard img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0}
+.abadge{padding:7px 14px;border-radius:20px;font-size:11px;font-weight:600;background:#9333EA;color:#fff;border:none;cursor:pointer;white-space:nowrap}
+#toast{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid rgba(147,51,234,.7);padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;display:none;z-index:200;white-space:nowrap}
+.arow{display:flex;align-items:center;gap:10px;padding:8px 16px 4px}
+.arow .bk{font-size:22px;cursor:pointer;background:none;border:none;color:#fff}
+.arow .ttl{font-weight:600;font-size:15px}
+.actbtn{display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%;cursor:pointer;color:#fff;text-align:left;margin-bottom:8px}
+.actbtn .ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.actbtn .lbl{font-weight:600;font-size:13px}
+.actbtn .sub{font-size:11px;margin-top:2px}
+.actbtn .arr{color:#555;font-size:18px;margin-left:auto}
 </style>
 </head>
 <body>
 <div id="phone">
   <div id="screen"></div>
-  <div id="toastPill"></div>
-  <div class="bottom-nav">
-    <button class="btn" onclick="go('home')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
-    <button class="btn" onclick="go('scout-landing')" style="position:relative">
-      <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <div style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:7px;color:white;border:1.5px solid #000">✦</div>
+  <div id="toast"></div>
+  <div class="bnav">
+    <button class="btn" onclick="go('home')"><svg class="svi" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+    <button class="btn" onclick="go('scout')" style="position:relative">
+      <svg class="svi" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <div style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:7px;color:#fff;border:1.5px solid #000;display:flex;align-items:center;justify-content:center">✦</div>
     </button>
-    <button class="btn" onclick="go('saved')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></button>
-    <button class="btn" onclick="go('upload')"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></button>
-    <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="go('saved')">
-      <div style="width:22px;height:22px;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">Sri</div>
+    <button class="btn" onclick="go('saved')"><svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="btn" onclick="go('upload')"><svg class="svi" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
+    <div onclick="go('saved')" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;cursor:pointer">
+      <div style="width:22px;height:22px;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff">Sri</div>
     </div>
   </div>
 </div>
-
 <script>
-const screen = document.getElementById('screen');
-const toast  = document.getElementById('toastPill');
-let activeFlow = null, userUploadedImage = null, currentSavedCategory = null, activeDayTab = 1, navStack = ['home'], analyzeTimer = null;
+var S=document.getElementById('screen');
+var T=document.getElementById('toast');
+var activeFlow=null, userImg2=null, savedCat=null, dayTab=1, stack=['home'];
 
-function showToast(msg){toast.textContent=msg;toast.style.display='block';setTimeout(()=>{toast.style.display='none'},2200)}
-function grad(t){return`<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${t}</span>`}
-function bkSVG(s){return s?`<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`:`<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`}
-function htSVG(l){return l?`<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`:`<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`}
-function escapeAttr(str) { return str.replace(/'/g, "&apos;").replace(/"/g, "&quot;"); }
+function showToast(m){T.textContent=m;T.style.display='block';setTimeout(function(){T.style.display='none'},2200)}
+function OL(isbn){return 'https://covers.openlibrary.org/b/isbn/'+isbn+'-L.jpg'}
+function pex(id,w){return 'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w='+(w||800)}
+function prav(n){return 'https://i.pravatar.cc/150?img='+n}
 
-// ── POSTS ──────────────────────────────────────────────────────────────────
-const OL = (isbn) => `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
-
-const initialPosts = [
-  // ── LITERATURE ──────────────────────────────────────────────────────────
-  {id:1, username:'nonfiction_reads', location:'', userImg:'https://i.pravatar.cc/150?img=1',
-   mediaImg: OL('9780062316097'),
-   caption:'Sapiens: A Brief History of Humankind — Yuval Noah Harari. Mind-bending look at 70,000 years of human history. 📚',
-   category:'Literature', saved:true,  liked:true,  tags:['sapiens','harari','history','nonfiction']},
-
-  {id:2, username:'bio_library', location:'', userImg:'https://i.pravatar.cc/150?img=2',
-   mediaImg: OL('9781451648539'),
-   caption:'Steve Jobs by Walter Isaacson — The definitive biography of Apple\'s visionary co-founder. 📖',
-   category:'Literature', saved:true,  liked:true,  tags:['steve jobs','isaacson','biography']},
-
-  {id:3, username:'habit_lab', location:'', userImg:'https://i.pravatar.cc/150?img=3',
-   mediaImg: OL('9780735224292'),
-   caption:'Atomic Habits by James Clear — Tiny changes, remarkable results. The book that rewired how I work. 📈',
-   category:'Literature', saved:true,  liked:false, tags:['atomic habits','james clear','habits']},
-
-  {id:4, username:'finance_wisdom', location:'', userImg:'https://i.pravatar.cc/150?img=4',
-   mediaImg: OL('9780857197689'),
-   caption:'The Psychology of Money by Morgan Housel — 19 short stories on wealth, greed, and happiness. 💡',
-   category:'Literature', saved:true,  liked:true,  tags:['psychology of money','morgan housel','finance']},
-
-  {id:5, username:'deep_focus', location:'', userImg:'https://i.pravatar.cc/150?img=5',
-   mediaImg: OL('9781455586691'),
-   caption:'Deep Work by Cal Newport — Rules for focused success in a distracted world. 🎯',
-   category:'Literature', saved:true,  liked:true,  tags:['deep work','cal newport','productivity']},
-
-  {id:6, username:'science_shelf', location:'', userImg:'https://i.pravatar.cc/150?img=6',
-   mediaImg: OL('9780812993547'),
-   caption:'Educated: A Memoir by Tara Westover — A remarkable true story of self-invention. 🎓',
-   category:'Literature', saved:false, liked:true,  tags:['educated','tara westover','memoir']},
-
-  // ── FOOD ────────────────────────────────────────────────────────────────
-  {id:7, username:'trattoria_roma', location:'Trattoria Da Enzo al 29, Rome 🇮🇹', userImg:'https://i.pravatar.cc/150?img=7',
-   mediaImg:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Handmade Truffle Cacio e Pepe at Trattoria Da Enzo — Rome\'s most iconic pasta, perfected. 🍝',
-   category:'Food', saved:true, liked:true, tags:['cacio e pepe','pasta','rome','italy']},
-
-  {id:8, username:'ginza_sushi', location:'Sukiyabashi Jiro, Ginza, Tokyo 🇯🇵', userImg:'https://i.pravatar.cc/150?img=8',
-   mediaImg:'https://images.pexels.com/photos/2323398/pexels-photo-2323398.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Omakase Otoro Nigiri at Sukiyabashi Jiro — the most celebrated sushi counter on earth. 🍣',
-   category:'Food', saved:true, liked:true, tags:['sushi','omakase','tokyo','jiro']},
-
-  {id:9, username:'napoli_pizza', location:"L'Antica Pizzeria da Michele, Naples 🇮🇹", userImg:'https://i.pravatar.cc/150?img=9',
-   mediaImg:'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Wood-fired Neapolitan Margherita at Da Michele — since 1870, only two pizzas on the menu. 🍕',
-   category:'Food', saved:false, liked:true, tags:['pizza','naples','margherita','neapolitan']},
-
-  {id:10, username:'tokyo_ramen', location:'Ichiran Ramen, Shinjuku, Tokyo 🇯🇵', userImg:'https://i.pravatar.cc/150?img=10',
-   mediaImg:'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Solo booth Tonkotsu Ramen at Ichiran Shinjuku — rich pork broth, perfect noodles. 🍜',
-   category:'Food', saved:false, liked:true, tags:['ramen','tonkotsu','ichiran','tokyo']},
-
-  {id:11, username:'paris_patisserie', location:'Cédric Grolet Opéra, Paris 🇫🇷', userImg:'https://i.pravatar.cc/150?img=11',
-   mediaImg:'https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Sculpted Hazelnut Trompe-l\'oeil Pastry at Cédric Grolet — edible art at its finest. 🥐',
-   category:'Food', saved:true, liked:false, tags:['pastry','cedric grolet','paris','patisserie']},
-
-  // ── FASHION ─────────────────────────────────────────────────────────────
-  {id:12, username:'soho_chic', location:'', userImg:'https://i.pravatar.cc/150?img=12',
-   mediaImg:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Minimalist linen blazer & tailored co-ord — clean lines, effortless confidence. 🧥',
-   category:'Fashion', saved:true, liked:true, tags:['linen blazer','minimalist','fashion','blazer']},
-
-  {id:13, username:'milan_runway', location:'', userImg:'https://i.pravatar.cc/150?img=13',
-   mediaImg:'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Double-breasted wool trench from Milan — the season\'s most versatile investment piece. 🧥',
-   category:'Fashion', saved:false, liked:true, tags:['trench coat','wool','milan','fashion']},
-
-  {id:14, username:'scandi_style', location:'', userImg:'https://i.pravatar.cc/150?img=14',
-   mediaImg:'https://images.pexels.com/photos/972995/pexels-photo-972995.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Oversized camel coat + cashmere scarf — Scandinavian quiet luxury done right. 🧣',
-   category:'Fashion', saved:true, liked:true, tags:['camel coat','scandi','fashion','luxury']},
-
-  {id:15, username:'harajuku_fits', location:'', userImg:'https://i.pravatar.cc/150?img=15',
-   mediaImg:'https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Vintage oversized bomber jacket — streetwear at its most expressive. 👟',
-   category:'Fashion', saved:false, liked:false, tags:['bomber jacket','streetwear','vintage','fashion']},
-
-  // ── TRAVEL ──────────────────────────────────────────────────────────────
-  {id:16, username:'paris_views', location:'Champ de Mars, Paris 🇫🇷', userImg:'https://i.pravatar.cc/150?img=16',
-   mediaImg:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Eiffel Tower at golden hour from Champ de Mars — Paris never gets old. 🗼',
-   category:'Travel', saved:true, liked:true, tags:['eiffel tower','paris','france','travel']},
-
-  {id:17, username:'santorini_sunsets', location:'Oia, Santorini 🇬🇷', userImg:'https://i.pravatar.cc/150?img=17',
-   mediaImg:'https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Blue dome churches of Oia — the sunset here will stop your heart. 🇬🇷',
-   category:'Travel', saved:true, liked:true, tags:['santorini','oia','greece','islands']},
-
-  {id:18, username:'kyoto_trails', location:'Arashiyama, Kyoto 🇯🇵', userImg:'https://i.pravatar.cc/150?img=18',
-   mediaImg:'https://images.pexels.com/photos/161401/fushimi-inari-taisha-shrine-kyoto-japan-temple-161401.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Arashiyama Bamboo Grove at dawn — one of Japan\'s most magical 5am decisions. 🎍',
-   category:'Travel', saved:true, liked:true, tags:['kyoto','bamboo','arashiyama','japan']},
-
-  {id:19, username:'bali_terraces', location:'Tegallalang, Ubud, Bali 🇮🇩', userImg:'https://i.pravatar.cc/150?img=19',
-   mediaImg:'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Tegallalang rice terraces — Bali\'s emerald stairways carved over centuries. 🌴',
-   category:'Travel', saved:true, liked:true, tags:['bali','ubud','rice terraces','indonesia']},
-
-  {id:20, username:'venice_gondola', location:'Grand Canal, Venice 🇮🇹', userImg:'https://i.pravatar.cc/150?img=20',
-   mediaImg:'https://images.pexels.com/photos/1796715/pexels-photo-1796715.jpeg?auto=compress&cs=tinysrgb&w=800',
-   caption:'Grand Canal at sunset — Venice is a city that shouldn\'t exist, and yet here we are. 🛶',
-   category:'Travel', saved:false, liked:true, tags:['venice','italy','gondola','canal']},
+var posts=[
+  // LITERATURE — book cover from Open Library by ISBN
+  {id:1,  u:'nonfiction_reads', loc:'',                                          av:prav(1),  img:OL('9780062316097'), cap:'Sapiens: A Brief History of Humankind — Yuval Noah Harari. 70,000 years of human history in one book. 📚', cat:'literature', saved:true,  liked:true,  tags:['sapiens','harari','history','nonfiction']},
+  {id:2,  u:'bio_library',      loc:'',                                          av:prav(2),  img:OL('9781451648539'), cap:'Steve Jobs by Walter Isaacson — the definitive biography of Apple\'s visionary. 📖',                     cat:'literature', saved:true,  liked:true,  tags:['steve jobs','isaacson','biography','apple']},
+  {id:3,  u:'habit_lab',        loc:'',                                          av:prav(3),  img:OL('9780735224292'), cap:'Atomic Habits by James Clear — tiny changes, remarkable results. The book that rewired how I work. 📈',    cat:'literature', saved:true,  liked:false, tags:['atomic habits','james clear','habits','productivity']},
+  {id:4,  u:'finance_wisdom',   loc:'',                                          av:prav(4),  img:OL('9780857197689'), cap:'The Psychology of Money by Morgan Housel — 19 short stories on wealth, greed & happiness. 💡',             cat:'literature', saved:true,  liked:true,  tags:['psychology of money','morgan housel','finance','money']},
+  {id:5,  u:'deep_focus',       loc:'',                                          av:prav(5),  img:OL('9781455586691'), cap:'Deep Work by Cal Newport — rules for focused success in a distracted world. 🎯',                          cat:'literature', saved:true,  liked:true,  tags:['deep work','cal newport','productivity','focus']},
+  {id:6,  u:'science_shelf',    loc:'',                                          av:prav(6),  img:OL('9780812993547'), cap:'Educated: A Memoir by Tara Westover — a remarkable true story of self-invention. 🎓',                     cat:'literature', saved:false, liked:true,  tags:['educated','tara westover','memoir','self invention']},
+  // FOOD — real restaurant photos
+  {id:7,  u:'trattoria_roma',   loc:'📍 Trattoria Da Enzo al 29, Rome 🇮🇹',      av:prav(7),  img:pex(1279330),       cap:'Handmade Truffle Cacio e Pepe at Trattoria Da Enzo — Rome\'s most iconic pasta, perfected. 🍝',             cat:'food',       saved:true,  liked:true,  tags:['cacio e pepe','pasta','rome','italy','truffle']},
+  {id:8,  u:'ginza_sushi',      loc:'📍 Sukiyabashi Jiro, Ginza, Tokyo 🇯🇵',     av:prav(8),  img:pex(2323398),       cap:'Omakase Otoro Nigiri at Sukiyabashi Jiro — the most celebrated sushi counter on earth. 🍣',                 cat:'food',       saved:true,  liked:true,  tags:['sushi','omakase','tokyo','jiro','nigiri']},
+  {id:9,  u:'napoli_pizza',     loc:"📍 L'Antica Pizzeria da Michele, Naples 🇮🇹", av:prav(9),  img:pex(315755),        cap:'Wood-fired Neapolitan Margherita at Da Michele — since 1870, only two pizzas on the menu. 🍕',               cat:'food',       saved:false, liked:true,  tags:['pizza','naples','margherita','neapolitan','italy']},
+  {id:10, u:'tokyo_ramen',      loc:'📍 Ichiran Ramen, Shinjuku, Tokyo 🇯🇵',     av:prav(10), img:pex(1907228),       cap:'Solo booth Tonkotsu Ramen at Ichiran Shinjuku — rich pork broth, perfect noodles. 🍜',                     cat:'food',       saved:false, liked:true,  tags:['ramen','tonkotsu','ichiran','tokyo','japan']},
+  {id:11, u:'paris_patisserie', loc:'📍 Cédric Grolet Opéra, Paris 🇫🇷',         av:prav(11), img:pex(205961),        cap:'Sculpted Hazelnut Pastry at Cédric Grolet — edible art at its absolute finest. 🥐',                        cat:'food',       saved:true,  liked:false, tags:['pastry','cedric grolet','paris','patisserie','hazelnut']},
+  // FASHION — outfit photos
+  {id:12, u:'soho_chic',        loc:'',                                          av:prav(12), img:pex(1536619),       cap:'Minimalist linen blazer & tailored co-ord — clean lines, effortless confidence. 🧥',                      cat:'fashion',    saved:true,  liked:true,  tags:['linen blazer','minimalist','fashion','blazer','tailored']},
+  {id:13, u:'milan_runway',     loc:'',                                          av:prav(13), img:pex(934070),        cap:'Double-breasted wool trench — the season\'s most versatile investment piece from Milan. 🧥',               cat:'fashion',    saved:false, liked:true,  tags:['trench coat','wool','milan','fashion','winter']},
+  {id:14, u:'scandi_style',     loc:'',                                          av:prav(14), img:pex(972995),        cap:'Oversized camel coat + cashmere scarf — Scandinavian quiet luxury done right. 🧣',                        cat:'fashion',    saved:true,  liked:true,  tags:['camel coat','scandi','fashion','luxury','cashmere']},
+  {id:15, u:'harajuku_fits',    loc:'',                                          av:prav(15), img:pex(1040945),       cap:'Vintage oversized bomber jacket — streetwear at its most expressive. 👟',                                  cat:'fashion',    saved:false, liked:false, tags:['bomber jacket','streetwear','vintage','fashion','harajuku']},
+  // TRAVEL — destination photos
+  {id:16, u:'paris_views',      loc:'📍 Champ de Mars, Paris 🇫🇷',               av:prav(16), img:pex(699466),        cap:'Eiffel Tower at golden hour from Champ de Mars — Paris never gets old. 🗼',                               cat:'travel',     saved:true,  liked:true,  tags:['eiffel tower','paris','france','travel','golden hour']},
+  {id:17, u:'santorini_sunsets',loc:'📍 Oia, Santorini 🇬🇷',                     av:prav(17), img:pex(1010657),       cap:'Blue dome churches of Oia — the sunset here will stop your heart. 🇬🇷',                                   cat:'travel',     saved:true,  liked:true,  tags:['santorini','oia','greece','islands','sunset']},
+  {id:18, u:'kyoto_trails',     loc:'📍 Arashiyama, Kyoto 🇯🇵',                  av:prav(18), img:pex(161401),        cap:'Fushimi Inari torii gates at dawn — one of Japan\'s most magical 5am decisions. 🎍',                       cat:'travel',     saved:true,  liked:true,  tags:['kyoto','japan','fushimi inari','shrine','torii']},
+  {id:19, u:'bali_terraces',    loc:'📍 Tegallalang, Ubud, Bali 🇮🇩',            av:prav(19), img:pex(2166553),       cap:'Tegallalang rice terraces — Bali\'s emerald stairways carved over centuries. 🌴',                          cat:'travel',     saved:true,  liked:true,  tags:['bali','ubud','rice terraces','indonesia','travel']},
+  {id:20, u:'venice_gondola',   loc:'📍 Grand Canal, Venice 🇮🇹',                av:prav(20), img:pex(1796715),       cap:'Grand Canal at sunset — Venice is a city that shouldn\'t exist, and yet here we are. 🛶',                 cat:'travel',     saved:false, liked:true,  tags:['venice','italy','gondola','canal','sunset']},
 ];
 
-// ── CATEGORY COVERS ──────────────────────────────────────────────────────────
-const catCovers = {
-  Literature: OL('9780062316097'),
-  Food:       'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600',
-  Fashion:    'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=600',
-  Travel:     'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=600',
+var catCovers={
+  literature: OL('9780062316097'),
+  food:       pex(1279330,600),
+  fashion:    pex(1536619,600),
+  travel:     pex(699466,600)
 };
 
-// ── FLOW DATA ────────────────────────────────────────────────────────────────
-const flows = {
-  literature: {
-    label: 'Sapiens: A Brief History of Humankind — Yuval Noah Harari',
-    confidence: '95%', coverCat:'Literature',
-    nearbyTitle: 'Find This Book Online',
-    nearby: [
-      {name:'Amazon — Sapiens (Hardcover)',  dist:'$22.99', rating:'4.8', img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari'},
-      {name:'Goodreads — Reviews & Notes',  dist:'Free',   rating:'4.4', img:OL('9780062316097'), link:'https://www.goodreads.com/book/show/23692271-sapiens'},
+// All flows — string concatenation only, no nested backticks
+var flows={
+  literature:{
+    label:'Sapiens: A Brief History of Humankind — Yuval Noah Harari',
+    conf:'95%', cat:'literature',
+    nearbyTitle:'Find This Book Online',
+    nearby:[
+      {name:'Amazon — Sapiens Hardcover',   info:'$22.99 · ★ 4.8', img:OL('9780062316097'),    link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari'},
+      {name:'Goodreads — Reviews & Notes',  info:'Free · ★ 4.4',   img:OL('9780062316097'),    link:'https://www.goodreads.com/book/show/23692271-sapiens'},
     ],
-    shopTitle: 'Shop & Explore This Book',
-    shop: [
-      {name:'Sapiens — Hardcover',     brand:'Amazon',    price:'$22.99', badge:'Bestseller', img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari+hardcover'},
-      {name:'Sapiens — Kindle Edition', brand:'Amazon',    price:'$12.99', badge:'Instant',    img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Harari+kindle'},
-      {name:'Sapiens — Audiobook',      brand:'Audible',   price:'$14.95', badge:'Top Rated',  img:OL('9780062316097'), link:'https://www.audible.com/search?keywords=Sapiens+Harari'},
+    shopTitle:'Shop This Book',
+    shop:[
+      {name:'Sapiens — Hardcover',      brand:'Amazon',  price:'$22.99', badge:'Bestseller', img:OL('9780062316097'),    link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari+hardcover'},
+      {name:'Sapiens — Kindle',         brand:'Amazon',  price:'$12.99', badge:'Instant',    img:OL('9780062316097'),    link:'https://www.amazon.com/s?k=Sapiens+Harari+kindle'},
+      {name:'Sapiens — Audiobook',      brand:'Audible', price:'$14.95', badge:'Top Rated',  img:OL('9780062316097'),    link:'https://www.audible.com/search?keywords=Sapiens+Harari'},
     ],
-    planTitle: '3-Day Reading Plan: Sapiens',
-    planDays:{
-      1:{title:'Part 1 — The Cognitive Revolution', details:'Chapters 1–4: How Homo Sapiens outcompeted all other humans through the power of shared myths and language, 70,000 years ago.'},
-      2:{title:'Part 2 — The Agricultural Revolution', details:'Chapters 5–8: How farming didn\'t just change what we eat — it fundamentally altered human society, gender roles, and inequality.'},
-      3:{title:'Part 3 — The Scientific Revolution', details:'Chapters 14–20: Capitalism, empire, the Enlightenment, and what the rise of AI means for the future of our species.'},
+    planTitle:'3-Day Reading Plan: Sapiens',
+    days:{
+      1:{t:'Part 1 — The Cognitive Revolution',   d:'Chapters 1–4: How Homo Sapiens outcompeted all other humans through shared myths and language, 70,000 years ago.'},
+      2:{t:'Part 2 — The Agricultural Revolution',d:'Chapters 5–8: How farming didn\'t just change what we eat — it altered human society, gender roles, and inequality.'},
+      3:{t:'Part 3 — The Scientific Revolution',  d:'Chapters 14–20: Capitalism, empire, the Enlightenment, and what AI means for the future of our species.'},
     },
     saves:[
-      {l:'Goodreads — Top Harari Books',    u:'Browse Yuval Harari reading list', link:'https://www.goodreads.com/author/list/395812.Yuval_Noah_Harari'},
-      {l:'Amazon — Non-fiction Bestsellers',u:'Shop top non-fiction of the year',  link:'https://www.amazon.com/Best-Sellers-Books-Nonfiction/zgbs/books/2660'},
+      {l:'Goodreads — Harari Reading List',    sub:'Browse all Yuval Harari books',     link:'https://www.goodreads.com/author/list/395812.Yuval_Noah_Harari'},
+      {l:'Amazon — Non-fiction Bestsellers',   sub:'Shop top non-fiction of the year',  link:'https://www.amazon.com/Best-Sellers-Books-Nonfiction/zgbs/books/2660'},
     ],
   },
-
-  food: {
-    label: 'Handmade Truffle Cacio e Pepe — Trattoria Da Enzo al 29, Rome',
-    confidence: '96%', coverCat:'Food',
-    nearbyTitle: 'Italian Restaurants Near You',
-    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970!2d12.4763!3d41.8884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f6046e8f8e679%3A0xa4ba29e7a40acfdc!2sTrattoria%20Da%20Enzo%20al%2029!5e0!3m2!1sen!2sin!4v1699999999999',
-    nearby: [
-      {name:'Trattoria Da Enzo al 29', dist:'Rome, Italy', rating:'4.9', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Trattoria+Da+Enzo+al+29+Rome'},
-      {name:'Osteria dell\'Enoteca',   dist:'Rome, Italy', rating:'4.7', img:'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=200',  link:'https://www.google.com/maps/search/Osteria+Cacio+e+Pepe+Rome'},
+  food:{
+    label:'Handmade Truffle Cacio e Pepe — Trattoria Da Enzo al 29, Rome',
+    conf:'96%', cat:'food',
+    nearbyTitle:'Italian Restaurants',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970!2d12.4763!3d41.8884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f6046e8f8e679%3A0xa4ba29e7a40acfdc!2sTrattoria%20Da%20Enzo%20al%2029!5e0!3m2!1sen!2sin!4v1699999999999',
+    nearby:[
+      {name:'Trattoria Da Enzo al 29', info:'Rome, Italy · ★ 4.9', img:pex(1279330,200), link:'https://www.google.com/maps/search/Trattoria+Da+Enzo+al+29+Rome'},
+      {name:'Osteria dell\'Enoteca',   info:'Rome, Italy · ★ 4.7', img:pex(315755,200),  link:'https://www.google.com/maps/search/Osteria+Cacio+e+Pepe+Rome'},
     ],
-    shopTitle: 'Shop Ingredients & Make It',
-    shop: [
-      {name:'Authentic Pecorino Romano DOP', brand:'Amazon Fresh', price:'$18.00', badge:'Imported', img:'https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.amazon.com/s?k=pecorino+romano+DOP+authentic+imported'},
-      {name:'Tellicherry Black Pepper (Coarse)', brand:'Amazon',   price:'$12.00', badge:'Chef Pick', img:'https://images.pexels.com/photos/1640770/pexels-photo-1640770.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.amazon.com/s?k=tellicherry+black+peppercorns+coarse'},
-      {name:'Cacio e Pepe Recipe — Serious Eats', brand:'Web',    price:'Free',   badge:'Best Recipe', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.seriouseats.com/cacio-e-pepe-pasta-recipe'},
+    shopTitle:'Ingredients & Recipe',
+    shop:[
+      {name:'Pecorino Romano DOP',         brand:'Amazon Fresh', price:'$18.00', badge:'Imported',    img:pex(773253,200),  link:'https://www.amazon.com/s?k=pecorino+romano+DOP+authentic'},
+      {name:'Tellicherry Black Peppercorns',brand:'Amazon',      price:'$12.00', badge:'Chef Pick',   img:pex(1640770,200), link:'https://www.amazon.com/s?k=tellicherry+black+peppercorns+coarse'},
+      {name:'Cacio e Pepe — Best Recipe',  brand:'Serious Eats', price:'Free',   badge:'Top Recipe',  img:pex(1279330,200), link:'https://www.seriouseats.com/cacio-e-pepe-pasta-recipe'},
     ],
-    planTitle: '3-Day Rome Food Itinerary',
-    planDays:{
-      1:{title:'Day 1 — Trastevere Pasta Crawl', details:'Lunch at Da Enzo al 29 for Cacio e Pepe. Dinner at Roscioli for carbonara and a natural wine from their legendary cellar.'},
-      2:{title:'Day 2 — Testaccio Market & Gelato', details:'Morning espresso at Sant\'Eustachio il Caffè. Street food at Testaccio Market. Afternoon gelato at Fatamorgana.'},
-      3:{title:'Day 3 — Jewish Ghetto Cooking Class', details:'Learn to make handmade pasta and artichoke carciofi alla giudia with a local Roman chef.'},
+    planTitle:'3-Day Rome Food Itinerary',
+    days:{
+      1:{t:'Day 1 — Trastevere Pasta Crawl', d:'Lunch at Da Enzo al 29 for Cacio e Pepe. Dinner at Roscioli for carbonara and natural wine from their legendary cellar.'},
+      2:{t:'Day 2 — Testaccio Market',       d:'Morning espresso at Sant\'Eustachio il Caffè. Street food at the Testaccio Market. Gelato at Fatamorgana.'},
+      3:{t:'Day 3 — Cooking Class',          d:'Learn to make handmade pasta and carciofi alla giudia (Jewish-style artichokes) with a local Roman chef.'},
     },
     saves:[
-      {l:'Rome Food Map — Eater',         u:'Best restaurants in Rome 2024', link:'https://www.eater.com/maps/best-restaurants-rome'},
-      {l:'Cacio e Pepe Recipe — NYT Cooking', u:'Classic Roman pasta at home', link:'https://cooking.nytimes.com/recipes/1015819-cacio-e-pepe'},
+      {l:'Rome Food Map — Eater',            sub:'Best restaurants in Rome 2024',   link:'https://www.eater.com/maps/best-restaurants-rome'},
+      {l:'Cacio e Pepe — NYT Cooking',       sub:'Classic Roman pasta at home',     link:'https://cooking.nytimes.com/recipes/1015819-cacio-e-pepe'},
     ],
   },
-
-  fashion: {
-    label: 'Minimalist Linen Blazer & Tailored Co-ord Outfit',
-    confidence: '94%', coverCat:'Fashion',
-    nearbyTitle: 'Shop This Look',
-    nearby: [
-      {name:'Linen Blazer — ZARA',    dist:'Shop Online', rating:'4.5', img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.zara.com/us/en/search?searchTerm=linen+blazer'},
-      {name:'Linen Blazer — H&M',     dist:'Shop Online', rating:'4.3', img:'https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www2.hm.com/en_us/search-results.html?q=linen+blazer'},
+  fashion:{
+    label:'Minimalist Linen Blazer & Tailored Co-ord Outfit',
+    conf:'94%', cat:'fashion',
+    nearbyTitle:'Shop This Look',
+    nearby:[
+      {name:'Linen Blazer — ZARA',   info:'Shop Online · ★ 4.5', img:pex(1536619,200), link:'https://www.zara.com/us/en/search?searchTerm=linen+blazer'},
+      {name:'Linen Blazer — H&M',   info:'Shop Online · ★ 4.3', img:pex(1043474,200), link:'https://www2.hm.com/en_us/search-results.html?q=linen+blazer'},
     ],
-    shopTitle: 'Shop Similar Styles',
-    shop: [
-      {name:'White Linen Blazer',       brand:'ZARA',     price:'$89.00',  badge:'Trending',    img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.zara.com/us/en/search?searchTerm=white+linen+blazer'},
-      {name:'Tailored Linen Co-ord Set',brand:'Mango',    price:'$79.00',  badge:'New In',      img:'https://images.pexels.com/photos/972995/pexels-photo-972995.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://shop.mango.com/us/women/new/linen-blazer'},
-      {name:'Pinterest — Linen Blazer Outfits', brand:'Pinterest', price:'Free', badge:'Inspo', img:'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.pinterest.com/search/pins/?q=minimalist+linen+blazer+outfit+women'},
+    shopTitle:'Shop Similar Styles',
+    shop:[
+      {name:'White Linen Blazer',         brand:'ZARA',     price:'$89.00', badge:'Trending',   img:pex(1536619,200), link:'https://www.zara.com/us/en/search?searchTerm=white+linen+blazer'},
+      {name:'Tailored Linen Co-ord Set',  brand:'Mango',    price:'$79.00', badge:'New In',     img:pex(972995,200),  link:'https://shop.mango.com/us/women/new/linen-blazer'},
+      {name:'Linen Blazer Outfit Inspo',  brand:'Pinterest',price:'Free',   badge:'Inspiration',img:pex(934070,200),  link:'https://www.pinterest.com/search/pins/?q=minimalist+linen+blazer+outfit+women'},
     ],
-    planTitle: '3-Day Capsule Styling Guide',
-    planDays:{
-      1:{title:'Day 1 — Office Chic', details:'Pair the linen blazer with wide-leg tailored trousers, leather loafers, and a minimal gold chain. Clean, powerful, effortless.'},
-      2:{title:'Day 2 — Weekend Brunch', details:'Layer open over a silk slip dress, add oversized sunglasses and a structured leather tote.'},
-      3:{title:'Day 3 — Evening Out', details:'Combine with high-waisted selvedge denim, strappy heels, and a gold ear cuff. Day-to-night done right.'},
+    planTitle:'3-Day Capsule Styling Guide',
+    days:{
+      1:{t:'Day 1 — Office Chic',      d:'Pair the linen blazer with wide-leg tailored trousers, leather loafers, and a minimal gold chain. Clean, powerful, effortless.'},
+      2:{t:'Day 2 — Weekend Brunch',   d:'Layer open over a silk slip dress, add oversized sunglasses and a structured leather tote.'},
+      3:{t:'Day 3 — Evening Out',      d:'Combine with high-waisted selvedge denim, strappy heels, and a gold ear cuff. Day-to-night done right.'},
     },
     saves:[
-      {l:'Pinterest — Minimalist Wardrobe',u:'Capsule wardrobe inspiration board', link:'https://www.pinterest.com/search/pins/?q=minimalist+capsule+wardrobe+women'},
-      {l:'Who What Wear — Blazer Guide',   u:'How to style a linen blazer',        link:'https://www.whowhatwear.com/linen-blazer-outfit-ideas'},
+      {l:'Pinterest — Minimalist Wardrobe', sub:'Capsule wardrobe inspiration',    link:'https://www.pinterest.com/search/pins/?q=minimalist+capsule+wardrobe+women'},
+      {l:'Who What Wear — Blazer Guide',    sub:'How to style a linen blazer',     link:'https://www.whowhatwear.com/linen-blazer-outfit-ideas'},
     ],
   },
-
-  travel: {
-    label: 'Eiffel Tower at Golden Hour — Champ de Mars, Paris',
-    confidence: '98%', coverCat:'Travel',
-    nearbyTitle: 'Nearby Attractions',
-    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624!2d2.2945!3d48.8584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701f7f0a3c07%3A0x30340c49952e4b64!2sEiffel%20Tower!5e0!3m2!1sen!2sin!4v1699999999999',
-    nearby: [
-      {name:'Eiffel Tower',        dist:'Champ de Mars, Paris', rating:'4.9', img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/place/Eiffel+Tower,+Paris'},
-      {name:'Trocadéro Gardens',   dist:'0.6 km from tower',    rating:'4.8', img:'https://images.pexels.com/photos/338515/pexels-photo-338515.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/place/Trocad%C3%A9ro,+Paris'},
+  travel:{
+    label:'Eiffel Tower at Golden Hour — Champ de Mars, Paris',
+    conf:'98%', cat:'travel',
+    nearbyTitle:'Nearby Attractions',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624!2d2.2945!3d48.8584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701f7f0a3c07%3A0x30340c49952e4b64!2sEiffel%20Tower!5e0!3m2!1sen!2sin!4v1699999999999',
+    nearby:[
+      {name:'Eiffel Tower',        info:'Champ de Mars, Paris · ★ 4.9', img:pex(699466,200),  link:'https://www.google.com/maps/place/Eiffel+Tower,+Paris'},
+      {name:'Trocadéro Gardens',   info:'0.6 km from tower · ★ 4.8',    img:pex(338515,200),  link:'https://www.google.com/maps/place/Trocad%C3%A9ro,+Paris'},
     ],
-    shopTitle: 'Book Tours & Tickets',
-    shop: [
-      {name:'Eiffel Tower — Skip the Line Ticket', brand:'GetYourGuide', price:'$42.00', badge:'Bestseller', img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/'},
-      {name:'Seine River Sunset Cruise',           brand:'Viator',       price:'$28.00', badge:'Top Rated',  img:'https://images.pexels.com/photos/1796715/pexels-photo-1796715.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.viator.com/tours/Paris/Paris-Seine-River-Cruise/d479-2140SEINE'},
-      {name:'Paris 3-Day Pass',                    brand:'Paris Museum', price:'$65.00', badge:'Best Value', img:'https://images.pexels.com/photos/161401/fushimi-inari-taisha-shrine-kyoto-japan-temple-161401.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.parismuseumpass.fr/en/'},
+    shopTitle:'Book Tours & Tickets',
+    shop:[
+      {name:'Eiffel Tower — Skip-the-Line', brand:'GetYourGuide', price:'$42.00', badge:'Bestseller', img:pex(699466,200),  link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/'},
+      {name:'Seine River Sunset Cruise',    brand:'Viator',       price:'$28.00', badge:'Top Rated',  img:pex(1796715,200), link:'https://www.viator.com/tours/Paris/Paris-Seine-River-Cruise/d479-2140SEINE'},
+      {name:'Paris Museum Pass (3-Day)',    brand:'Paris Museum', price:'$65.00', badge:'Best Value',  img:pex(338515,200),  link:'https://www.parismuseumpass.fr/en/'},
     ],
-    planTitle: '3-Day Paris Itinerary',
-    planDays:{
-      1:{title:'Day 1 — Eiffel & Seine', details:'Morning at Champ de Mars. Book summit tickets in advance. Evening Seine river cruise for the best lit-up view of the city.'},
-      2:{title:'Day 2 — Louvre & Le Marais', details:'3 hours at the Louvre (book timed entry). Afternoon boutique shopping in Le Marais. Dinner at Breizh Café for Breton crêpes.'},
-      3:{title:'Day 3 — Montmartre & Sacré-Cœur', details:'Wander Montmartre\'s artist squares at 8am. Climb Sacré-Cœur for the city panorama. End with crêpes at a boulevard café.'},
+    planTitle:'3-Day Paris Itinerary',
+    days:{
+      1:{t:'Day 1 — Eiffel Tower & Seine',    d:'Morning at Champ de Mars. Book summit tickets in advance. Evening Seine river cruise for the best lit-up view of Paris.'},
+      2:{t:'Day 2 — Louvre & Le Marais',      d:'3 hours at the Louvre (book timed entry). Afternoon shopping in Le Marais. Dinner at Breizh Café for Breton crêpes.'},
+      3:{t:'Day 3 — Montmartre & Sacré-Cœur', d:'Wander Montmartre\'s artist squares at 8am. Climb Sacré-Cœur for the city panorama. End with crêpes at a boulevard café.'},
     },
     saves:[
-      {l:'GetYourGuide — Paris Tours',    u:'Book top-rated Paris experiences',  link:'https://www.getyourguide.com/paris-l16/'},
-      {l:'Lonely Planet — Paris Guide',   u:'Full Paris travel guide & tips',    link:'https://www.lonelyplanet.com/france/paris'},
+      {l:'GetYourGuide — Paris Tours',    sub:'Book top-rated Paris experiences',  link:'https://www.getyourguide.com/paris-l16/'},
+      {l:'Lonely Planet — Paris Guide',   sub:'Full Paris travel guide & tips',    link:'https://www.lonelyplanet.com/france/paris'},
     ],
   },
 };
 
-// ── ROUTING ──────────────────────────────────────────────────────────────────
-function go(s, isBack=false){
-  if(analyzeTimer){ clearInterval(analyzeTimer); analyzeTimer = null; }
-  if(!isBack && navStack[navStack.length-1]!==s) navStack.push(s);
-  const fn=screens[s];
-  if(fn){screen.innerHTML=fn();screen.scrollTop=0;attachEvents(s);}
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function go(s,back){
+  if(!back && stack[stack.length-1]!==s) stack.push(s);
+  var fn=screens[s];
+  if(fn){S.innerHTML=fn();S.scrollTop=0;attachEvents(s);}
 }
 function openLink(url){if(url)window.open(url,'_blank','noopener,noreferrer')}
-function toggleLike(id,el){const p=initialPosts.find(x=>x.id===id);if(p){p.liked=!p.liked;el.innerHTML=htSVG(p.liked)}}
-function toggleSave(id,el){const p=initialPosts.find(x=>x.id===id);if(p){p.saved=!p.saved;el.innerHTML=bkSVG(p.saved);showToast(p.saved?`Saved to ${p.category}`:'Removed from saves')}}
-function scoutPost(id){const p=initialPosts.find(x=>x.id===id);if(!p)return;userUploadedImage=p.mediaImg;activeFlow=flows[p.category.toLowerCase()]||flows.fashion;go('analyzing')}
-function demoScout(cat){userUploadedImage=null;activeFlow=flows[cat]||flows.fashion;go('analyzing')}
+function toggleLike(id,el){
+  var p=posts.find(function(x){return x.id===id});
+  if(!p)return;
+  p.liked=!p.liked;
+  el.innerHTML=heartSVG(p.liked);
+}
+function toggleSave(id,el){
+  var p=posts.find(function(x){return x.id===id});
+  if(!p)return;
+  p.saved=!p.saved;
+  el.innerHTML=bookSVG(p.saved);
+  showToast(p.saved?'Saved to '+capFirst(p.cat)+' collection':'Removed from saves');
+}
+function scoutPost(id){
+  var p=posts.find(function(x){return x.id===id});
+  if(!p)return;
+  userImg2=p.img;
+  activeFlow=flows[p.cat]||flows.fashion;
+  go('analyzing');
+}
+function demoScout(cat){
+  userImg2=null;
+  activeFlow=flows[cat]||flows.fashion;
+  go('analyzing');
+}
+function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
+function heartSVG(on){
+  return on
+    ? '<svg class="svi" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+    : '<svg class="svi" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+}
+function bookSVG(on){
+  return on
+    ? '<svg class="svi" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+    : '<svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+}
+function sbar(){return '<div class="sbar"><span>9:41</span><span style="font-size:11px">●●● WiFi 85%</span></div>'}
+function grad(t){return '<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">'+t+'</span>'}
+function rp(s){return s.replace(/'/g,"\\'")}
 
-function sbar(){return`<div class="sbar"><span>9:41</span><span style="font-size:11px">●●● WiFi 85%</span></div>`}
+// ── SCREENS — all use string concatenation, zero nested template literals ─────
+var screens={
 
-// ── SCREENS ───────────────────────────────────────────────────────────────────
-const screens={
+home: function(){
+  var stories='';
+  posts.slice(0,10).forEach(function(p){
+    stories+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer" onclick="scoutPost('+p.id+')">'
+      +'<div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)">'
+      +'<img src="'+p.av+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'</div>'
+      +'<span style="font-size:10px;color:#ccc;width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.u+'</span>'
+      +'</div>';
+  });
+  var feed='';
+  posts.forEach(function(p){
+    feed+='<div class="igpost">'
+      +'<div class="igph">'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<img src="'+p.av+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<div><div style="font-size:13px;font-weight:600">'+p.u+' <span style="color:#60a5fa;font-size:11px">✓</span></div>'
+      +(p.loc?'<div style="font-size:10px;color:#888">'+p.loc+'</div>':'')
+      +'</div></div><span style="font-size:18px;color:#888">···</span></div>'
+      +'<div class="igmedia" onclick="scoutPost('+p.id+')">'
+      +'<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.15)">'
+      +'<span style="color:#9333EA">✦</span> Tap to Scout</div></div>'
+      +'<div class="igact">'
+      +'<div style="display:flex;gap:14px">'
+      +'<button class="btn" onclick="toggleLike('+p.id+',this)">'+heartSVG(p.liked)+'</button>'
+      +'<button class="btn"><svg class="svi" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
+      +'</div>'
+      +'<button class="btn" onclick="toggleSave('+p.id+',this)">'+bookSVG(p.saved)+'</button>'
+      +'</div>'
+      +'<div class="igcap"><b>'+p.u+'</b> <span style="color:#ddd">'+p.cap+'</span>'
+      +'<div style="font-size:11px;color:#a855f7;margin-top:4px;font-weight:600;cursor:pointer" onclick="scoutPost('+p.id+')">✦ AI Visual Search Available</div>'
+      +'</div></div>';
+  });
+  return sbar()
+    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px 4px">'
+    +'<span style="font-size:24px;font-weight:700;font-family:Georgia,serif">Instagram</span>'
+    +'<button class="btn" onclick="go(\'saved\')"><svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>'
+    +'</div>'
+    +'<div style="display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">'
+    +'<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">'
+    +'<div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899)">'
+    +'<div style="width:100%;height:100%;border-radius:50%;background:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #000">Sri</div>'
+    +'</div><span style="font-size:10px;color:#aaa">Sri</span></div>'
+    +stories+'</div>'
+    +'<div style="padding-bottom:10px">'+feed+'</div>';
+},
 
-home:()=>`${sbar()}
-<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px 4px">
-  <span style="font-size:24px;font-weight:700;font-family:Georgia,serif">Instagram</span>
-  <span class="btn" onclick="go('saved')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
-</div>
-<div style="display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">
-  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-    <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899)">
-      <div style="width:100%;height:100%;border-radius:50%;background:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #000">Sri</div>
-    </div>
-    <span style="font-size:10px;color:#aaa">Sri</span>
-  </div>
-  ${initialPosts.slice(0,10).map(p=>`
-  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer" onclick="scoutPost(${p.id})">
-    <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)">
-      <img src="${p.userImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000" referrerpolicy="no-referrer-when-downgrade"/>
-    </div>
-    <span style="font-size:10px;color:#ccc;width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.username}</span>
-  </div>`).join('')}
-</div>
-<div style="padding-bottom:10px">
-${initialPosts.map(p=>`
-<div class="ig-post">
-  <div class="ig-post-header">
-    <div style="display:flex;align-items:center;gap:10px">
-      <img src="${p.userImg}" style="width:34px;height:34px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
-      <div>
-        <div style="font-size:13px;font-weight:600">${p.username} <span style="color:#60a5fa;font-size:11px">✓</span></div>
-        ${p.location?`<div style="font-size:10px;color:#888">📍 ${p.location}</div>`:''}
-      </div>
-    </div>
-    <span style="font-size:18px;color:#888">···</span>
-  </div>
-  <div class="ig-media" onclick="scoutPost(${p.id})" style="cursor:pointer">
-    <img src="${p.mediaImg}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
-    <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,0.15)">
-      <span style="color:#9333EA">✦</span> Tap to Scout
-    </div>
-  </div>
-  <div class="ig-actions">
-    <div style="display:flex;gap:14px">
-      <button class="btn" onclick="toggleLike(${p.id},this)">${htSVG(p.liked)}</button>
-      <button class="btn"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></button>
-    </div>
-    <button class="btn" onclick="toggleSave(${p.id},this)">${bkSVG(p.saved)}</button>
-  </div>
-  <div class="ig-caption"><b>${p.username}</b> <span style="color:#ddd">${p.caption}</span>
-    <div style="font-size:11px;color:#a855f7;margin-top:4px;font-weight:600;cursor:pointer" onclick="scoutPost(${p.id})">✦ AI Visual Search Available</div>
-  </div>
-</div>`).join('')}
-</div>`,
+scout: function(){
+  return sbar()
+    +'<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">'
+    +'<button class="btn bk" id="back">‹</button>'
+    +'<div style="flex:1"><input class="sinput" id="sbox" placeholder="Search \'sapiens\', \'blazer\', \'cacio e pepe\'..." oninput="doSearch(this.value)"/></div>'
+    +'</div>'
+    +'<div id="sarea">'+scoutHomeHTML()+'</div>';
+},
 
-'scout-landing':()=>`${sbar()}
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-  <button class="btn" id="back" style="font-size:22px">‹</button>
-  <div style="flex:1"><input class="search-input" id="scoutSearchBox" placeholder="Search 'sapiens', 'blazer', 'cacio e pepe'..." oninput="renderSearch(this.value)"/></div>
-</div>
-<div id="searchArea">${scoutHome()}</div>`,
+upload: function(){
+  var demos=[
+    {t:'Non-Fiction Book: Sapiens',     cat:'literature', img:OL('9780062316097')},
+    {t:'Cacio e Pepe — Da Enzo, Rome',  cat:'food',       img:pex(1279330,200)},
+    {t:'Minimalist Linen Blazer Outfit',cat:'fashion',    img:pex(1536619,200)},
+    {t:'Eiffel Tower, Paris at Sunset', cat:'travel',     img:pex(699466,200)},
+  ];
+  var dhtml='';
+  demos.forEach(function(d){
+    dhtml+='<button class="btn" onclick="demoScout(\''+d.cat+'\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:10px;border:1px solid #222;width:100%;margin-bottom:8px">'
+      +'<img src="'+d.img+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:12px;color:#fff">'+d.t+'</div><div style="color:#666;font-size:10px">Run Scout AI Analysis</div></div>'
+      +'<div style="padding:4px 10px;border-radius:14px;background:#EC489922;color:#EC4899;font-size:10px;font-weight:600">✦ Test</div>'
+      +'</button>';
+  });
+  return sbar()
+    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">Upload to Scout</span></div>'
+    +'<div style="padding:16px">'
+    +'<input type="file" id="fi" accept="image/*" style="display:none" onchange="handleFile(this.files[0])"/>'
+    +'<div onclick="document.getElementById(\'fi\').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:#9333EA0d">'
+    +'<div style="font-size:40px">📷</div>'
+    +'<div style="text-align:center"><div style="font-weight:600;font-size:14px;margin-bottom:2px">Select from Camera Roll</div><div style="color:#777;font-size:11px">PNG, JPG, WEBP</div></div>'
+    +'<div style="padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:12px;font-weight:600;color:#fff">Choose Photo</div>'
+    +'</div></div>'
+    +'<div style="display:flex;align-items:center;gap:12px;padding:0 20px;margin-bottom:10px"><div style="flex:1;height:1px;background:#222"></div><span style="color:#555;font-size:11px">or try a demo</span><div style="flex:1;height:1px;background:#222"></div></div>'
+    +'<div style="padding:0 16px">'+dhtml+'</div>';
+},
 
-upload:()=>`${sbar()}
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-  <button class="btn" id="back" style="font-size:22px">‹</button>
-  <span style="font-weight:600;font-size:15px">Upload to Scout</span>
-</div>
-<div style="padding:16px">
-  <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFile(this.files[0])"/>
-  <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:#9333EA0d">
-    <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:26px">📷</div>
-    <div style="text-align:center"><div style="font-weight:600;font-size:14px;margin-bottom:2px">Select from Camera Roll</div><div style="color:#777;font-size:11px">PNG, JPG, WEBP</div></div>
-    <div style="padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:12px;font-weight:600">Choose Photo</div>
-  </div>
-</div>
-<div style="display:flex;align-items:center;gap:12px;padding:0 20px;margin-bottom:10px">
-  <div style="flex:1;height:1px;background:#222"></div><span style="color:#555;font-size:11px">or try a demo</span><div style="flex:1;height:1px;background:#222"></div>
-</div>
-<div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
-${[
-  {t:'Non-Fiction Book: Sapiens', cat:'literature', img:OL('9780062316097')},
-  {t:'Cacio e Pepe — Da Enzo, Rome', cat:'food', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200'},
-  {t:'Minimalist Linen Blazer Outfit', cat:'fashion', img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200'},
-  {t:'Eiffel Tower, Paris at Sunset', cat:'travel', img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200'},
-].map(d=>`
-<button class="btn" onclick="demoScout('${d.cat}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:10px;border:1px solid #222;width:100%">
-  <img src="${d.img}" style="width:44px;height:44px;border-radius:8px;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
-  <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:12px">${d.t}</div><div style="color:#666;font-size:10px">Run Scout AI Analysis</div></div>
-  <div style="padding:4px 10px;border-radius:14px;background:#EC489922;color:#EC4899;font-size:10px;font-weight:600">✦ Test</div>
-</button>`).join('')}
-</div>`,
+analyzing: function(){
+  var flow=activeFlow||flows.fashion;
+  var cover=catCovers[flow.cat]||catCovers.fashion;
+  var steps=['Scanning visual patterns…','Identifying objects & context…','Matching to database…','Generating recommendations…'];
+  var shtml='';
+  steps.forEach(function(s,i){
+    shtml+='<div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:'+(i===0?1:0.3)+'">'
+      +'<div style="width:10px;height:10px;border-radius:50%;background:'+(i===0?'#EC4899':'#333')+'"></div>'
+      +'<span style="font-size:11px;color:#ccc">'+s+'</span></div>';
+  });
+  return sbar()
+    +'<div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">'
+    +'<div style="width:170px;height:170px;border-radius:24px;border:2px solid #9333EA66;overflow:hidden;position:relative;margin-bottom:28px">'
+    +'<img src="'+(userImg2||cover)+'" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+    +'<div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.8s linear infinite;top:0"></div>'
+    +'</div>'
+    +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:16px"><span style="font-size:16px;font-weight:700">Instagram </span>'+grad('<span style="font-size:16px;font-weight:700">Scout</span>')+'</div>'
+    +'<div id="steps" style="display:flex;flex-direction:column;gap:8px;width:230px;margin-bottom:20px">'+shtml+'</div>'
+    +'<div style="width:220px;height:4px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div id="pbar" style="height:100%;width:0%;background:linear-gradient(90deg,#9333EA,#EC4899,#F59E0B)"></div></div>'
+    +'<div id="pnum" style="color:#666;font-size:11px;margin-top:6px">0%</div>'
+    +'</div>';
+},
 
-analyzing:()=>{
-  const flow=activeFlow||flows.fashion;
-  const cover=catCovers[flow.coverCat]||catCovers.Fashion;
-  return`${sbar()}
-<div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">
-  <div style="width:170px;height:170px;border-radius:24px;border:2px solid #9333EA66;background:#111;overflow:hidden;position:relative;margin-bottom:28px">
-    <img src="${userUploadedImage||cover}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
-    <div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.8s linear infinite;top:0"></div>
-  </div>
-  <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px">
-    <span style="font-size:16px;font-weight:700">Instagram</span>${grad('<span style="font-size:16px;font-weight:700">Scout</span>')}
-  </div>
-  <div style="display:flex;flex-direction:column;gap:8px;width:230px;margin-bottom:20px" id="steps">
-    ${['Scanning visual patterns…','Identifying objects & context…','Matching to database…','Generating recommendations…'].map((s,i)=>`
-    <div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:${i===0?1:0.3}">
-      <div style="width:10px;height:10px;border-radius:50%;background:${i===0?'#EC4899':'#333'}"></div>
-      <span style="font-size:11px;color:#ccc">${s}</span>
-    </div>`).join('')}
-  </div>
-  <div style="width:220px;height:4px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div id="progbar" style="height:100%;width:0%;background:linear-gradient(90deg,#9333EA,#EC4899,#F59E0B)"></div></div>
-  <div id="prognum" style="color:#666;font-size:11px;margin-top:6px">0%</div>
-</div>`},
+results: function(){
+  var flow=activeFlow||flows.fashion;
+  var cover=catCovers[flow.cat]||catCovers.fashion;
+  var savesHTML='';
+  flow.saves.forEach(function(s){
+    savesHTML+='<div onclick="openLink(\''+rp(s.link)+'\')" style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f;cursor:pointer">'
+      +'<div style="font-size:10px;color:#eee;font-weight:600;margin-bottom:3px">'+s.l+'</div>'
+      +'<div style="font-size:9px;color:#a855f7">'+s.sub+' ›</div>'
+      +'</div>';
+  });
+  return sbar()
+    +'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px">'
+    +'<button class="btn bk" id="back">‹</button>'
+    +'<div style="background:#9333EA22;color:#a855f7;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:600">✦ AI Powered</div>'
+    +'</div>'
+    +'<div style="padding:10px 16px">'
+    +'<div style="border-radius:18px;overflow:hidden;border:1px solid #9333EA44;background:#111">'
+    +'<div style="height:190px;overflow:hidden">'
+    +'<img src="'+(userImg2||cover)+'" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+    +'</div><div style="padding:12px 14px;display:flex;gap:8px;align-items:flex-start">'
+    +'<span style="color:#9333EA;font-size:14px">✦</span>'
+    +'<p style="font-size:13px;line-height:1.4;margin:0;font-weight:500">'+flow.label+'</p>'
+    +'</div></div></div>'
+    +'<div style="margin:0 16px 12px;padding:10px 14px;border-radius:12px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:12px">'
+    +'<div style="flex:1"><div style="color:#666;font-size:10px;margin-bottom:4px">Scout Confidence</div>'
+    +'<div style="height:4px;background:#222;border-radius:4px;overflow:hidden"><div style="width:95%;height:100%;background:linear-gradient(90deg,#9333EA,#EC4899)"></div></div>'
+    +'</div><div style="font-size:13px;font-weight:700;color:#9333EA">'+flow.conf+'</div></div>'
+    +'<div style="padding:0 16px 14px">'
+    +'<div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Take Action</div>'
+    +'<button class="actbtn" onclick="go(\'nearby\')">'
+    +'<div class="ico" style="background:#9333EA22;color:#9333EA"><svg class="svi" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+    +'<div><div class="lbl">'+flow.nearbyTitle+'</div><div class="sub" style="color:#9333EA">'+flow.nearby.length+' results found</div></div>'
+    +'<span class="arr">›</span></button>'
+    +'<button class="actbtn" onclick="go(\'shop\')">'
+    +'<div class="ico" style="background:#EC489922;color:#EC4899"><svg class="svi" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>'
+    +'<div><div class="lbl">'+flow.shopTitle+'</div><div class="sub" style="color:#EC4899">Tap to shop or explore</div></div>'
+    +'<span class="arr">›</span></button>'
+    +'<button class="actbtn" onclick="dayTab=1;go(\'plan\')">'
+    +'<div class="ico" style="background:#F59E0B22;color:#F59E0B"><svg class="svi" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>'
+    +'<div><div class="lbl">'+flow.planTitle+'</div><div class="sub" style="color:#F59E0B">3-day AI-generated guide</div></div>'
+    +'<span class="arr">›</span></button>'
+    +'</div>'
+    +'<div style="padding:0 16px 16px">'
+    +'<div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Explore More</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+savesHTML+'</div>'
+    +'</div>';
+},
 
-results:()=>{
-  const flow=activeFlow||flows.fashion;
-  const cover=catCovers[flow.coverCat]||catCovers.Fashion;
-  return`${sbar()}
-<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px">
-  <button class="btn" id="back" style="font-size:22px">‹</button>
-  <div style="background:#9333EA22;color:#a855f7;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:600">✦ AI Powered</div>
-</div>
-<div style="padding:10px 16px">
-  <div style="border-radius:18px;overflow:hidden;border:1px solid #9333EA44;background:#111">
-    <div style="height:190px;overflow:hidden">
-      <img src="${userUploadedImage||cover}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
-    </div>
-    <div style="padding:12px 14px">
-      <div style="display:flex;align-items:flex-start;gap:8px">
-        <span style="color:#9333EA;font-size:14px">✦</span>
-        <p style="font-size:13px;line-height:1.4;margin:0;font-weight:500">${flow.label}</p>
-      </div>
-    </div>
-  </div>
-</div>
-<div style="margin:0 16px 12px;padding:10px 14px;border-radius:12px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:12px">
-  <div style="flex:1">
-    <div style="color:#666;font-size:10px;margin-bottom:4px">Scout Confidence</div>
-    <div style="height:4px;background:#222;border-radius:4px;overflow:hidden"><div style="width:95%;height:100%;background:linear-gradient(90deg,#9333EA,#EC4899)"></div></div>
-  </div>
-  <div style="font-size:13px;font-weight:700;color:#9333EA">${flow.confidence}</div>
-</div>
-<div style="padding:0 16px 14px">
-  <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Take Action</div>
-  <div style="display:flex;flex-direction:column;gap:8px">
-    <button class="btn" onclick="go('sub-nearby')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
-      <div style="width:38px;height:38px;border-radius:10px;background:#9333EA22;display:flex;align-items:center;justify-content:center;color:#9333EA">
-        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-      </div>
-      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${flow.nearbyTitle}</div><div style="font-size:11px;color:#9333EA">${flow.nearby.length} results found</div></div>
-      <span style="color:#555;font-size:18px">›</span>
-    </button>
-    <button class="btn" onclick="go('sub-shop')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
-      <div style="width:38px;height:38px;border-radius:10px;background:#EC489922;display:flex;align-items:center;justify-content:center;color:#EC4899">
-        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-      </div>
-      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${flow.shopTitle}</div><div style="font-size:11px;color:#EC4899">Tap to shop or explore</div></div>
-      <span style="color:#555;font-size:18px">›</span>
-    </button>
-    <button class="btn" onclick="activeDayTab=1;go('sub-plan')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
-      <div style="width:38px;height:38px;border-radius:10px;background:#F59E0B22;display:flex;align-items:center;justify-content:center;color:#F59E0B">
-        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      </div>
-      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${flow.planTitle}</div><div style="font-size:11px;color:#F59E0B">3-day AI-generated guide</div></div>
-      <span style="color:#555;font-size:18px">›</span>
-    </button>
-  </div>
-</div>
-<div style="padding:0 16px 16px">
-  <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Explore More</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    ${flow.saves.map(s=>`
-    <div onclick="openLink('${escapeAttr(s.link)}')" style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f;cursor:pointer;transition:border-color 0.15s" onmouseenter="this.style.borderColor='#9333EA66'" onmouseleave="this.style.borderColor='#1f1f1f'">
-      <div style="font-size:10px;color:#eee;font-weight:600;margin-bottom:3px">${s.l}</div>
-      <div style="font-size:9px;color:#a855f7">${s.u} ›</div>
-    </div>`).join('')}
-  </div>
-</div>`},
+nearby: function(){
+  var flow=activeFlow||flows.fashion;
+  var mapHTML=flow.mapEmbed
+    ? '<div style="margin:10px 16px;border-radius:16px;overflow:hidden;border:1px solid #2c2c2e;height:160px"><iframe src="'+flow.mapEmbed+'" width="100%" height="160" style="border:0;display:block" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>'
+    : '';
+  var cards='';
+  flow.nearby.forEach(function(item){
+    cards+='<div class="scard" onclick="openLink(\''+rp(item.link)+'\')">'
+      +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+item.name+'</div>'
+      +'<div style="font-size:10px;color:#888;margin-top:2px">'+item.info+'</div></div>'
+      +'<button class="abadge" onclick="openLink(\''+rp(item.link)+'\')">Open →</button>'
+      +'</div>';
+  });
+  return sbar()
+    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">'+flow.nearbyTitle+'</span></div>'
+    +mapHTML
+    +'<div style="padding:0 16px">'+cards+'</div>';
+},
 
-'sub-nearby':()=>{
-  const flow=activeFlow||flows.fashion;
-  const hasMap=!!flow.mapEmbed;
-  return`${sbar()}
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-  <button class="btn" id="back" style="font-size:22px">‹</button>
-  <span style="font-weight:600;font-size:15px">${flow.nearbyTitle}</span>
-</div>
-${hasMap?`
-<div style="margin:10px 16px;border-radius:16px;overflow:hidden;border:1px solid #2c2c2e;height:160px">
-  <iframe src="${flow.mapEmbed}" width="100%" height="160" style="border:0;display:block" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-</div>`:``}
-<div style="padding:0 16px">
-  ${flow.nearby.map(item=>`
-  <div class="sub-card">
-    <img src="${item.img}" referrerpolicy="no-referrer-when-downgrade"/>
-    <div style="flex:1">
-      <div style="font-size:13px;font-weight:700">${item.name}</div>
-      <div style="font-size:10px;color:#888;margin-top:2px">${item.dist} · ★ ${item.rating}</div>
-    </div>
-    <button class="action-badge" onclick="openLink('${escapeAttr(item.link)}')">Open →</button>
-  </div>`).join('')}
-</div>`},
+shop: function(){
+  var flow=activeFlow||flows.fashion;
+  var cards='';
+  flow.shop.forEach(function(item){
+    cards+='<div class="scard" onclick="openLink(\''+rp(item.link)+'\')">'
+      +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<div style="flex:1">'
+      +'<div style="font-size:12px;font-weight:700">'+item.name+'</div>'
+      +'<div style="font-size:10px;color:#888;margin-top:2px">'+item.brand+' · <span style="color:#EC4899;font-weight:600">'+item.price+'</span></div>'
+      +'<div style="margin-top:3px;display:inline-block;padding:2px 7px;background:#F59E0B22;color:#F59E0B;border-radius:8px;font-size:9px;font-weight:600">'+item.badge+'</div>'
+      +'</div>'
+      +'<button class="abadge" style="background:#EC4899" onclick="event.stopPropagation();openLink(\''+rp(item.link)+'\')">Shop →</button>'
+      +'</div>';
+  });
+  return sbar()
+    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">'+flow.shopTitle+'</span></div>'
+    +'<div style="padding:10px 16px">'+cards+'</div>';
+},
 
-'sub-shop':()=>{
-  const flow=activeFlow||flows.fashion;
-  return`${sbar()}
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-  <button class="btn" id="back" style="font-size:22px">‹</button>
-  <span style="font-weight:600;font-size:15px">${flow.shopTitle}</span>
-</div>
-<div style="padding:10px 16px">
-  ${flow.shop.map(item=>`
-  <div class="sub-card" style="cursor:pointer" onclick="openLink('${escapeAttr(item.link)}')">
-    <img src="${item.img}" referrerpolicy="no-referrer-when-downgrade"/>
-    <div style="flex:1">
-      <div style="font-size:12px;font-weight:700">${item.name}</div>
-      <div style="font-size:10px;color:#888;margin-top:2px">${item.brand} · <span style="color:#EC4899;font-weight:600">${item.price}</span></div>
-      <div style="margin-top:3px;display:inline-block;padding:2px 7px;background:#F59E0B22;color:#F59E0B;border-radius:8px;font-size:9px;font-weight:600">${item.badge}</div>
-    </div>
-    <button class="action-badge" style="background:#EC4899" onclick="openLink('${escapeAttr(item.link)}')">Shop →</button>
-  </div>`).join('')}
-</div>`,
+plan: function(){
+  var flow=activeFlow||flows.fashion;
+  var day=flow.days[dayTab]||flow.days[1];
+  var tabs='';
+  [1,2,3].forEach(function(d){
+    var active=dayTab===d;
+    tabs+='<button class="btn" onclick="dayTab='+d+';go(\'plan\')" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;color:'+(active?'#fff':'#888')+';background:'+(active?'linear-gradient(135deg,#9333EA,#EC4899)':'transparent')+'">Day '+d+'</button>';
+  });
+  return sbar()
+    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">'+flow.planTitle+'</span></div>'
+    +'<div style="padding:10px 16px">'
+    +'<div style="display:flex;gap:8px;margin-bottom:14px;background:#111;padding:4px;border-radius:12px;border:1px solid #222">'+tabs+'</div>'
+    +'<div style="background:#111;border:1px solid #222;border-radius:16px;padding:16px">'
+    +'<div style="font-size:14px;font-weight:700;margin-bottom:8px">'+day.t+'</div>'
+    +'<div style="font-size:12px;color:#aaa;line-height:1.6">'+day.d+'</div>'
+    +'</div></div>';
+},
 
-'sub-plan':()=>{
-  const flow=activeFlow||flows.fashion;
-  const day=flow.planDays[activeDayTab]||flow.planDays[1];
-  return`${sbar()}
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-  <button class="btn" id="back" style="font-size:22px">‹</button>
-  <span style="font-weight:600;font-size:15px">${flow.planTitle}</span>
-</div>
-<div style="padding:10px 16px">
-  <div style="display:flex;gap:8px;margin-bottom:14px;background:#111;padding:4px;border-radius:12px;border:1px solid #222">
-    ${[1,2,3].map(d=>`
-    <button class="btn" onclick="activeDayTab=${d};go('sub-plan')" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;background:${activeDayTab===d?'linear-gradient(135deg,#9333EA,#EC4899)':'transparent'};color:${activeDayTab===d?'#fff':'#888'}">
-      Day ${d}
-    </button>`).join('')}
-  </div>
-  <div style="background:#111;border:1px solid #222;border-radius:16px;padding:16px">
-    <div style="font-size:14px;font-weight:700;margin-bottom:8px">${day.title}</div>
-    <div style="font-size:12px;color:#aaa;line-height:1.6">${day.details}</div>
-  </div>
-</div>`,
+saved: function(){
+  var savedList=posts.filter(function(p){return p.saved});
+  var cats=['Literature','Food','Fashion','Travel'];
+  if(savedCat){
+    var items=savedList.filter(function(p){return p.cat===savedCat.toLowerCase()});
+    var cardsHTML='';
+    if(items.length===0){
+      cardsHTML='<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">Nothing saved in '+savedCat+' yet.</div>';
+    } else {
+      cardsHTML='<div class="grid2">';
+      items.forEach(function(item){
+        cardsHTML+='<div class="tcard" onclick="scoutPost('+item.id+')">'
+          +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+          +'<div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">'+item.cap+'</div></div>'
+          +'</div>';
+      });
+      cardsHTML+='</div>';
+    }
+    return sbar()
+      +'<div class="arow"><button class="bk" onclick="savedCat=null;go(\'saved\')">‹</button><span class="ttl">'+savedCat+' Collection</span></div>'
+      +'<div style="padding:10px 16px">'+cardsHTML+'</div>';
+  }
+  var catCards='<div class="grid2">';
+  cats.forEach(function(cat){
+    var count=savedList.filter(function(p){return p.cat===cat.toLowerCase()}).length;
+    catCards+='<div class="tcard" onclick="savedCat=\''+cat+'\';go(\'saved\')">'
+      +'<img src="'+catCovers[cat.toLowerCase()]+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<div style="padding:8px"><div style="font-size:12px;font-weight:700">'+cat+'</div>'
+      +'<div style="font-size:10px;color:#a855f7;margin-top:2px;font-weight:600">'+count+' Saved</div>'
+      +'</div></div>';
+  });
+  catCards+='</div>';
+  return sbar()
+    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">Saved Collections</span></div>'
+    +'<div style="padding:10px 14px">'+catCards+'</div>';
+},
 
-saved:()=>{
-  const savedList=initialPosts.filter(p=>p.saved);
-  const cats=['Literature','Food','Fashion','Travel'];
-  if(currentSavedCategory){
-    const items=savedList.filter(p=>p.category===currentSavedCategory);
-    return`${sbar()}
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-  <button class="btn" onclick="currentSavedCategory=null;go('saved')" style="font-size:22px">‹</button>
-  <span style="font-weight:600;font-size:15px">${currentSavedCategory} Collection</span>
-</div>
-<div style="padding:10px 16px">
-  ${items.length===0?`<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">Nothing saved in ${currentSavedCategory} yet.</div>`:`
-  <div class="grid-container">
-    ${items.map(item=>`
-    <div class="thumb-card" onclick="scoutPost(${item.id})">
-      <img src="${item.mediaImg}" referrerpolicy="no-referrer-when-downgrade"/>
-      <div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">${item.caption}</div></div>
-    </div>`).join('')}
-  </div>`}
-</div>`}
-  return`${sbar()}
-<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-  <button class="btn" id="back" style="font-size:22px">‹</button>
-  <span style="font-weight:600;font-size:15px">Saved Collections</span>
-</div>
-<div style="padding:10px 14px">
-  <div class="grid-container">
-    ${cats.map(cat=>{
-      const count=savedList.filter(p=>p.category===cat).length;
-      return`<div class="thumb-card" onclick="currentSavedCategory='${cat}';go('saved')">
-        <img src="${catCovers[cat]}" referrerpolicy="no-referrer-when-downgrade"/>
-        <div style="padding:8px">
-          <div style="font-size:12px;font-weight:700">${cat}</div>
-          <div style="font-size:10px;color:#a855f7;margin-top:2px;font-weight:600">${count} Saved</div>
-        </div>
-      </div>`;
-    }).join('')}
-  </div>
-</div>`}
 };
 
-// ── SEARCH ─────────────────────────────────────────────────────────────────
-function scoutHome(){return`
-<div style="text-align:center;padding:28px 24px 20px">
-  <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;position:relative">
-    ✦<div style="position:absolute;top:-4px;right:-4px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid #9333EA44">AI</div>
-  </div>
-  <div style="font-size:24px;font-weight:800;margin-bottom:4px">Instagram ${grad('Scout')}</div>
-  <div style="color:#888;font-size:12px">Visual AI Search — Books, Food, Fashion & Travel</div>
-</div>
-<div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-  ${[
-    {icon:'📷',label:'Upload from Camera Roll',sub:'Search anything in your photos',screen:'upload',border:'#9333EA33'},
-    {icon:'📚',label:'Browse Books',sub:'Find & buy any book',screen:'upload',border:'#EC489933'},
-    {icon:'🔖',label:'Search Saved Posts',sub:'Explore your saved collection',screen:'saved',border:'#F59E0B33'},
-  ].map(b=>`
-  <button class="btn" onclick="go('${b.screen}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid ${b.border};width:100%">
-    <div style="width:44px;height:44px;border-radius:12px;background:${b.border};display:flex;align-items:center;justify-content:center;font-size:20px">${b.icon}</div>
-    <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${b.label}</div><div style="color:#666;font-size:11px;margin-top:2px">${b.sub}</div></div>
-    <span style="color:#555;font-size:18px">›</span>
-  </button>`).join('')}
-</div>`}
+// ── SCOUT LANDING ─────────────────────────────────────────────────────────────
+function scoutHomeHTML(){
+  return '<div style="text-align:center;padding:28px 24px 20px">'
+    +'<div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;position:relative">✦'
+    +'<div style="position:absolute;top:-4px;right:-4px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid rgba(147,51,234,.27)">AI</div></div>'
+    +'<div style="font-size:24px;font-weight:800;margin-bottom:4px">Instagram '+grad('Scout')+'</div>'
+    +'<div style="color:#888;font-size:12px">Visual AI Search — Books, Food, Fashion & Travel</div></div>'
+    +'<div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:20px">'
+    +'<button class="btn" onclick="go(\'upload\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid rgba(147,51,234,.2);width:100%">'
+    +'<div style="width:44px;height:44px;border-radius:12px;background:rgba(147,51,234,.13);display:flex;align-items:center;justify-content:center;font-size:20px">📷</div>'
+    +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Upload from Camera Roll</div><div style="color:#666;font-size:11px;margin-top:2px">Search anything in your photos</div></div>'
+    +'<span style="color:#555;font-size:18px">›</span></button>'
+    +'<button class="btn" onclick="go(\'saved\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid rgba(245,158,11,.2);width:100%">'
+    +'<div style="width:44px;height:44px;border-radius:12px;background:rgba(245,158,11,.13);display:flex;align-items:center;justify-content:center;font-size:20px">🔖</div>'
+    +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Search Saved Posts</div><div style="color:#666;font-size:11px;margin-top:2px">Explore your saved collection</div></div>'
+    +'<span style="color:#555;font-size:18px">›</span></button>'
+    +'</div>';
+}
 
-function renderSearch(val){
-  const area=document.getElementById('searchArea');
+// ── SEARCH ─────────────────────────────────────────────────────────────────
+function doSearch(val){
+  var area=document.getElementById('sarea');
   if(!area)return;
-  if(!val.trim()){area.innerHTML=scoutHome();return}
-  const matches=initialPosts.filter(p=>p.tags.some(t=>t.includes(val.toLowerCase()))||p.caption.toLowerCase().includes(val.toLowerCase()));
-  area.innerHTML=`
-<div style="padding:0 16px;margin-bottom:10px;font-size:11px;color:#888">Found <b style="color:#fff">${matches.length}</b> result${matches.length!==1?'s':''} for "<b style="color:#a855f7">${val}</b>"</div>
-<div class="grid-container">
-  ${matches.length===0?`<div style="grid-column:1/span 2;color:#666;font-size:12px;text-align:center;padding:30px">No results. Try "sapiens", "blazer", "pasta", or "paris".</div>`:matches.map(p=>`
-  <div class="thumb-card" onclick="scoutPost(${p.id})">
-    <img src="${p.mediaImg}" referrerpolicy="no-referrer-when-downgrade"/>
-    <div style="padding:8px">
-      <div style="font-size:11px;font-weight:600;line-height:1.3">${p.caption}</div>
-      <div style="font-size:9px;color:#a855f7;margin-top:3px">${p.category}</div>
-    </div>
-  </div>`).join('')}
-</div>`}
+  if(!val.trim()){area.innerHTML=scoutHomeHTML();return}
+  var v=val.toLowerCase();
+  var matches=posts.filter(function(p){
+    return p.tags.some(function(t){return t.includes(v)})||p.cap.toLowerCase().includes(v);
+  });
+  var html='<div style="padding:0 16px;margin-bottom:10px;font-size:11px;color:#888">Found <b style="color:#fff">'+matches.length+'</b> result'+(matches.length!==1?'s':'')+' for "<b style="color:#a855f7">'+val+'</b>"</div>';
+  if(matches.length===0){
+    html+='<div style="color:#666;font-size:12px;text-align:center;padding:30px">No results. Try "sapiens", "blazer", "pasta", or "paris".</div>';
+  } else {
+    html+='<div class="grid2">';
+    matches.forEach(function(p){
+      html+='<div class="tcard" onclick="scoutPost('+p.id+')">'
+        +'<img src="'+p.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+        +'<div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">'+p.cap+'</div>'
+        +'<div style="font-size:9px;color:#a855f7;margin-top:3px">'+capFirst(p.cat)+'</div></div>'
+        +'</div>';
+    });
+    html+='</div>';
+  }
+  area.innerHTML=html;
+}
 
 function handleFile(file){
   if(!file)return;
-  const r=new FileReader();
-  r.onload=e=>{userUploadedImage=e.target.result;activeFlow=flows.fashion;go('analyzing')};
+  var r=new FileReader();
+  r.onload=function(e){userImg2=e.target.result;activeFlow=flows.fashion;go('analyzing')};
   r.readAsDataURL(file);
 }
 
+// ── EVENT ATTACHMENT ──────────────────────────────────────────────────────────
 function attachEvents(s){
-  const b=document.getElementById('back');
-  if(b) b.onclick=()=>{
-    if(navStack.length>1){
-      navStack.pop();
-      go(navStack[navStack.length-1],true);
-    } else {
-      go('home',true);
+  // Back button
+  var b=document.getElementById('back');
+  if(b){
+    b.onclick=function(){
+      if(stack.length>1){stack.pop();go(stack[stack.length-1],true)}
+      else go('home',true);
+    };
+  }
+  // Back buttons with class .bk that aren't #back
+  document.querySelectorAll('.bk').forEach(function(el){
+    if(el.id!=='back'){
+      // already has inline onclick
     }
-  };
-
+  });
+  // Analyzing progress bar
   if(s==='analyzing'){
-    let p=0;
-    const bar=document.getElementById('progbar'),num=document.getElementById('prognum'),items=document.querySelectorAll('.step-item');
-    analyzeTimer=setInterval(()=>{
+    var p=0;
+    var bar=document.getElementById('pbar');
+    var num=document.getElementById('pnum');
+    var items=document.querySelectorAll('.step-item');
+    var iv=setInterval(function(){
       p=Math.min(p+5,95);
       if(bar)bar.style.width=p+'%';
       if(num)num.textContent=p+'%';
-      items.forEach((it,i)=>{if(i<=Math.floor(p/25))it.style.opacity='1'});
+      items.forEach(function(it,i){if(i<=Math.floor(p/25))it.style.opacity='1'});
     },50);
-    setTimeout(()=>{
-      if(analyzeTimer) clearInterval(analyzeTimer);
+    setTimeout(function(){
+      clearInterval(iv);
       if(bar)bar.style.width='100%';
       if(num)num.textContent='100%';
-      setTimeout(()=>go('results'),250);
+      setTimeout(function(){go('results')},250);
     },1800);
   }
 }
