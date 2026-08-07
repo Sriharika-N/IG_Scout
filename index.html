@@ -4,732 +4,658 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Instagram Scout — AI Visual Search Prototype</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
 body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;padding:20px;color:#fff}
-
 #phone{width:390px;height:844px;background:#000;border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1c1c1e,0 0 0 12px #2c2c2e,0 30px 90px rgba(147,51,234,0.35);position:relative;flex-shrink:0;display:flex;flex-direction:column}
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative;background:#000}
 #screen::-webkit-scrollbar{display:none}
-
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:12px;font-weight:600;color:#fff;background:#000;position:sticky;top:0;z-index:50}
 .bottom-nav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
 .btn{cursor:pointer;background:none;border:none;color:inherit;padding:0;font-family:inherit;font-size:inherit;display:inline-flex;align-items:center;justify-content:center}
-
 @keyframes scanline{0%{top:0%}100%{top:100%}}
-@keyframes fadeup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastSlide{from{transform:translate(-50%,100%);opacity:0}to{transform:translate(-50%,0);opacity:1}}
-.fadeup{animation:fadeup 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards}
-
-.svg-icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle;transition:all 0.15s ease}
-
-.ig-post{border-bottom:1px solid #1a1a1a;margin-bottom:12px;background:#000}
+.svg-icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle}
+.ig-post{border-bottom:1px solid #1a1a1a;background:#000}
 .ig-post-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-.ig-media{width:100%;height:380px;background:#141414;overflow:hidden;position:relative}
+.ig-media{width:100%;height:340px;background:#141414;overflow:hidden;position:relative}
 .ig-media img{width:100%;height:100%;object-fit:cover;display:block}
-.ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px;font-size:22px}
-.ig-caption{padding:0 14px 12px;font-size:13px;line-height:1.4}
-
+.ig-actions{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px}
+.ig-caption{padding:0 14px 14px;font-size:13px;line-height:1.4}
 .search-input{width:100%;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
 .search-input::placeholder{color:#777}
-
 .grid-container{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 14px}
-.thumb-card{background:#121212;border:1px solid #222;border-radius:14px;overflow:hidden;text-align:left;cursor:pointer;position:relative;transition:transform 0.15s ease}
+.thumb-card{background:#121212;border:1px solid #222;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform 0.15s ease}
 .thumb-card:active{transform:scale(0.97)}
-.thumb-card img{width:100%;height:130px;object-fit:cover;display:block;background:#1a1a1a}
-
+.thumb-card img{width:100%;height:130px;object-fit:cover;display:block}
 .sub-card{background:#111;border:1px solid #222;border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
 .sub-card img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0}
-.action-badge{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;background:#9333EA;color:#fff;border:none;cursor:pointer}
-
-#toastPill{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid #9333EAaa;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.8);display:none;z-index:200;white-space:nowrap;animation:toastSlide 0.25s ease}
+.action-badge{padding:7px 14px;border-radius:20px;font-size:11px;font-weight:600;background:#9333EA;color:#fff;border:none;cursor:pointer;white-space:nowrap}
+#toastPill{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid #9333EAaa;padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.8);display:none;z-index:200;white-space:nowrap}
 </style>
 </head>
 <body>
-
 <div id="phone">
   <div id="screen"></div>
   <div id="toastPill"></div>
   <div class="bottom-nav">
-    <button class="btn" onclick="go('home')" title="Home Feed">
-      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-    </button>
-    <button class="btn" id="scoutBtn" onclick="go('scout-landing')" style="position:relative" title="AI Scout">
+    <button class="btn" onclick="go('home')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
+    <button class="btn" onclick="go('scout-landing')" style="position:relative">
       <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <div style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:7px;color:white;border:1.5px solid #000">✦</div>
     </button>
-    <button class="btn" onclick="go('saved')" title="Saved Collection">
-      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-    </button>
-    <button class="btn" onclick="go('upload')" title="Upload Image">
-      <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-    </button>
-    <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;padding:2px;cursor:pointer" onclick="go('saved')">
-      <div style="width:100%;height:100%;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">Sri</div>
+    <button class="btn" onclick="go('saved')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></button>
+    <button class="btn" onclick="go('upload')"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></button>
+    <div style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;cursor:pointer" onclick="go('saved')">
+      <div style="width:22px;height:22px;border-radius:50%;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">Sri</div>
     </div>
   </div>
 </div>
 
 <script>
 const screen = document.getElementById('screen');
-const toast = document.getElementById('toastPill');
+const toast  = document.getElementById('toastPill');
+let activeFlow = null, userUploadedImage = null, currentSavedCategory = null, activeDayTab = 1, navStack = ['home'];
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
-// activeFlow holds the FULL flow object for the current scout session.
-// This is the single source of truth; sub-screens read from this, never from currentCat.
-let activeFlow = null;
-let userUploadedImage = null;
-let currentSavedCategory = null;
-let activeDayTab = 1;
-let navStack = ['home'];
+function showToast(msg){toast.textContent=msg;toast.style.display='block';setTimeout(()=>{toast.style.display='none'},2200)}
+function grad(t){return`<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${t}</span>`}
+function bkSVG(s){return s?`<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`:`<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`}
+function htSVG(l){return l?`<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`:`<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`}
 
-function showToast(msg) {
-  toast.textContent = msg;
-  toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 2200);
-}
+// ── POSTS ──────────────────────────────────────────────────────────────────
+// Using Open Library covers (by ISBN, stable URLs) for books
+// Using verified Pexels direct IDs for food/fashion/travel
+const OL = (isbn) => `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
 
-// ─── CATEGORY COVERS ─────────────────────────────────────────────────────────
-const categoryCovers = {
-  Fashion: 'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=600',
-  Food:    'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600',
-  Travel:  'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=600',
-  Literature: 'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=600'
-};
-
-// ─── SVG HELPERS ─────────────────────────────────────────────────────────────
-function getBookmarkSVG(isSaved) {
-  return isSaved
-    ? `<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#ffffff;stroke:#ffffff;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`
-    : `<svg class="svg-icon" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`;
-}
-function getHeartSVG(isLiked) {
-  return isLiked
-    ? `<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`
-    : `<svg class="svg-icon" viewBox="0 0 24 24" style="fill:none;stroke:currentColor;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
-}
-
-// ─── POSTS ───────────────────────────────────────────────────────────────────
 const initialPosts = [
-  // Literature (1–8)
-  { id:1,  username:'nonfiction_reads',  location:'Strand Bookstore, NYC',             userImg:'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150',  mediaImg:'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=800',  caption:'Sapiens: A Brief History of Humankind by Yuval Noah Harari 📚',         category:'Literature', saved:true,  liked:true,  tags:['sapiens','harari','history','nonfiction','books'] },
-  { id:2,  username:'bio_library',       location:"Powell's Books, Portland",          userImg:'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/3747139/pexels-photo-3747139.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Steve Jobs by Walter Isaacson — Definitive Biography 📖',              category:'Literature', saved:true,  liked:true,  tags:['steve jobs','isaacson','biography','nonfiction'] },
-  { id:3,  username:'tech_thinkers',     location:'Boston Public Library, MA',          userImg:'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Thinking, Fast and Slow by Daniel Kahneman 🧠',                        category:'Literature', saved:false, liked:true,  tags:['thinking fast and slow','kahneman','psychology'] },
-  { id:4,  username:'habit_lab',         location:'Rizzoli Bookstore, NYC',             userImg:'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1130980/pexels-photo-1130980.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Atomic Habits by James Clear — Daily Growth Essentials 📈',             category:'Literature', saved:true,  liked:false, tags:['atomic habits','james clear','self improvement'] },
-  { id:5,  username:'science_shelf',     location:'Trinity College Library, Dublin',    userImg:'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Educated: A Memoir by Tara Westover 🎓',                               category:'Literature', saved:false, liked:true,  tags:['educated','tara westover','memoir'] },
-  { id:6,  username:'finance_wisdom',    location:'London Library, UK',                 userImg:'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/2228570/pexels-photo-2228570.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'The Psychology of Money by Morgan Housel 💡',                         category:'Literature', saved:true,  liked:true,  tags:['psychology of money','morgan housel','finance'] },
-  { id:7,  username:'astro_reads',       location:'Hay-on-Wye, Wales',                  userImg:'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/694740/pexels-photo-694740.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Astrophysics for People in a Hurry by Neil deGrasse Tyson 🌌',         category:'Literature', saved:false, liked:false, tags:['astrophysics','tyson','science'] },
-  { id:8,  username:'mindset_journal',   location:'City Lights Books, San Francisco',   userImg:'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Deep Work by Cal Newport — Focus in a Distracted World 🎯',            category:'Literature', saved:true,  liked:true,  tags:['deep work','cal newport','productivity'] },
-  // Food (9–16)
-  { id:9,  username:'trattoria_roma',    location:'Trattoria Da Enzo, Rome',            userImg:'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Handmade Truffle Cacio e Pepe Pasta at Trattoria Da Enzo 🍝',           category:'Food',       saved:true,  liked:true,  tags:['cacio e pepe','pasta','rome','trattoria da enzo'] },
-  { id:10, username:'ginza_sushi',       location:'Sukiyabashi Jiro, Tokyo',            userImg:'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/2323398/pexels-photo-2323398.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Omakase Bluefin Otoro Nigiri at Sukiyabashi Jiro 🍣',                  category:'Food',       saved:true,  liked:true,  tags:['sushi','jiro','tokyo','omakase'] },
-  { id:11, username:'napoli_pizza',      location:"L'Antica Pizzeria da Michele, Naples", userImg:'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Wood-fired Margherita Extra at Da Michele Naples 🍕',                   category:'Food',       saved:false, liked:true,  tags:['pizza','naples','margherita'] },
-  { id:12, username:'soho_brunch',       location:"Sadelle's, NYC",                     userImg:'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1351238/pexels-photo-1351238.jpeg?auto=compress&cs=tinysrgb&w=800', caption:"House Salmon Tower & Smashed Avocado Toast at Sadelle's 🥑",           category:'Food',       saved:true,  liked:true,  tags:['avocado toast','sadelles','nyc','brunch'] },
-  { id:13, username:'paris_patisserie', location:'Cédric Grolet Opera, Paris',          userImg:'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Sculpted Hazelnut Fruit Pastry at Cédric Grolet 🥐',                   category:'Food',       saved:true,  liked:false, tags:['croissant','cedric grolet','paris'] },
-  { id:14, username:'tokyo_ramen',       location:'Ichiran Ramen, Shinjuku',            userImg:'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Tonkotsu Ramen with Chashu Pork at Ichiran Shinjuku 🍜',               category:'Food',       saved:false, liked:true,  tags:['ramen','ichiran','tokyo'] },
-  { id:15, username:'bk_burger',         location:'Peter Luger Steak House, Brooklyn',  userImg:'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Luger Single Dry-Aged Beef Burger at Peter Luger 🍔',                  category:'Food',       saved:false, liked:false, tags:['burger','peter luger','brooklyn'] },
-  { id:16, username:'kyoto_tea',         location:'Tsujiri, Kyoto',                     userImg:'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1110970/pexels-photo-1110970.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Uji Matcha Soft Serve Parfait at Tsujiri Kyoto 🍵',                    category:'Food',       saved:true,  liked:true,  tags:['matcha','tsujiri','kyoto'] },
-  // Fashion (17–23)
-  { id:17, username:'soho_chic',         location:'SoHo, New York',                     userImg:'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Minimalist Linen Blazer & Co-ord Set in SoHo 🧥',                     category:'Fashion',    saved:true,  liked:true,  tags:['linen blazer','fashion','soho'] },
-  { id:18, username:'milan_runway',      location:'Milan, Italy',                        userImg:'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Double-Breasted Wool Trench Coat at Milan Fashion Week 🧥',          category:'Fashion',    saved:false, liked:true,  tags:['trench coat','milan','fashion'] },
-  { id:19, username:'scandi_style',      location:'Copenhagen, Denmark',                 userImg:'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/972995/pexels-photo-972995.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Oversized Camel Wool Coat & Cashmere Scarf 🧣',                      category:'Fashion',    saved:true,  liked:true,  tags:['wool coat','copenhagen','fashion'] },
-  { id:20, username:'paris_street',      location:'Le Marais, Paris',                   userImg:'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Tailored High-Waisted Silk Trousers & Heels 👠',                     category:'Fashion',    saved:false, liked:true,  tags:['silk trousers','paris','fashion'] },
-  { id:21, username:'harajuku_fits',     location:'Tokyo, Japan',                        userImg:'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Oversized Vintage Bomber Jacket in Harajuku 👟',                    category:'Fashion',    saved:false, liked:false, tags:['bomber jacket','tokyo','streetwear'] },
-  { id:22, username:'la_denim',          location:'Los Angeles, CA',                     userImg:'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Straight-Leg Selvedge Denim Jeans 👖',                               category:'Fashion',    saved:true,  liked:false, tags:['denim','jeans','la'] },
-  { id:23, username:'london_evening',    location:'Mayfair, London',                     userImg:'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/2220316/pexels-photo-2220316.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Emerald Green Silk Evening Slip Dress 👗',                           category:'Fashion',    saved:false, liked:true,  tags:['dress','silk dress','london'] },
-  // Travel (24–30)
-  { id:24, username:'paris_views',       location:'Champ de Mars, Paris',               userImg:'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Eiffel Tower Sunset View from Champ de Mars 🗼',                     category:'Travel',     saved:true,  liked:true,  tags:['eiffel tower','paris','france'] },
-  { id:25, username:'santorini_sunsets', location:'Oia, Santorini',                      userImg:'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Iconic Blue Dome Churches of Oia Village 🇬🇷',                      category:'Travel',     saved:true,  liked:true,  tags:['santorini','oia','greece'] },
-  { id:26, username:'kyoto_trails',      location:'Arashiyama, Kyoto',                  userImg:'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/161401/fushimi-inari-taisha-shrine-kyoto-japan-temple-161401.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Arashiyama Bamboo Grove Trail at Sunrise 🎍',                        category:'Travel',     saved:true,  liked:true,  tags:['kyoto','bamboo grove','japan'] },
-  { id:27, username:'swiss_peaks',       location:'Zermatt, Switzerland',                userImg:'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Matterhorn Peak Views from Gornergrat Railway 🏔️',                  category:'Travel',     saved:false, liked:true,  tags:['matterhorn','switzerland','zermatt'] },
-  { id:28, username:'venice_gondola',    location:'Grand Canal, Venice',                 userImg:'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/1796715/pexels-photo-1796715.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Grand Canal Sunset Gondola Tour in Venice 🛶',                      category:'Travel',     saved:false, liked:true,  tags:['venice','grand canal','italy'] },
-  { id:29, username:'bali_terraces',     location:'Tegallalang, Bali',                  userImg:'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'Tegallalang Rice Terraces in Ubud 🌴',                               category:'Travel',     saved:true,  liked:true,  tags:['ubud','bali','indonesia'] },
-  { id:30, username:'ny_rockefeller',    location:'Top of the Rock, NYC',               userImg:'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150', mediaImg:'https://images.pexels.com/photos/802024/pexels-photo-802024.jpeg?auto=compress&cs=tinysrgb&w=800', caption:'360 Observation Deck at Top of the Rock NYC 🏙️',                    category:'Travel',     saved:false, liked:false, tags:['nyc','rockefeller','skyline'] },
+  // ── LITERATURE ──────────────────────────────────────────────────────────
+  {id:1, username:'nonfiction_reads', location:'', userImg:'https://i.pravatar.cc/150?img=1',
+   mediaImg: OL('9780062316097'),
+   caption:'Sapiens: A Brief History of Humankind — Yuval Noah Harari. Mind-bending look at 70,000 years of human history. 📚',
+   category:'Literature', saved:true,  liked:true,  tags:['sapiens','harari','history','nonfiction']},
+
+  {id:2, username:'bio_library', location:'', userImg:'https://i.pravatar.cc/150?img=2',
+   mediaImg: OL('9781451648539'),
+   caption:'Steve Jobs by Walter Isaacson — The definitive biography of Apple\'s visionary co-founder. 📖',
+   category:'Literature', saved:true,  liked:true,  tags:['steve jobs','isaacson','biography']},
+
+  {id:3, username:'habit_lab', location:'', userImg:'https://i.pravatar.cc/150?img=3',
+   mediaImg: OL('9780735224292'),
+   caption:'Atomic Habits by James Clear — Tiny changes, remarkable results. The book that rewired how I work. 📈',
+   category:'Literature', saved:true,  liked:false, tags:['atomic habits','james clear','habits']},
+
+  {id:4, username:'finance_wisdom', location:'', userImg:'https://i.pravatar.cc/150?img=4',
+   mediaImg: OL('9780857197689'),
+   caption:'The Psychology of Money by Morgan Housel — 19 short stories on wealth, greed, and happiness. 💡',
+   category:'Literature', saved:true,  liked:true,  tags:['psychology of money','morgan housel','finance']},
+
+  {id:5, username:'deep_focus', location:'', userImg:'https://i.pravatar.cc/150?img=5',
+   mediaImg: OL('9781455586691'),
+   caption:'Deep Work by Cal Newport — Rules for focused success in a distracted world. 🎯',
+   category:'Literature', saved:true,  liked:true,  tags:['deep work','cal newport','productivity']},
+
+  {id:6, username:'science_shelf', location:'', userImg:'https://i.pravatar.cc/150?img=6',
+   mediaImg: OL('9780812993547'),
+   caption:'Educated: A Memoir by Tara Westover — A remarkable true story of self-invention. 🎓',
+   category:'Literature', saved:false, liked:true,  tags:['educated','tara westover','memoir']},
+
+  // ── FOOD ────────────────────────────────────────────────────────────────
+  {id:7, username:'trattoria_roma', location:'Trattoria Da Enzo al 29, Rome 🇮🇹', userImg:'https://i.pravatar.cc/150?img=7',
+   mediaImg:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Handmade Truffle Cacio e Pepe at Trattoria Da Enzo — Rome\'s most iconic pasta, perfected. 🍝',
+   category:'Food', saved:true, liked:true, tags:['cacio e pepe','pasta','rome','italy']},
+
+  {id:8, username:'ginza_sushi', location:'Sukiyabashi Jiro, Ginza, Tokyo 🇯🇵', userImg:'https://i.pravatar.cc/150?img=8',
+   mediaImg:'https://images.pexels.com/photos/2323398/pexels-photo-2323398.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Omakase Otoro Nigiri at Sukiyabashi Jiro — the most celebrated sushi counter on earth. 🍣',
+   category:'Food', saved:true, liked:true, tags:['sushi','omakase','tokyo','jiro']},
+
+  {id:9, username:'napoli_pizza', location:"L'Antica Pizzeria da Michele, Naples 🇮🇹", userImg:'https://i.pravatar.cc/150?img=9',
+   mediaImg:'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Wood-fired Neapolitan Margherita at Da Michele — since 1870, only two pizzas on the menu. 🍕',
+   category:'Food', saved:false, liked:true, tags:['pizza','naples','margherita','neapolitan']},
+
+  {id:10, username:'tokyo_ramen', location:'Ichiran Ramen, Shinjuku, Tokyo 🇯🇵', userImg:'https://i.pravatar.cc/150?img=10',
+   mediaImg:'https://images.pexels.com/photos/1907228/pexels-photo-1907228.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Solo booth Tonkotsu Ramen at Ichiran Shinjuku — rich pork broth, perfect noodles. 🍜',
+   category:'Food', saved:false, liked:true, tags:['ramen','tonkotsu','ichiran','tokyo']},
+
+  {id:11, username:'paris_patisserie', location:'Cédric Grolet Opéra, Paris 🇫🇷', userImg:'https://i.pravatar.cc/150?img=11',
+   mediaImg:'https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Sculpted Hazelnut Trompe-l\'oeil Pastry at Cédric Grolet — edible art at its finest. 🥐',
+   category:'Food', saved:true, liked:false, tags:['pastry','cedric grolet','paris','patisserie']},
+
+  // ── FASHION ─────────────────────────────────────────────────────────────
+  {id:12, username:'soho_chic', location:'', userImg:'https://i.pravatar.cc/150?img=12',
+   mediaImg:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Minimalist linen blazer & tailored co-ord — clean lines, effortless confidence. 🧥',
+   category:'Fashion', saved:true, liked:true, tags:['linen blazer','minimalist','fashion','blazer']},
+
+  {id:13, username:'milan_runway', location:'', userImg:'https://i.pravatar.cc/150?img=13',
+   mediaImg:'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Double-breasted wool trench from Milan — the season\'s most versatile investment piece. 🧥',
+   category:'Fashion', saved:false, liked:true, tags:['trench coat','wool','milan','fashion']},
+
+  {id:14, username:'scandi_style', location:'', userImg:'https://i.pravatar.cc/150?img=14',
+   mediaImg:'https://images.pexels.com/photos/972995/pexels-photo-972995.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Oversized camel coat + cashmere scarf — Scandinavian quiet luxury done right. 🧣',
+   category:'Fashion', saved:true, liked:true, tags:['camel coat','scandi','fashion','luxury']},
+
+  {id:15, username:'harajuku_fits', location:'', userImg:'https://i.pravatar.cc/150?img=15',
+   mediaImg:'https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Vintage oversized bomber jacket — streetwear at its most expressive. 👟',
+   category:'Fashion', saved:false, liked:false, tags:['bomber jacket','streetwear','vintage','fashion']},
+
+  // ── TRAVEL ──────────────────────────────────────────────────────────────
+  {id:16, username:'paris_views', location:'Champ de Mars, Paris 🇫🇷', userImg:'https://i.pravatar.cc/150?img=16',
+   mediaImg:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Eiffel Tower at golden hour from Champ de Mars — Paris never gets old. 🗼',
+   category:'Travel', saved:true, liked:true, tags:['eiffel tower','paris','france','travel']},
+
+  {id:17, username:'santorini_sunsets', location:'Oia, Santorini 🇬🇷', userImg:'https://i.pravatar.cc/150?img=17',
+   mediaImg:'https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Blue dome churches of Oia — the sunset here will stop your heart. 🇬🇷',
+   category:'Travel', saved:true, liked:true, tags:['santorini','oia','greece','islands']},
+
+  {id:18, username:'kyoto_trails', location:'Arashiyama, Kyoto 🇯🇵', userImg:'https://i.pravatar.cc/150?img=18',
+   mediaImg:'https://images.pexels.com/photos/161401/fushimi-inari-taisha-shrine-kyoto-japan-temple-161401.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Arashiyama Bamboo Grove at dawn — one of Japan\'s most magical 5am decisions. 🎍',
+   category:'Travel', saved:true, liked:true, tags:['kyoto','bamboo','arashiyama','japan']},
+
+  {id:19, username:'bali_terraces', location:'Tegallalang, Ubud, Bali 🇮🇩', userImg:'https://i.pravatar.cc/150?img=19',
+   mediaImg:'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Tegallalang rice terraces — Bali\'s emerald stairways carved over centuries. 🌴',
+   category:'Travel', saved:true, liked:true, tags:['bali','ubud','rice terraces','indonesia']},
+
+  {id:20, username:'venice_gondola', location:'Grand Canal, Venice 🇮🇹', userImg:'https://i.pravatar.cc/150?img=20',
+   mediaImg:'https://images.pexels.com/photos/1796715/pexels-photo-1796715.jpeg?auto=compress&cs=tinysrgb&w=800',
+   caption:'Grand Canal at sunset — Venice is a city that shouldn\'t exist, and yet here we are. 🛶',
+   category:'Travel', saved:false, liked:true, tags:['venice','italy','gondola','canal']},
 ];
 
-// ─── FLOW DATA: each category has its OWN correct links ──────────────────────
-const categoryFlowData = {
+// ── CATEGORY COVERS ──────────────────────────────────────────────────────────
+const catCovers = {
+  Literature: OL('9780062316097'),
+  Food:       'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=600',
+  Fashion:    'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=600',
+  Travel:     'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=600',
+};
+
+// ── FLOW DATA — every link is real and opens correct destination ──────────────
+const flows = {
 
   literature: {
-    label: 'Sapiens: A Brief History of Humankind by Yuval Noah Harari',
-    confidence: '95%',
-    coverCat: 'Literature',
-    nearbyTitle: 'Bookstores Nearby',
+    label: 'Sapiens: A Brief History of Humankind — Yuval Noah Harari',
+    confidence: '95%', coverCat:'Literature',
+    nearbyTitle: 'Find This Book Online',
     nearby: [
-      { name:'Strand Book Store',  dist:'0.3 km', rating:'4.9', price:'$$',  img:'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Strand+Book+Store+New+York' },
-      { name:'Rizzoli Bookstore',  dist:'1.2 km', rating:'4.8', price:'$$$', img:'https://images.pexels.com/photos/694740/pexels-photo-694740.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Rizzoli+Bookstore+New+York' }
+      {name:'Amazon — Sapiens (Hardcover)',  dist:'$22.99', rating:'4.8', img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari'},
+      {name:'Goodreads — Reviews & Notes',  dist:'Free',   rating:'4.4', img:OL('9780062316097'), link:'https://www.goodreads.com/book/show/23692271-sapiens'},
     ],
-    shopTitle: 'Buy Book Online',
+    shopTitle: 'Shop & Explore This Book',
     shop: [
-      { name:'Sapiens (Hardcover)',  brand:'Amazon',  price:'$22.99', badge:'Bestseller', img:'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.amazon.com/s?k=Sapiens+A+Brief+History+of+Humankind+Harari' },
-      { name:'Sapiens (Audiobook)', brand:'Audible',  price:'$14.95', badge:'Top Rated',  img:'https://images.pexels.com/photos/3747139/pexels-photo-3747139.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.audible.com/search?keywords=Sapiens+Harari' }
+      {name:'Sapiens — Hardcover',      brand:'Amazon',    price:'$22.99', badge:'Bestseller', img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari+hardcover'},
+      {name:'Sapiens — Kindle Edition', brand:'Amazon',    price:'$12.99', badge:'Instant',    img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Harari+kindle'},
+      {name:'Sapiens — Audiobook',      brand:'Audible',   price:'$14.95', badge:'Top Rated',  img:OL('9780062316097'), link:'https://www.audible.com/search?keywords=Sapiens+Harari'},
     ],
-    planTitle: '3-Day Non-Fiction Reading Plan',
-    planDays: {
-      1: { title:'Part 1 — The Cognitive Revolution', details:'Chapters 1–4: Human evolution, the rise of language, and how Homo sapiens came to dominate the planet.' },
-      2: { title:'Part 2 — The Agricultural Revolution', details:'Chapters 5–8: How wheat "domesticated" humans, the birth of social hierarchies and early city-states.' },
-      3: { title:'Part 3 — The Scientific Revolution', details:'Chapters 14–20: Capitalism, empire-building, the Enlightenment, and what AI means for our species next.' }
+    planTitle: '3-Day Reading Plan: Sapiens',
+    planDays:{
+      1:{title:'Part 1 — The Cognitive Revolution', details:'Chapters 1–4: How Homo Sapiens outcompeted all other humans through the power of shared myths and language, 70,000 years ago.'},
+      2:{title:'Part 2 — The Agricultural Revolution', details:'Chapters 5–8: How farming didn\'t just change what we eat — it fundamentally altered human society, gender roles, and inequality.'},
+      3:{title:'Part 3 — The Scientific Revolution', details:'Chapters 14–20: Capitalism, empire, the Enlightenment, and what the rise of AI means for the future of our species.'},
     },
-    saves: [
-      { l:'Top Non-Fiction Books of the Decade', u:'@nonfiction_reads' },
-      { l:'Yuval Harari Keynote Notes',          u:'@bio_library' }
-    ]
+    saves:[
+      {l:'Goodreads — Top Harari Books',    u:'Browse Yuval Harari reading list', link:'https://www.goodreads.com/author/list/395812.Yuval_Noah_Harari'},
+      {l:'Amazon — Non-fiction Bestsellers',u:'Shop top non-fiction of the year',  link:'https://www.amazon.com/Best-Sellers-Books-Nonfiction/zgbs/books/2660'},
+    ],
   },
 
   food: {
-    label: 'Handmade Truffle Cacio e Pepe at Trattoria Da Enzo',
-    confidence: '96%',
-    coverCat: 'Food',
-    nearbyTitle: 'Italian Restaurants Nearby',
+    label: 'Handmade Truffle Cacio e Pepe — Trattoria Da Enzo al 29, Rome',
+    confidence: '96%', coverCat:'Food',
+    nearbyTitle: 'Italian Restaurants Near You',
+    // Map embed: Rome, Trattoria Da Enzo area
+    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970!2d12.4763!3d41.8884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f6046e8f8e679%3A0xa4ba29e7a40acfdc!2sTrattoria%20Da%20Enzo%20al%2029!5e0!3m2!1sen!2sin!4v1699999999999',
     nearby: [
-      { name:'Trattoria Da Enzo',       dist:'0.4 km', rating:'4.9', price:'$$$', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Trattoria+Da+Enzo+al+29+Rome' },
-      { name:'Osteria Cacio e Pepe',    dist:'0.8 km', rating:'4.7', price:'$$',  img:'https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Osteria+Cacio+e+Pepe+Rome' }
+      {name:'Trattoria Da Enzo al 29', dist:'Rome, Italy', rating:'4.9', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Trattoria+Da+Enzo+al+29+Rome'},
+      {name:'Osteria dell\'Enoteca',   dist:'Rome, Italy', rating:'4.7', img:'https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&w=200',  link:'https://www.google.com/maps/search/Osteria+Cacio+e+Pepe+Rome'},
     ],
-    shopTitle: 'Ingredients & Pasta Tools',
+    shopTitle: 'Shop Ingredients & Make It',
     shop: [
-      { name:'Artisanal Pecorino Romano', brand:'Google Search', price:'$18.00', badge:'Imported',   img:'https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/search?q=buy+authentic+pecorino+romano+cheese+online' },
-      { name:'Italian Bronze Pasta Press', brand:'Amazon',       price:'$45.00', badge:'Top Rated',  img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.amazon.com/s?k=italian+pasta+maker+machine+bronze+die' }
+      {name:'Authentic Pecorino Romano DOP', brand:'Amazon Fresh', price:'$18.00', badge:'Imported', img:'https://images.pexels.com/photos/773253/pexels-photo-773253.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.amazon.com/s?k=pecorino+romano+DOP+authentic+imported'},
+      {name:'Tellicherry Black Pepper (Coarse)', brand:'Amazon',   price:'$12.00', badge:'Chef Pick', img:'https://images.pexels.com/photos/1640770/pexels-photo-1640770.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.amazon.com/s?k=tellicherry+black+peppercorns+coarse'},
+      {name:'Cacio e Pepe Recipe — Serious Eats', brand:'Web',    price:'Free',   badge:'Best Recipe', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.seriouseats.com/cacio-e-pepe-pasta-recipe'},
     ],
-    planTitle: '3-Day Rome Foodie Itinerary',
-    planDays: {
-      1: { title:'Day 1 — Trastevere Pasta Crawl', details:'Lunch at Da Enzo for Cacio e Pepe, dinner at Roscioli for carbonara and natural wine.' },
-      2: { title:'Day 2 — Testaccio Market & Gelato', details:'Morning espresso at Sant\'Eustachio il Caffè, street food at the Testaccio market, gelato at Fatamorgana.' },
-      3: { title:'Day 3 — Cooking Class in the Jewish Ghetto', details:'Master handmade pasta and artichoke carciofi alla giudia with a local chef.' }
+    planTitle: '3-Day Rome Food Itinerary',
+    planDays:{
+      1:{title:'Day 1 — Trastevere Pasta Crawl', details:'Lunch at Da Enzo al 29 for Cacio e Pepe. Dinner at Roscioli for carbonara and a natural wine from their legendary cellar.'},
+      2:{title:'Day 2 — Testaccio Market & Gelato', details:'Morning espresso at Sant\'Eustachio il Caffè. Street food at Testaccio Market. Afternoon gelato at Fatamorgana.'},
+      3:{title:'Day 3 — Jewish Ghetto Cooking Class', details:'Learn to make handmade pasta and artichoke carciofi alla giudia with a local Roman chef.'},
     },
-    saves: [
-      { l:'Rome Truffle Cacio e Pepe Recipe', u:'@trattoria_roma' },
-      { l:'Best Pasta Spots in Italy',        u:'@napoli_pizza' }
-    ]
+    saves:[
+      {l:'Rome Food Map — Eater',         u:'Best restaurants in Rome 2024', link:'https://www.eater.com/maps/best-restaurants-rome'},
+      {l:'Cacio e Pepe Recipe — NYT Cooking', u:'Classic Roman pasta at home', link:'https://cooking.nytimes.com/recipes/1015819-cacio-e-pepe'},
+    ],
   },
 
   fashion: {
-    label: 'Minimalist White Linen Blazer & Tailored Outfit',
-    confidence: '94%',
-    coverCat: 'Fashion',
-    nearbyTitle: 'Fashion Boutiques Nearby',
+    label: 'Minimalist Linen Blazer & Tailored Co-ord Outfit',
+    confidence: '94%', coverCat:'Fashion',
+    nearbyTitle: 'Shop This Look',
     nearby: [
-      { name:'Zara SoHo Flagship',   dist:'0.3 km', rating:'4.6', price:'$$', img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Zara+SoHo+New+York' },
-      { name:'Mango Fashion Studio', dist:'0.6 km', rating:'4.5', price:'$$', img:'https://images.pexels.com/photos/972995/pexels-photo-972995.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Mango+SoHo+New+York' }
+      {name:'Linen Blazer — ZARA',    dist:'Shop Online', rating:'4.5', img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.zara.com/us/en/search?searchTerm=linen+blazer'},
+      {name:'Linen Blazer — H&M',     dist:'Shop Online', rating:'4.3', img:'https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www2.hm.com/en_us/search-results.html?q=linen+blazer'},
     ],
-    shopTitle: 'Shop Similar Style',
+    shopTitle: 'Shop Similar Styles',
     shop: [
-      { name:'Tailored Linen Blazer',    brand:'Google Search', price:'$89.99', badge:'Trending',    img:'https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/search?q=white+linen+blazer+women+buy+online' },
-      { name:'Pinterest Outfit Boards',  brand:'Pinterest',     price:'Free',   badge:'Inspiration', img:'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.pinterest.com/search/pins/?q=minimalist%20linen%20blazer%20outfit' }
+      {name:'White Linen Blazer',       brand:'ZARA',     price:'$89.00',  badge:'Trending',    img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.zara.com/us/en/search?searchTerm=white+linen+blazer'},
+      {name:'Tailored Linen Co-ord Set',brand:'Mango',    price:'$79.00',  badge:'New In',      img:'https://images.pexels.com/photos/972995/pexels-photo-972995.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://shop.mango.com/us/women/new/linen-blazer'},
+      {name:'Pinterest — Linen Blazer Outfits', brand:'Pinterest', price:'Free', badge:'Inspo', img:'https://images.pexels.com/photos/934070/pexels-photo-934070.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.pinterest.com/search/pins/?q=minimalist+linen+blazer+outfit+women'},
     ],
-    planTitle: '3-Day Capsule Wardrobe Styling',
-    planDays: {
-      1: { title:'Day 1 — Office Chic Look',        details:'Pair the linen blazer with wide-leg tailored trousers, loafers, and a minimal gold chain.' },
-      2: { title:'Day 2 — Weekend Brunch Ensemble', details:'Layer it open over a silk slip dress, add oversized sunglasses and a leather tote.' },
-      3: { title:'Day 3 — Evening Lounge Style',    details:'Combine with high-waisted selvedge denim, strappy heels, and gold hoop earrings.' }
+    planTitle: '3-Day Capsule Styling Guide',
+    planDays:{
+      1:{title:'Day 1 — Office Chic', details:'Pair the linen blazer with wide-leg tailored trousers, leather loafers, and a minimal gold chain. Clean, powerful, effortless.'},
+      2:{title:'Day 2 — Weekend Brunch', details:'Layer open over a silk slip dress, add oversized sunglasses and a structured leather tote.'},
+      3:{title:'Day 3 — Evening Out', details:'Combine with high-waisted selvedge denim, strappy heels, and a gold ear cuff. Day-to-night done right.'},
     },
-    saves: [
-      { l:'Minimalist Wardrobe Guide',  u:'@soho_chic' },
-      { l:'Milan Streetwear Picks',     u:'@milan_runway' }
-    ]
+    saves:[
+      {l:'Pinterest — Minimalist Wardrobe',u:'Capsule wardrobe inspiration board', link:'https://www.pinterest.com/search/pins/?q=minimalist+capsule+wardrobe+women'},
+      {l:'Who What Wear — Blazer Guide',   u:'How to style a linen blazer',        link:'https://www.whowhatwear.com/linen-blazer-outfit-ideas'},
+    ],
   },
 
   travel: {
-    label: 'Eiffel Tower Sunset View from Champ de Mars, Paris',
-    confidence: '98%',
-    coverCat: 'Travel',
-    nearbyTitle: 'Attractions & Viewpoints Nearby',
+    label: 'Eiffel Tower at Golden Hour — Champ de Mars, Paris',
+    confidence: '98%', coverCat:'Travel',
+    nearbyTitle: 'Nearby Attractions',
+    mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624!2d2.2945!3d48.8584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701f7f0a3c07%3A0x30340c49952e4b64!2sEiffel%20Tower!5e0!3m2!1sen!2sin!4v1699999999999',
     nearby: [
-      { name:"Eiffel Tower Summit Deck",  dist:'0.1 km', rating:'4.9', price:'$$$',  img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Eiffel+Tower+Paris' },
-      { name:'Trocadéro Plaza Viewpoint', dist:'0.5 km', rating:'4.8', price:'Free', img:'https://images.pexels.com/photos/338515/pexels-photo-338515.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Trocadero+Paris' }
+      {name:'Eiffel Tower',        dist:'Champ de Mars, Paris', rating:'4.9', img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/place/Eiffel+Tower,+Paris'},
+      {name:'Trocadéro Gardens',   dist:'0.6 km from tower',    rating:'4.8', img:'https://images.pexels.com/photos/338515/pexels-photo-338515.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/place/Trocad%C3%A9ro,+Paris'},
     ],
-    shopTitle: 'Tours & Experiences',
+    shopTitle: 'Book Tours & Tickets',
     shop: [
-      { name:'Eiffel Tower Skip-the-Line Ticket', brand:'GetYourGuide', price:'$42.00', badge:'Bestseller', img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/' },
-      { name:'Seine River Sunset Cruise',          brand:'Viator',       price:'$28.00', badge:'Top Rated',  img:'https://images.pexels.com/photos/338515/pexels-photo-338515.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.viator.com/tours/Paris/Paris-Seine-River-Cruise/d479-2140SEINE' }
+      {name:'Eiffel Tower — Skip the Line Ticket', brand:'GetYourGuide', price:'$42.00', badge:'Bestseller', img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/'},
+      {name:'Seine River Sunset Cruise',           brand:'Viator',       price:'$28.00', badge:'Top Rated',  img:'https://images.pexels.com/photos/1796715/pexels-photo-1796715.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.viator.com/tours/Paris/Paris-Seine-River-Cruise/d479-2140SEINE'},
+      {name:'Paris 3-Day Pass',                    brand:'Paris Museum', price:'$65.00', badge:'Best Value', img:'https://images.pexels.com/photos/161401/fushimi-inari-taisha-shrine-kyoto-japan-temple-161401.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.parismuseumpass.fr/en/'},
     ],
-    planTitle: '3-Day Paris Travel Itinerary',
-    planDays: {
-      1: { title:'Day 1 — Eiffel Tower & Seine Cruise', details:'Morning stroll at Champ de Mars, summit the Eiffel Tower at midday, evening Seine river cruise at sunset.' },
-      2: { title:'Day 2 — Louvre & Le Marais', details:'Mona Lisa and Winged Victory at the Louvre, then boutique shopping and falafel in the Marais district.' },
-      3: { title:'Day 3 — Montmartre & Sacré-Cœur', details:'Wander artist squares, climb to Sacré-Cœur for the city panorama, finish with crêpes at a boulevard café.' }
+    planTitle: '3-Day Paris Itinerary',
+    planDays:{
+      1:{title:'Day 1 — Eiffel & Seine', details:'Morning at Champ de Mars. Book summit tickets in advance. Evening Seine river cruise for the best lit-up view of the city.'},
+      2:{title:'Day 2 — Louvre & Le Marais', details:'3 hours at the Louvre (book timed entry). Afternoon boutique shopping in Le Marais. Dinner at Breizh Café for Breton crêpes.'},
+      3:{title:'Day 3 — Montmartre & Sacré-Cœur', details:'Wander Montmartre\'s artist squares at 8am. Climb Sacré-Cœur for the city panorama. End with crêpes at a boulevard café.'},
     },
-    saves: [
-      { l:'Paris Hidden Photography Spots', u:'@paris_views' },
-      { l:'Greece & Italy Travel Guide',    u:'@santorini_sunsets' }
-    ]
-  }
+    saves:[
+      {l:'GetYourGuide — Paris Tours',    u:'Book top-rated Paris experiences',  link:'https://www.getyourguide.com/paris-l16/'},
+      {l:'Lonely Planet — Paris Guide',   u:'Full Paris travel guide & tips',    link:'https://www.lonelyplanet.com/france/paris'},
+    ],
+  },
+
 };
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function sbar(){ return `<div class="sbar"><span>9:41</span><span style="font-size:11px">●●● WiFi 85%</span></div>`; }
-function grad(txt){ return `<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${txt}</span>`; }
-
-function go(s, isBack = false) {
-  if (!isBack && navStack[navStack.length - 1] !== s) navStack.push(s);
-  const fn = screens[s];
-  if (fn) { screen.innerHTML = fn(); screen.scrollTop = 0; attachEvents(s); }
+// ── ROUTING ──────────────────────────────────────────────────────────────────
+function go(s, isBack=false){
+  if(!isBack && navStack[navStack.length-1]!==s) navStack.push(s);
+  const fn=screens[s];
+  if(fn){screen.innerHTML=fn();screen.scrollTop=0;attachEvents(s);}
 }
+function openLink(url){if(url)window.open(url,'_blank','noopener,noreferrer')}
+function toggleLike(id,el){const p=initialPosts.find(x=>x.id===id);if(p){p.liked=!p.liked;el.innerHTML=htSVG(p.liked)}}
+function toggleSave(id,el){const p=initialPosts.find(x=>x.id===id);if(p){p.saved=!p.saved;el.innerHTML=bkSVG(p.saved);showToast(p.saved?`Saved to ${p.category}`:'Removed from saves')}}
+function scoutPost(id){const p=initialPosts.find(x=>x.id===id);if(!p)return;userUploadedImage=p.mediaImg;activeFlow=flows[p.category.toLowerCase()]||flows.fashion;go('analyzing')}
+function demoScout(cat){userUploadedImage=null;activeFlow=flows[cat]||flows.fashion;go('analyzing')}
 
-function openExternalLink(url) {
-  if (url) window.open(url, '_blank', 'noopener,noreferrer');
-}
+function sbar(){return`<div class="sbar"><span>9:41</span><span style="font-size:11px">●●● WiFi 85%</span></div>`}
 
-function toggleLikePost(postId, btnEl) {
-  const post = initialPosts.find(p => p.id === postId);
-  if (post) { post.liked = !post.liked; btnEl.innerHTML = getHeartSVG(post.liked); }
-}
+// ── SCREENS ───────────────────────────────────────────────────────────────────
+const screens={
 
-function toggleSavePost(postId, btnEl) {
-  const post = initialPosts.find(p => p.id === postId);
-  if (post) {
-    post.saved = !post.saved;
-    btnEl.innerHTML = getBookmarkSVG(post.saved);
-    showToast(post.saved ? `Saved to ${post.category} Collection` : 'Removed from Saved Items');
-  }
-}
-
-// ─── KEY FIX: set activeFlow from the post's category, then go to analyzing ──
-function triggerScoutOnItem(postId) {
-  const post = initialPosts.find(p => p.id === postId);
-  if (!post) return;
-  userUploadedImage = post.mediaImg;
-  // Resolve the correct flow object from the post's category
-  activeFlow = categoryFlowData[post.category.toLowerCase()] || categoryFlowData.fashion;
-  go('analyzing');
-}
-
-// Demo buttons from Upload screen also set activeFlow by explicit cat key
-function triggerDemoScout(catKey) {
-  userUploadedImage = null;
-  activeFlow = categoryFlowData[catKey] || categoryFlowData.fashion;
-  go('analyzing');
-}
-
-function handleFileSelect(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    userUploadedImage = e.target.result;
-    // uploaded images default to fashion; user can refine later
-    activeFlow = categoryFlowData.fashion;
-    go('analyzing');
-  };
-  reader.readAsDataURL(file);
-}
-
-// ─── SCREENS ─────────────────────────────────────────────────────────────────
-const screens = {
-
-home: () => `${sbar()}
-  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px 4px">
-    <span style="font-size:24px;font-weight:700;font-family:Georgia,serif;">Instagram</span>
-    <div style="display:flex;gap:16px;">
-      <span class="btn" onclick="go('saved')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+home:()=>`${sbar()}
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px 4px">
+  <span style="font-size:24px;font-weight:700;font-family:Georgia,serif">Instagram</span>
+  <span class="btn" onclick="go('saved')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></span>
+</div>
+<div style="display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
+    <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899)">
+      <div style="width:100%;height:100%;border-radius:50%;background:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #000">Sri</div>
+    </div>
+    <span style="font-size:10px;color:#aaa">Sri</span>
+  </div>
+  ${initialPosts.slice(0,10).map(p=>`
+  <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer" onclick="scoutPost(${p.id})">
+    <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)">
+      <img src="${p.userImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000" referrerpolicy="no-referrer-when-downgrade"/>
+    </div>
+    <span style="font-size:10px;color:#ccc;width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.username}</span>
+  </div>`).join('')}
+</div>
+<div style="padding-bottom:10px">
+${initialPosts.map(p=>`
+<div class="ig-post">
+  <div class="ig-post-header">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="${p.userImg}" style="width:34px;height:34px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
+      <div>
+        <div style="font-size:13px;font-weight:600">${p.username} <span style="color:#60a5fa;font-size:11px">✓</span></div>
+        ${p.location?`<div style="font-size:10px;color:#888">📍 ${p.location}</div>`:''}
+      </div>
+    </div>
+    <span style="font-size:18px;color:#888">···</span>
+  </div>
+  <div class="ig-media" onclick="scoutPost(${p.id})" style="cursor:pointer">
+    <img src="${p.mediaImg}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
+    <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,0.15)">
+      <span style="color:#9333EA">✦</span> Tap to Scout
     </div>
   </div>
-
-  <div style="display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-      <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center">
-        <div style="width:100%;height:100%;border-radius:50%;background:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;border:2px solid #000">Sri</div>
-      </div>
-      <span style="font-size:10px;color:#aaa">Sri</span>
+  <div class="ig-actions">
+    <div style="display:flex;gap:14px">
+      <button class="btn" onclick="toggleLike(${p.id},this)">${htSVG(p.liked)}</button>
+      <button class="btn"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></button>
     </div>
-    ${initialPosts.slice(0,10).map(p=>`
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer" onclick="triggerScoutOnItem(${p.id})">
-        <div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center">
-          <img src="${p.userImg}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000"/>
-        </div>
-        <span style="font-size:10px;color:#ccc;width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.username}</span>
-      </div>
-    `).join('')}
+    <button class="btn" onclick="toggleSave(${p.id},this)">${bkSVG(p.saved)}</button>
   </div>
+  <div class="ig-caption"><b>${p.username}</b> <span style="color:#ddd">${p.caption}</span>
+    <div style="font-size:11px;color:#a855f7;margin-top:4px;font-weight:600;cursor:pointer" onclick="scoutPost(${p.id})">✦ AI Visual Search Available</div>
+  </div>
+</div>`).join('')}
+</div>`,
 
-  <div style="padding-bottom:10px">
-    ${initialPosts.map(p=>`
-      <div class="ig-post">
-        <div class="ig-post-header">
-          <div style="display:flex;align-items:center;gap:10px">
-            <img src="${p.userImg}" style="width:34px;height:34px;border-radius:50%;object-fit:cover"/>
-            <div>
-              <div style="font-size:13px;font-weight:600">${p.username} <span style="color:#60a5fa;font-size:11px">✓</span></div>
-              <div style="font-size:10px;color:#888">${p.location}</div>
-            </div>
-          </div>
-          <span style="font-size:18px;color:#888;cursor:pointer">···</span>
-        </div>
-        <div class="ig-media" onclick="triggerScoutOnItem(${p.id})" style="cursor:pointer">
-          <img src="${p.mediaImg}"/>
-          <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;gap:4px">
-            <span style="color:#9333EA">✦</span> Tap to Scout
-          </div>
-        </div>
-        <div class="ig-actions">
-          <div style="display:flex;gap:14px">
-            <button class="btn" onclick="toggleLikePost(${p.id}, this)">${getHeartSVG(p.liked)}</button>
-            <button class="btn"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></button>
-          </div>
-          <button class="btn" onclick="toggleSavePost(${p.id}, this)">${getBookmarkSVG(p.saved)}</button>
-        </div>
-        <div class="ig-caption">
-          <b>${p.username}</b> <span style="color:#ddd">${p.caption}</span>
-          <div style="font-size:11px;color:#a855f7;margin-top:4px;font-weight:600;cursor:pointer" onclick="triggerScoutOnItem(${p.id})">✦ AI Visual Search Available</div>
-        </div>
+'scout-landing':()=>`${sbar()}
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
+  <button class="btn" id="back" style="font-size:22px">‹</button>
+  <div style="flex:1"><input class="search-input" id="scoutSearchBox" placeholder="Search 'sapiens', 'blazer', 'cacio e pepe'..." oninput="renderSearch(this.value)"/></div>
+</div>
+<div id="searchArea">${scoutHome()}</div>`,
+
+upload:()=>`${sbar()}
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
+  <button class="btn" id="back" style="font-size:22px">‹</button>
+  <span style="font-weight:600;font-size:15px">Upload to Scout</span>
+</div>
+<div style="padding:16px">
+  <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFile(this.files[0])"/>
+  <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:#9333EA0d">
+    <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;font-size:26px">📷</div>
+    <div style="text-align:center"><div style="font-weight:600;font-size:14px;margin-bottom:2px">Select from Camera Roll</div><div style="color:#777;font-size:11px">PNG, JPG, WEBP</div></div>
+    <div style="padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:12px;font-weight:600">Choose Photo</div>
+  </div>
+</div>
+<div style="display:flex;align-items:center;gap:12px;padding:0 20px;margin-bottom:10px">
+  <div style="flex:1;height:1px;background:#222"></div><span style="color:#555;font-size:11px">or try a demo</span><div style="flex:1;height:1px;background:#222"></div>
+</div>
+<div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
+${[
+  {t:'Non-Fiction Book: Sapiens', cat:'literature', img:OL('9780062316097')},
+  {t:'Cacio e Pepe — Da Enzo, Rome', cat:'food', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200'},
+  {t:'Minimalist Linen Blazer Outfit', cat:'fashion', img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200'},
+  {t:'Eiffel Tower, Paris at Sunset', cat:'travel', img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200'},
+].map(d=>`
+<button class="btn" onclick="demoScout('${d.cat}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:10px;border:1px solid #222;width:100%">
+  <img src="${d.img}" style="width:44px;height:44px;border-radius:8px;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
+  <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:12px">${d.t}</div><div style="color:#666;font-size:10px">Run Scout AI Analysis</div></div>
+  <div style="padding:4px 10px;border-radius:14px;background:#EC489922;color:#EC4899;font-size:10px;font-weight:600">✦ Test</div>
+</button>`).join('')}
+</div>`,
+
+analyzing:()=>{
+  const flow=activeFlow||flows.fashion;
+  const cover=catCovers[flow.coverCat]||catCovers.Fashion;
+  return`${sbar()}
+<div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">
+  <div style="width:170px;height:170px;border-radius:24px;border:2px solid #9333EA66;background:#111;overflow:hidden;position:relative;margin-bottom:28px">
+    <img src="${userUploadedImage||cover}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
+    <div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.8s linear infinite;top:0"></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px">
+    <span style="font-size:16px;font-weight:700">Instagram</span>${grad('<span style="font-size:16px;font-weight:700">Scout</span>')}
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;width:230px;margin-bottom:20px" id="steps">
+    ${['Scanning visual patterns…','Identifying objects & context…','Matching to database…','Generating recommendations…'].map((s,i)=>`
+    <div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:${i===0?1:0.3}">
+      <div style="width:10px;height:10px;border-radius:50%;background:${i===0?'#EC4899':'#333'}"></div>
+      <span style="font-size:11px;color:#ccc">${s}</span>
+    </div>`).join('')}
+  </div>
+  <div style="width:220px;height:4px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div id="progbar" style="height:100%;width:0%;background:linear-gradient(90deg,#9333EA,#EC4899,#F59E0B)"></div></div>
+  <div id="prognum" style="color:#666;font-size:11px;margin-top:6px">0%</div>
+</div>`},
+
+results:()=>{
+  const flow=activeFlow||flows.fashion;
+  const cover=catCovers[flow.coverCat]||catCovers.Fashion;
+  return`${sbar()}
+<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px">
+  <button class="btn" id="back" style="font-size:22px">‹</button>
+  <div style="background:#9333EA22;color:#a855f7;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:600">✦ AI Powered</div>
+</div>
+<div style="padding:10px 16px">
+  <div style="border-radius:18px;overflow:hidden;border:1px solid #9333EA44;background:#111">
+    <div style="height:190px;overflow:hidden">
+      <img src="${userUploadedImage||cover}" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>
+    </div>
+    <div style="padding:12px 14px">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <span style="color:#9333EA;font-size:14px">✦</span>
+        <p style="font-size:13px;line-height:1.4;margin:0;font-weight:500">${flow.label}</p>
       </div>
-    `).join('')}
-  </div>`,
+    </div>
+  </div>
+</div>
+<div style="margin:0 16px 12px;padding:10px 14px;border-radius:12px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:12px">
+  <div style="flex:1">
+    <div style="color:#666;font-size:10px;margin-bottom:4px">Scout Confidence</div>
+    <div style="height:4px;background:#222;border-radius:4px;overflow:hidden"><div style="width:95%;height:100%;background:linear-gradient(90deg,#9333EA,#EC4899)"></div></div>
+  </div>
+  <div style="font-size:13px;font-weight:700;color:#9333EA">${flow.confidence}</div>
+</div>
+<div style="padding:0 16px 14px">
+  <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Take Action</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn" onclick="go('sub-nearby')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
+      <div style="width:38px;height:38px;border-radius:10px;background:#9333EA22;display:flex;align-items:center;justify-content:center;color:#9333EA">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      </div>
+      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${flow.nearbyTitle}</div><div style="font-size:11px;color:#9333EA">${flow.nearby.length} results found</div></div>
+      <span style="color:#555;font-size:18px">›</span>
+    </button>
+    <button class="btn" onclick="go('sub-shop')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
+      <div style="width:38px;height:38px;border-radius:10px;background:#EC489922;display:flex;align-items:center;justify-content:center;color:#EC4899">
+        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+      </div>
+      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${flow.shopTitle}</div><div style="font-size:11px;color:#EC4899">Tap to shop or explore</div></div>
+      <span style="color:#555;font-size:18px">›</span>
+    </button>
+    <button class="btn" onclick="activeDayTab=1;go('sub-plan')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
+      <div style="width:38px;height:38px;border-radius:10px;background:#F59E0B22;display:flex;align-items:center;justify-content:center;color:#F59E0B">
+        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      </div>
+      <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${flow.planTitle}</div><div style="font-size:11px;color:#F59E0B">3-day AI-generated guide</div></div>
+      <span style="color:#555;font-size:18px">›</span>
+    </button>
+  </div>
+</div>
+<div style="padding:0 16px 16px">
+  <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Explore More</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    ${flow.saves.map(s=>`
+    <div onclick="openLink('${s.link}')" style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f;cursor:pointer;transition:border-color 0.15s" onmouseenter="this.style.borderColor='#9333EA66'" onmouseleave="this.style.borderColor='#1f1f1f'">
+      <div style="font-size:10px;color:#eee;font-weight:600;margin-bottom:3px">${s.l}</div>
+      <div style="font-size:9px;color:#a855f7">${s.u} ›</div>
+    </div>`).join('')}
+  </div>
+</div>`},
 
-'scout-landing': () => `${sbar()}
-  <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-    <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
+'sub-nearby':()=>{
+  const flow=activeFlow||flows.fashion;
+  const hasMap=!!flow.mapEmbed;
+  return`${sbar()}
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
+  <button class="btn" id="back" style="font-size:22px">‹</button>
+  <span style="font-weight:600;font-size:15px">${flow.nearbyTitle}</span>
+</div>
+${hasMap?`
+<div style="margin:10px 16px;border-radius:16px;overflow:hidden;border:1px solid #2c2c2e;height:160px">
+  <iframe src="${flow.mapEmbed}" width="100%" height="160" style="border:0;display:block" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+</div>`:``}
+<div style="padding:0 16px">
+  ${flow.nearby.map(item=>`
+  <div class="sub-card">
+    <img src="${item.img}" referrerpolicy="no-referrer-when-downgrade"/>
     <div style="flex:1">
-      <input type="text" class="search-input" id="scoutSearchBox" placeholder="Search 'sapiens', 'blazer', 'cacio e pepe'..." oninput="renderSearchResults(this.value)">
+      <div style="font-size:13px;font-weight:700">${item.name}</div>
+      <div style="font-size:10px;color:#888;margin-top:2px">${item.dist} · ★ ${item.rating}</div>
     </div>
-  </div>
-  <div id="searchResultsArea">
-    ${scoutLandingBody()}
-  </div>`,
+    <button class="action-badge" onclick="openLink('${item.link}')">Open →</button>
+  </div>`).join('')}
+</div>`},
 
-upload: () => `${sbar()}
-  <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-    <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
-    <span style="font-weight:600;font-size:15px">Upload to Scout</span>
-  </div>
-  <div style="padding:16px">
-    <input type="file" id="imgInp" accept="image/*" style="display:none" onchange="handleFileSelect(this.files[0])">
-    <div onclick="document.getElementById('imgInp').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:#9333EA0d">
-      <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#9333EA,#EC4899);display:flex;align-items:center;justify-content:center;color:#fff">
-        <svg class="svg-icon" style="width:28px;height:28px" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-      </div>
-      <div style="text-align:center"><div style="font-weight:600;color:#fff;font-size:14px;margin-bottom:2px">Select Image File</div><div style="color:#777;font-size:11px">Supports PNG, JPG, WEBP</div></div>
-      <div style="padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:12px;font-weight:600;color:#fff">Choose Photo</div>
-    </div>
-  </div>
-  <div style="display:flex;align-items:center;gap:12px;padding:0 20px;margin:2px 0 10px"><div style="flex:1;height:1px;background:#222"></div><span style="color:#555;font-size:11px">or tap a demo picture</span><div style="flex:1;height:1px;background:#222"></div></div>
-  <div style="padding:0 16px;display:flex;flex-direction:column;gap:8px">
-    ${[
-      { t:'Non-Fiction Book (Sapiens)',    cat:'literature', img:'https://images.pexels.com/photos/256450/pexels-photo-256450.jpeg?auto=compress&cs=tinysrgb&w=200' },
-      { t:'Truffle Cacio e Pepe Pasta',   cat:'food',       img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200' },
-      { t:'Minimalist Linen Blazer Outfit', cat:'fashion',  img:'https://images.pexels.com/photos/1536619/pexels-photo-1536619.jpeg?auto=compress&cs=tinysrgb&w=200' },
-      { t:'Eiffel Tower Sunset View',     cat:'travel',     img:'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=200' }
-    ].map(d=>`
-      <button class="btn" onclick="triggerDemoScout('${d.cat}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:10px;border:1px solid #222;width:100%">
-        <img src="${d.img}" style="width:40px;height:40px;border-radius:8px;object-fit:cover"/>
-        <div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:12px">${d.t}</div><div style="color:#666;font-size:10px">Run Scout AI Analysis</div></div>
-        <div style="padding:4px 10px;border-radius:14px;background:#EC489922;color:#EC4899;font-size:10px;font-weight:600">✦ Test</div>
-      </button>
-    `).join('')}
-  </div>`,
-
-analyzing: () => {
-  const flow = activeFlow || categoryFlowData.fashion;
-  const cover = categoryCovers[flow.coverCat] || categoryCovers.Fashion;
-  return `${sbar()}
-  <div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">
-    <div style="position:relative;margin-bottom:28px">
-      <div style="width:170px;height:170px;border-radius:24px;border:2px solid #9333EA66;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
-        <img src="${userUploadedImage || cover}" style="width:100%;height:100%;object-fit:cover"/>
-        <div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.8s linear infinite;top:0"></div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px">
-      <span style="font-size:16px;font-weight:700;color:#fff">Instagram</span>${grad('<span style="font-size:16px;font-weight:700">Scout</span>')}
-    </div>
-    <div style="display:flex;flex-direction:column;gap:8px;width:230px;margin-bottom:20px" id="steps">
-      ${['Scanning visual patterns…','Identifying context & objects…','Grounding with Google Lens…','Generating matches…'].map((s,i)=>`
-        <div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:${i===0?1:0.3}">
-          <div style="width:10px;height:10px;border-radius:50%;background:${i===0?'#EC4899':'#333'}"></div>
-          <span style="font-size:11px;color:#ccc">${s}</span>
-        </div>
-      `).join('')}
-    </div>
-    <div style="width:220px;height:4px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div id="progbar" style="height:100%;width:0%;background:linear-gradient(90deg,#9333EA,#EC4899,#F59E0B);transition:width 0.1s"></div></div>
-    <div id="prognum" style="color:#666;font-size:11px;margin-top:6px">0%</div>
-  </div>`;
-},
-
-results: () => {
-  // Always read from activeFlow — never derive from a loose string variable
-  const flow = activeFlow || categoryFlowData.fashion;
-  const cover = categoryCovers[flow.coverCat] || categoryCovers.Fashion;
-  return `${sbar()}
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px">
-    <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
-    <div style="background:#9333EA22;color:#a855f7;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:600">✦ AI Powered</div>
-  </div>
-
-  <div style="padding:10px 16px">
-    <div style="border-radius:18px;overflow:hidden;border:1px solid #9333EA44;position:relative;background:#111">
-      <div style="height:200px;overflow:hidden">
-        <img src="${userUploadedImage || cover}" style="width:100%;height:100%;object-fit:cover"/>
-      </div>
-      <div style="padding:12px 14px;background:linear-gradient(transparent,rgba(0,0,0,0.95))">
-        <div style="display:flex;align-items:flex-start;gap:8px">
-          <span style="color:#9333EA;font-size:14px;margin-top:1px">✦</span>
-          <p style="color:#fff;font-size:13px;line-height:1.4;margin:0;font-weight:500">${flow.label}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div style="margin:0 16px 12px;padding:10px 14px;border-radius:12px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:12px">
+'sub-shop':()=>{
+  const flow=activeFlow||flows.fashion;
+  return`${sbar()}
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
+  <button class="btn" id="back" style="font-size:22px">‹</button>
+  <span style="font-weight:600;font-size:15px">${flow.shopTitle}</span>
+</div>
+<div style="padding:10px 16px">
+  ${flow.shop.map(item=>`
+  <div class="sub-card" style="cursor:pointer" onclick="openLink('${item.link}')">
+    <img src="${item.img}" referrerpolicy="no-referrer-when-downgrade"/>
     <div style="flex:1">
-      <div style="color:#666;font-size:10px;margin-bottom:4px">Scout Confidence</div>
-      <div style="height:4px;background:#222;border-radius:4px;overflow:hidden">
-        <div style="width:95%;height:100%;background:linear-gradient(90deg,#9333EA,#EC4899);border-radius:4px"></div>
-      </div>
+      <div style="font-size:12px;font-weight:700">${item.name}</div>
+      <div style="font-size:10px;color:#888;margin-top:2px">${item.brand} · <span style="color:#EC4899;font-weight:600">${item.price}</span></div>
+      <div style="margin-top:3px;display:inline-block;padding:2px 7px;background:#F59E0B22;color:#F59E0B;border-radius:8px;font-size:9px;font-weight:600">${item.badge}</div>
     </div>
-    <div style="font-size:13px;font-weight:700;color:#9333EA">${flow.confidence}</div>
+    <button class="action-badge" style="background:#EC4899" onclick="openLink('${item.link}')">Shop →</button>
+  </div>`).join('')}
+</div>`,
+
+'sub-plan':()=>{
+  const flow=activeFlow||flows.fashion;
+  const day=flow.planDays[activeDayTab]||flow.planDays[1];
+  return`${sbar()}
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
+  <button class="btn" id="back" style="font-size:22px">‹</button>
+  <span style="font-weight:600;font-size:15px">${flow.planTitle}</span>
+</div>
+<div style="padding:10px 16px">
+  <div style="display:flex;gap:8px;margin-bottom:14px;background:#111;padding:4px;border-radius:12px;border:1px solid #222">
+    ${[1,2,3].map(d=>`
+    <button class="btn" onclick="activeDayTab=${d};go('sub-plan')" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;background:${activeDayTab===d?'linear-gradient(135deg,#9333EA,#EC4899)':'transparent'};color:${activeDayTab===d?'#fff':'#888'}">
+      Day ${d}
+    </button>`).join('')}
   </div>
-
-  <div style="padding:0 16px 14px">
-    <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Take Action</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn" onclick="go('sub-nearby')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
-        <div style="width:38px;height:38px;border-radius:10px;background:#9333EA22;display:flex;align-items:center;justify-content:center;color:#9333EA">
-          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-        </div>
-        <div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${flow.nearbyTitle}</div><div style="font-size:11px;color:#9333EA">${flow.nearby.length} places found</div></div>
-        <span style="color:#555;font-size:18px">›</span>
-      </button>
-      <button class="btn" onclick="go('sub-shop')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
-        <div style="width:38px;height:38px;border-radius:10px;background:#EC489922;display:flex;align-items:center;justify-content:center;color:#EC4899">
-          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-        </div>
-        <div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${flow.shopTitle}</div><div style="font-size:11px;color:#EC4899">Verified direct store matches</div></div>
-        <span style="color:#555;font-size:18px">›</span>
-      </button>
-      <button class="btn" onclick="activeDayTab=1;go('sub-plan')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%">
-        <div style="width:38px;height:38px;border-radius:10px;background:#F59E0B22;display:flex;align-items:center;justify-content:center;color:#F59E0B">
-          <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        </div>
-        <div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">${flow.planTitle}</div><div style="font-size:11px;color:#F59E0B">3-day AI-generated guide</div></div>
-        <span style="color:#555;font-size:18px">›</span>
-      </button>
-    </div>
+  <div style="background:#111;border:1px solid #222;border-radius:16px;padding:16px">
+    <div style="font-size:14px;font-weight:700;margin-bottom:8px">${day.title}</div>
+    <div style="font-size:12px;color:#aaa;line-height:1.6">${day.details}</div>
   </div>
+</div>`,
 
-  <div style="padding:0 16px 12px">
-    <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">From Your Saves</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      ${flow.saves.map(s=>`
-        <div style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f">
-          <div style="font-size:10px;color:#eee;font-weight:600;margin-bottom:4px">${s.l}</div>
-          <div style="font-size:9px;color:#888">${s.u}</div>
+saved:()=>{
+  const savedList=initialPosts.filter(p=>p.saved);
+  const cats=['Literature','Food','Fashion','Travel'];
+  if(currentSavedCategory){
+    const items=savedList.filter(p=>p.category===currentSavedCategory);
+    return`${sbar()}
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
+  <button class="btn" onclick="currentSavedCategory=null;go('saved')" style="font-size:22px">‹</button>
+  <span style="font-weight:600;font-size:15px">${currentSavedCategory} Collection</span>
+</div>
+<div style="padding:10px 16px">
+  ${items.length===0?`<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">Nothing saved in ${currentSavedCategory} yet.</div>`:`
+  <div class="grid-container">
+    ${items.map(item=>`
+    <div class="thumb-card" onclick="scoutPost(${item.id})">
+      <img src="${item.mediaImg}" referrerpolicy="no-referrer-when-downgrade"/>
+      <div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">${item.caption}</div></div>
+    </div>`).join('')}
+  </div>`}
+</div>`}
+  return`${sbar()}
+<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
+  <button class="btn" id="back" style="font-size:22px">‹</button>
+  <span style="font-weight:600;font-size:15px">Saved Collections</span>
+</div>
+<div style="padding:10px 14px">
+  <div class="grid-container">
+    ${cats.map(cat=>{
+      const count=savedList.filter(p=>p.category===cat).length;
+      return`<div class="thumb-card" onclick="currentSavedCategory='${cat}';go('saved')">
+        <img src="${catCovers[cat]}" referrerpolicy="no-referrer-when-downgrade"/>
+        <div style="padding:8px">
+          <div style="font-size:12px;font-weight:700">${cat}</div>
+          <div style="font-size:10px;color:#a855f7;margin-top:2px;font-weight:600">${count} Saved</div>
         </div>
-      `).join('')}
-    </div>
-  </div>`;
-},
-
-'sub-nearby': () => {
-  const flow = activeFlow || categoryFlowData.fashion;
-  return `${sbar()}
-  <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-    <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
-    <span style="font-weight:600;font-size:15px">${flow.nearbyTitle}</span>
-  </div>
-  <div style="margin:10px 16px;height:120px;background:#1c1c1e;border-radius:16px;border:1px solid #2c2c2e;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;opacity:0.25;background-image:radial-gradient(#9333EA 1px, transparent 1px);background-size:12px 12px"></div>
-    <div style="z-index:2;font-size:12px;font-weight:700;color:#fff">Map View</div>
-    <div style="z-index:2;font-size:10px;color:#888">Locations sorted by distance</div>
-  </div>
-  <div style="padding:0 16px">
-    ${flow.nearby.map(item=>`
-      <div class="sub-card">
-        <img src="${item.img}"/>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:700">${item.name}</div>
-          <div style="font-size:10px;color:#888;margin-top:2px">${item.dist} · ★ ${item.rating} · ${item.price}</div>
-        </div>
-        <button class="action-badge" onclick="openExternalLink('${item.link}')">Map →</button>
-      </div>
-    `).join('')}
-  </div>`;
-},
-
-'sub-shop': () => {
-  const flow = activeFlow || categoryFlowData.fashion;
-  return `${sbar()}
-  <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-    <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
-    <span style="font-weight:600;font-size:15px">${flow.shopTitle}</span>
-  </div>
-  <div style="padding:10px 16px">
-    ${flow.shop.map(item=>`
-      <div class="sub-card">
-        <img src="${item.img}"/>
-        <div style="flex:1">
-          <div style="font-size:12px;font-weight:700">${item.name}</div>
-          <div style="font-size:10px;color:#888;margin-top:2px">${item.brand} · <span style="color:#EC4899;font-weight:600">${item.price}</span> · <span style="color:#F59E0B;font-weight:600">${item.badge}</span></div>
-        </div>
-        <button class="action-badge" style="background:#EC4899" onclick="openExternalLink('${item.link}')">Buy →</button>
-      </div>
-    `).join('')}
-  </div>`;
-},
-
-'sub-plan': () => {
-  const flow = activeFlow || categoryFlowData.fashion;
-  const day = flow.planDays[activeDayTab] || flow.planDays[1];
-  return `${sbar()}
-  <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-    <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
-    <span style="font-weight:600;font-size:15px">${flow.planTitle}</span>
-  </div>
-  <div style="padding:10px 16px">
-    <div style="display:flex;gap:8px;margin-bottom:14px;background:#111;padding:4px;border-radius:12px;border:1px solid #222">
-      ${[1,2,3].map(d=>`
-        <button class="btn" onclick="activeDayTab=${d};go('sub-plan')" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;background:${activeDayTab===d?'linear-gradient(135deg,#9333EA,#EC4899)':'transparent'};color:${activeDayTab===d?'#fff':'#888'}">
-          Day ${d}
-        </button>
-      `).join('')}
-    </div>
-    <div style="background:#111;border:1px solid #222;border-radius:16px;padding:16px">
-      <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px">${day.title}</div>
-      <div style="font-size:12px;color:#aaa;line-height:1.6">${day.details}</div>
-    </div>
-  </div>`;
-},
-
-saved: () => {
-  const savedList = initialPosts.filter(p => p.saved);
-  const categories = ['Literature','Food','Fashion','Travel'];
-
-  if (currentSavedCategory) {
-    const catItems = savedList.filter(p => p.category.toLowerCase() === currentSavedCategory.toLowerCase());
-    return `${sbar()}
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">
-        <button class="btn" onclick="currentSavedCategory=null;go('saved')" style="font-size:22px;color:#fff">‹</button>
-        <span style="font-weight:600;font-size:15px">${currentSavedCategory} Collection</span>
-      </div>
-      <div style="padding:10px 16px">
-        ${catItems.length===0 ? `<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">No items saved in ${currentSavedCategory} yet.</div>` : `
-          <div class="grid-container">
-            ${catItems.map(item=>`
-              <div class="thumb-card" onclick="triggerScoutOnItem(${item.id})">
-                <img src="${item.mediaImg}"/>
-                <div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">${item.caption}</div></div>
-              </div>
-            `).join('')}
-          </div>
-        `}
       </div>`;
-  }
-
-  return `${sbar()}
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px">
-    <div style="display:flex;align-items:center;gap:8px">
-      <button class="btn" id="back" style="font-size:22px;color:#fff">‹</button>
-      <span style="font-weight:600;font-size:15px">Saved Collections</span>
-    </div>
+    }).join('')}
   </div>
-  <div style="padding:10px 14px">
-    <div class="grid-container">
-      ${categories.map(cat=>{
-        const count = savedList.filter(p=>p.category.toLowerCase()===cat.toLowerCase()).length;
-        return `
-          <div class="thumb-card" onclick="currentSavedCategory='${cat}';go('saved')">
-            <img src="${categoryCovers[cat]}"/>
-            <div style="padding:8px">
-              <div style="font-size:12px;font-weight:700;color:#fff">${cat}</div>
-              <div style="font-size:10px;color:#a855f7;margin-top:2px;font-weight:600">${count} Saved</div>
-            </div>
-          </div>`;
-      }).join('')}
-    </div>
-  </div>`;
-}
-
-}; // end screens
-
-// ─── SCOUT LANDING BODY (shared between first render & search reset) ──────────
-function scoutLandingBody() {
-  return `
-    <div style="text-align:center;padding:28px 24px 20px">
-      <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;position:relative">✦<div style="position:absolute;top:-4px;right:-4px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid #9333EA44">AI</div></div>
-      <div style="font-size:24px;font-weight:800;color:#fff;margin-bottom:4px">Instagram ${grad('Scout')}</div>
-      <div style="color:#888;font-size:12px">Visual Search for Books, Food, Fashion & Travel</div>
-    </div>
-    <div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-      <button class="btn" onclick="go('upload')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid #9333EA33;width:100%">
-        <div style="width:44px;height:44px;border-radius:12px;background:#9333EA22;display:flex;align-items:center;justify-content:center;color:#9333EA"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
-        <div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">Upload from Camera Roll</div><div style="color:#666;font-size:11px;margin-top:2px">Find anything from your photos</div></div>
-        <span style="color:#555;font-size:18px">›</span>
-      </button>
-      <button class="btn" onclick="go('upload')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid #EC489933;width:100%">
-        <div style="width:44px;height:44px;border-radius:12px;background:#EC489922;display:flex;align-items:center;justify-content:center;color:#EC4899"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>
-        <div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">Point Your Camera</div><div style="color:#666;font-size:11px;margin-top:2px">Scan anything in real time</div></div>
-        <span style="color:#555;font-size:18px">›</span>
-      </button>
-      <button class="btn" onclick="go('saved')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid #F59E0B33;width:100%">
-        <div style="width:44px;height:44px;border-radius:12px;background:#F59E0B22;display:flex;align-items:center;justify-content:center;color:#F59E0B"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg></div>
-        <div style="text-align:left;flex:1"><div style="font-weight:600;color:#fff;font-size:13px">Search Saved Posts</div><div style="color:#666;font-size:11px;margin-top:2px">Unlock your saved collection</div></div>
-        <span style="color:#555;font-size:18px">›</span>
-      </button>
-    </div>`;
-}
-
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
-function renderSearchResults(val) {
-  const container = document.getElementById('searchResultsArea');
-  if (!container) return;
-  if (!val.trim()) { container.innerHTML = scoutLandingBody(); return; }
-  const matches = initialPosts.filter(p =>
-    p.tags.some(t => t.toLowerCase().includes(val.toLowerCase())) ||
-    p.caption.toLowerCase().includes(val.toLowerCase())
-  );
-  container.innerHTML = `
-    <div style="padding:0 16px;margin-bottom:10px;font-size:11px;color:#888">Found ${matches.length} result${matches.length!==1?'s':''} for "<b style="color:#fff">${val}</b>"</div>
-    <div class="grid-container">
-      ${matches.length===0 ? `<div style="grid-column:1/span 2;color:#666;font-size:12px;text-align:center;padding:20px">No matches. Try "sapiens", "blazer", or "cacio e pepe".</div>` : matches.map(p=>`
-        <div class="thumb-card" onclick="triggerScoutOnItem(${p.id})">
-          <img src="${p.mediaImg}"/>
-          <div style="padding:8px"><div style="font-size:11px;font-weight:600">${p.caption}</div><div style="font-size:9px;color:#a855f7;margin-top:3px">${p.category}</div></div>
-        </div>
-      `).join('')}
-    </div>`;
-}
-
-// ─── EVENT ATTACHMENT ─────────────────────────────────────────────────────────
-function attachEvents(s) {
-  const b = document.getElementById('back');
-  if (b) {
-    b.onclick = () => {
-      if (navStack.length > 1) { navStack.pop(); go(navStack[navStack.length - 1], true); }
-      else go('home', true);
-    };
-  }
-  if (s === 'home') {
-    const sb = document.getElementById('scoutBtn');
-    if (sb) sb.onclick = () => go('scout-landing');
-  }
-  if (s === 'analyzing') {
-    let p = 0;
-    const bar = document.getElementById('progbar'), num = document.getElementById('prognum'), items = document.querySelectorAll('.step-item');
-    const iv = setInterval(() => {
-      p = Math.min(p + 5, 95);
-      if (bar) bar.style.width = p + '%';
-      if (num) num.textContent = p + '%';
-      items.forEach((it, i) => { if (i <= Math.floor(p / 25)) it.style.opacity = '1'; });
-    }, 50);
-    setTimeout(() => {
-      clearInterval(iv);
-      if (bar) bar.style.width = '100%';
-      if (num) num.textContent = '100%';
-      setTimeout(() => go('results'), 250);
-    }, 1800);
-  }
-}
-
-// Set referrerpolicy on all images after render so Unsplash accepts requests
-const origInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-const patchImgs = () => {
-  document.querySelectorAll('img:not([referrerpolicy])').forEach(img => {
-    img.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-  });
+</div>`},
 };
-// Patch after each screen render
-const _go = go;
-setInterval(patchImgs, 300);
 
-// Boot
+// ── SEARCH ─────────────────────────────────────────────────────────────────
+function scoutHome(){return`
+<div style="text-align:center;padding:28px 24px 20px">
+  <div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;position:relative">
+    ✦<div style="position:absolute;top:-4px;right:-4px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid #9333EA44">AI</div>
+  </div>
+  <div style="font-size:24px;font-weight:800;margin-bottom:4px">Instagram ${grad('Scout')}</div>
+  <div style="color:#888;font-size:12px">Visual AI Search — Books, Food, Fashion & Travel</div>
+</div>
+<div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+  ${[
+    {icon:'📷',label:'Upload from Camera Roll',sub:'Search anything in your photos',screen:'upload',border:'#9333EA33'},
+    {icon:'📚',label:'Browse Books',sub:'Find & buy any book',screen:'upload',border:'#EC489933'},
+    {icon:'🔖',label:'Search Saved Posts',sub:'Explore your saved collection',screen:'saved',border:'#F59E0B33'},
+  ].map(b=>`
+  <button class="btn" onclick="go('${b.screen}')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid ${b.border};width:100%">
+    <div style="width:44px;height:44px;border-radius:12px;background:${b.border};display:flex;align-items:center;justify-content:center;font-size:20px">${b.icon}</div>
+    <div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px">${b.label}</div><div style="color:#666;font-size:11px;margin-top:2px">${b.sub}</div></div>
+    <span style="color:#555;font-size:18px">›</span>
+  </button>`).join('')}
+</div>`}
+
+function renderSearch(val){
+  const area=document.getElementById('searchArea');
+  if(!area)return;
+  if(!val.trim()){area.innerHTML=scoutHome();return}
+  const matches=initialPosts.filter(p=>p.tags.some(t=>t.includes(val.toLowerCase()))||p.caption.toLowerCase().includes(val.toLowerCase()));
+  area.innerHTML=`
+<div style="padding:0 16px;margin-bottom:10px;font-size:11px;color:#888">Found <b style="color:#fff">${matches.length}</b> result${matches.length!==1?'s':''} for "<b style="color:#a855f7">${val}</b>"</div>
+<div class="grid-container">
+  ${matches.length===0?`<div style="grid-column:1/span 2;color:#666;font-size:12px;text-align:center;padding:30px">No results. Try "sapiens", "blazer", "pasta", or "paris".</div>`:matches.map(p=>`
+  <div class="thumb-card" onclick="scoutPost(${p.id})">
+    <img src="${p.mediaImg}" referrerpolicy="no-referrer-when-downgrade"/>
+    <div style="padding:8px">
+      <div style="font-size:11px;font-weight:600;line-height:1.3">${p.caption}</div>
+      <div style="font-size:9px;color:#a855f7;margin-top:3px">${p.category}</div>
+    </div>
+  </div>`).join('')}
+</div>`}
+
+function handleFile(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{userUploadedImage=e.target.result;activeFlow=flows.fashion;go('analyzing')};
+  r.readAsDataURL(file);
+}
+
+function attachEvents(s){
+  const b=document.getElementById('back');
+  if(b) b.onclick=()=>{if(navStack.length>1){navStack.pop();go(navStack[navStack.length-1],true)}else go('home',true)};
+  if(s==='analyzing'){
+    let p=0;
+    const bar=document.getElementById('progbar'),num=document.getElementById('prognum'),items=document.querySelectorAll('.step-item');
+    const iv=setInterval(()=>{
+      p=Math.min(p+5,95);
+      if(bar)bar.style.width=p+'%';
+      if(num)num.textContent=p+'%';
+      items.forEach((it,i)=>{if(i<=Math.floor(p/25))it.style.opacity='1'});
+    },50);
+    setTimeout(()=>{clearInterval(iv);if(bar)bar.style.width='100%';if(num)num.textContent='100%';setTimeout(()=>go('results'),250)},1800);
+  }
+}
+
 go('home');
 </script>
 </body>
