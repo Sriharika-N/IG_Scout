@@ -11,7 +11,7 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 #screen{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;background:#000}
 #screen::-webkit-scrollbar{display:none}
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:12px;font-weight:600;background:#000;position:sticky;top:0;z-index:50}
-.bnav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
+.bnav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
 .btn{cursor:pointer;background:none;border:none;color:#fff;padding:0;font-family:inherit;display:inline-flex;align-items:center;justify-content:center}
 @keyframes scanline{0%{top:0}100%{top:100%}}
 @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -76,48 +76,48 @@ function esc(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 function heartSVG(on){return on?'<svg class="svi" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>':'<svg class="svi" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'}
 function bookSVG(on){return on?'<svg class="svi" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>':'<svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'}
 
-// ── IMAGE URLS — Unsplash direct (no referrer needed), Google Books for covers ──
+// ── IMAGE URLS — Verified Unsplash IDs and Google Books API ──
 function usp(id,w){return 'https://images.unsplash.com/photo-'+id+'?w='+(w||800)+'&q=80&fit=crop&auto=format'}
 function gb(id){return 'https://books.google.com/books/content?id='+id+'&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api'}
 function prav(n){return 'https://i.pravatar.cc/150?img='+n}
 
 // Verified image URLs:
 var IMG={
-  // Books - Google Books API (verified correct covers)
-  sapiens:    gb('FmyBAwAAQBAJ'),
-  stevejobs:  gb('8U2oAAAAQBAJ'),
+  // Books - Google Books API
+  sapiens:      gb('FmyBAwAAQBAJ'),
+  stevejobs:    gb('8U2oAAAAQBAJ'),
   atomichabits: gb('XfFmDwAAQBAJ'),
-  psychmoney: gb('VhuzDwAAQBAJ'),
-  deepwork:   gb('n1eBCwAAQBAJ'),
+  psychmoney:   gb('VhuzDwAAQBAJ'),
+  deepwork:     gb('n1eBCwAAQBAJ'),
   // Travel
-  eiffel:     usp('1502602898657-3e91760cbb34'),
-  eiffel2:    usp('1499856845952-5e0d23be41d3'),
-  santorini:  usp('1570077188670-e3a8d69ac5ff'),
-  bali:       usp('1537996194471-e657df975ab4'),
-  kyoto:      usp('1478436127897-769e1b3f1f78'),
-  venice:     usp('1514896856000-91cb6de818e0'),
+  eiffel:       usp('1511739001486-6bfe61320473'),
+  eiffel2:      usp('1502602898657-3e91760cbb34'),
+  santorini:    usp('1570077188670-e3a8d69ac5ff'),
+  bali:         usp('1537996194471-e657df975ab4'),
+  kyoto:        usp('1493976040374-85c8e12f0c0e'),
+  venice:       usp('1514896856000-91cb6de818e0'),
   // Food
-  pasta:      usp('1555396273-367ea4eb4db5'),
-  sushi:      usp('1579584425555-c3ce17fd4351'),
-  pizza:      usp('1513104890138-7c749659a591'),
-  ramen:      usp('1569050467447-ce54b3bbc37d'),
-  pastry:     usp('1488477181946-6428a0291777'),
+  pasta:        usp('1621996346565-e3d5d6281288'),
+  sushi:        usp('1579871494447-9811cf80d66c'),
+  pizza:        usp('1513104890138-7c749659a591'),
+  ramen:        usp('1569718212165-3a8278d5f624'),
+  pastry:       usp('1555507036-ab1f4038808a'),
   // Fashion
-  blazer:     usp('1594938298603-6c8e0de9d9d2'),
-  camel:      usp('1539109136881-3be0616acf4b'),
-  trench:     usp('1520013252-4a30a6a87bd1'),
-  denim:      usp('1541099649105-f69ad21f3246'),
-  bomber:     usp('1552374196-1ab2a1c593e8'),
+  blazer:       usp('1591047139829-d91aecb6caea'),
+  camel:        usp('1539109136881-3be0616acf4b'),
+  trench:       usp('1544441893-675973e31985'),
+  denim:        usp('1541099649105-f69ad21f3246'),
+  bomber:       usp('1551028719-00167b16eac5'),
   // Additional location-specific images
-  fira:       usp('1554254648-2d58a1bc3fd5'),   // Fira Santorini cliff view
-  stmarks:    usp('1534523785856-3e5f4c39b6d4'), // Venice waterfront  
-  bamboo:     usp('1528360983277-13d401cdc186'), // Kyoto bamboo grove
-  murano:     usp('1530103043960-5a0a2c8f2587'), // Venice Murano colorful
-  montmartre: usp('1499856845952-5e0d23be41d3'), // Paris Montmartre/dusk
-  louvre:     usp('1499856845952-5e0d23be41d3'), // Paris alternative
+  fira:         usp('1533105079780-92b9be482077'),
+  stmarks:      usp('1516483638261-f4dbaf036963'),
+  bamboo:       usp('1503899036084-c55cdd92da26'),
+  murano:       usp('1520106212299-d99c443e4568'),
+  montmartre:   usp('1502602898657-3e91760cbb34'),
+  louvre:       usp('1499856845952-5e0d23be41d3'),
 };
 
-// ── POSTS — jumbled mix, correct image per caption ──────────────────────────
+// ── POSTS — Jumbled mix with correct category/image alignment ──────────────────────────
 var posts=[
   {id:1,  u:'paris_views',       loc:'📍 Champ de Mars, Paris 🇫🇷', av:prav(16), img:IMG.eiffel,       bk:false, cap:'Eiffel Tower at golden hour — Paris never gets old. 🗼',                                             cat:'travel',    saved:false, liked:true,  tags:['eiffel tower','paris','france','travel'],               flow:'travel_paris'},
   {id:2,  u:'nonfiction_reads',  loc:'',                             av:prav(1),  img:IMG.sapiens,     bk:true,  cap:'Sapiens: A Brief History of Humankind — Yuval Noah Harari. 70,000 years of our story. 📚',            cat:'literature', saved:false, liked:true,  tags:['sapiens','harari','history','nonfiction'],              flow:'lit_sapiens'},
@@ -145,7 +145,6 @@ var posts=[
 var catCovers={literature:IMG.sapiens,food:IMG.pasta,fashion:IMG.blazer,travel:IMG.eiffel};
 
 // ── SPONSORED ADS per category ───────────────────────────────────────────────
-// Monetization: sponsored links from relevant brands (clearly tagged)
 var sponsoredAds={
   travel:[
     {tag:'Sponsored · Travel Insurance',  name:'Cover your Paris trip with Digit Travel Insurance', cta:'Get Quote →', link:'https://www.godigit.com/travel-insurance', color:'#3B82F6'},
@@ -240,7 +239,7 @@ travel_bali:{label:'Tegallalang Rice Terraces — Ubud, Bali, Indonesia',conf:'9
   mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945!2d115.2790!3d-8.4320!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd718f4c31c4d2d%3A0xa5f95b3ec12938a2!2sTegallalang+Rice+Terrace!5e0!3m2!1sen!2sin!4v1699999999',
   nearby:[
     {name:'Tegallalang Rice Terraces',info:'Ubud, Bali · ★ 4.6',img:IMG.bali,link:'https://www.google.com/maps/place/Tegallalang+Rice+Terrace'},
-    {name:'Sacred Monkey Forest',     info:'Ubud, Bali · ★ 4.5',img:IMG.kyoto,link:'https://www.google.com/maps/place/Sacred+Monkey+Forest+Sanctuary'},
+    {name:'Sacred Monkey Forest',     info:'Ubud, Bali · ★ 4.5',img:IMG.bamboo,link:'https://www.google.com/maps/place/Sacred+Monkey+Forest+Sanctuary'},
   ],
   shopTitle:'Book Bali Experiences',
   shop:[
@@ -249,7 +248,7 @@ travel_bali:{label:'Tegallalang Rice Terraces — Ubud, Bali, Indonesia',conf:'9
     {name:'Mount Batur Sunrise Trek', brand:'Viator',      price:'₹4,200',badge:'Popular',   img:IMG.bali,link:'https://www.viator.com/Bali/d348-ttd'},
   ],
   planTitle:'3-Day Bali Itinerary',
-  planImgs:{1:IMG.bali,2:IMG.kyoto,3:IMG.bali},
+  planImgs:{1:IMG.bali,2:IMG.bamboo,3:IMG.bali},
   days:{
     1:{t:'Day 1 — Ubud & Rice Terraces',d:'Arrive at Tegallalang by 7am before crowds. Visit Sacred Monkey Forest. Evening Kecak fire dance at Uluwatu.'},
     2:{t:'Day 2 — Temples & Culture',   d:'Tirta Empul holy spring temple. Lunch at Locavore (book weeks ahead). Afternoon artisan market in Ubud.'},
@@ -266,16 +265,16 @@ travel_kyoto:{label:'Fushimi Inari Taisha — Torii Gates, Kyoto, Japan',conf:'9
   mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3268!2d135.7726!3d34.9671!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6001081517274be5%3A0xe13bd18b2d3d6310!2sFushimi+Inari+Taisha!5e0!3m2!1sen!2sin!4v1699999999',
   nearby:[
     {name:'Fushimi Inari Taisha',info:'Kyoto, Japan · ★ 4.8',img:IMG.kyoto,link:'https://www.google.com/maps/place/Fushimi+Inari+Taisha'},
-    {name:'Arashiyama Bamboo',   info:'Kyoto, Japan · ★ 4.7',img:IMG.bali, link:'https://www.google.com/maps/place/Arashiyama+Bamboo+Grove'},
+    {name:'Arashiyama Bamboo',   info:'Kyoto, Japan · ★ 4.7',img:IMG.bamboo, link:'https://www.google.com/maps/place/Arashiyama+Bamboo+Grove'},
   ],
   shopTitle:'Book Kyoto Experiences',
   shop:[
     {name:'Fushimi Inari Night Walk',brand:'GetYourGuide',price:'₹2,400',badge:'Unique',   img:IMG.kyoto,link:'https://www.getyourguide.com/kyoto-l97265/'},
     {name:'Kyoto Tea Ceremony',      brand:'Airbnb Exp.', price:'₹3,100',badge:'Cultural', img:IMG.kyoto,link:'https://www.airbnb.com/s/Kyoto--Japan/experiences'},
-    {name:'Arashiyama Bamboo Tour',  brand:'Viator',      price:'₹2,800',badge:'Top Rated',img:IMG.bali, link:'https://www.viator.com/Kyoto/d332-ttd'},
+    {name:'Arashiyama Bamboo Tour',  brand:'Viator',      price:'₹2,800',badge:'Top Rated',img:IMG.bamboo, link:'https://www.viator.com/Kyoto/d332-ttd'},
   ],
   planTitle:'3-Day Kyoto Itinerary',
-  planImgs:{1:IMG.kyoto,2:IMG.bali,3:IMG.kyoto},
+  planImgs:{1:IMG.kyoto,2:IMG.bamboo,3:IMG.kyoto},
   days:{
     1:{t:'Day 1 — Fushimi Inari & Gion',  d:'5am at Fushimi Inari before the crowds. Tea ceremony in Gion. Evening stroll along Hanamikoji Street in yukata.'},
     2:{t:'Day 2 — Arashiyama & Temples',  d:'Bamboo Grove at sunrise. Tenryu-ji Zen garden. Afternoon at Kinkaku-ji (Golden Pavilion).'},
@@ -443,7 +442,7 @@ food_paris:{label:'Sculpted Hazelnut Pastry — Cédric Grolet Opéra, Paris',co
   ],
 },
 
-// FASHION FLOWS — each shows the exact garment in the image
+// FASHION FLOWS
 fashion_blazer:{label:'White Minimalist Linen Blazer — Tailored Co-ord Look',conf:'93%',cat:'fashion',
   nearbyTitle:'Shop White Linen Blazers',
   nearby:[
@@ -748,7 +747,7 @@ home:function(){
       +(p.loc?'<div style="font-size:10px;color:#888">'+p.loc+'</div>':'')
       +'</div></div><span style="font-size:18px;color:#888">···</span></div>'
       +'<div class="igmedia" onclick="scoutPost('+p.id+')">'
-      +'<img src="'+p.img+'" class="'+(p.bk?'bkcover':'')+'" referrerpolicy="no-referrer-when-downgrade" onerror="this.style.display=\'none\';this.parentNode.style.background=\'#141414\'"/>'
+      +'<img src="'+p.img+'" class="'+(p.bk?'bkcover':'')+'" referrerpolicy="no-referrer-when-downgrade"/>'
       +'<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.15)">'
       +'<span style="color:#a855f7">✦</span> Tap to Scout</div>'
       +'</div>'
