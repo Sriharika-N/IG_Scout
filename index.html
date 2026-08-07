@@ -55,16 +55,15 @@ body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;m
 <script>
 const screen = document.getElementById('screen');
 const toast  = document.getElementById('toastPill');
-let activeFlow = null, userUploadedImage = null, currentSavedCategory = null, activeDayTab = 1, navStack = ['home'];
+let activeFlow = null, userUploadedImage = null, currentSavedCategory = null, activeDayTab = 1, navStack = ['home'], analyzeTimer = null;
 
 function showToast(msg){toast.textContent=msg;toast.style.display='block';setTimeout(()=>{toast.style.display='none'},2200)}
 function grad(t){return`<span style="background:linear-gradient(135deg,#9333EA,#EC4899,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${t}</span>`}
 function bkSVG(s){return s?`<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#fff;stroke:#fff"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`:`<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`}
 function htSVG(l){return l?`<svg class="svg-icon" viewBox="0 0 24 24" style="fill:#ef4444;stroke:#ef4444"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`:`<svg class="svg-icon" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`}
+function escapeAttr(str) { return str.replace(/'/g, "&apos;").replace(/"/g, "&quot;"); }
 
 // ── POSTS ──────────────────────────────────────────────────────────────────
-// Using Open Library covers (by ISBN, stable URLs) for books
-// Using verified Pexels direct IDs for food/fashion/travel
 const OL = (isbn) => `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
 
 const initialPosts = [
@@ -181,9 +180,8 @@ const catCovers = {
   Travel:     'https://images.pexels.com/photos/699466/pexels-photo-699466.jpeg?auto=compress&cs=tinysrgb&w=600',
 };
 
-// ── FLOW DATA — every link is real and opens correct destination ──────────────
+// ── FLOW DATA ────────────────────────────────────────────────────────────────
 const flows = {
-
   literature: {
     label: 'Sapiens: A Brief History of Humankind — Yuval Noah Harari',
     confidence: '95%', coverCat:'Literature',
@@ -194,7 +192,7 @@ const flows = {
     ],
     shopTitle: 'Shop & Explore This Book',
     shop: [
-      {name:'Sapiens — Hardcover',      brand:'Amazon',    price:'$22.99', badge:'Bestseller', img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari+hardcover'},
+      {name:'Sapiens — Hardcover',     brand:'Amazon',    price:'$22.99', badge:'Bestseller', img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Yuval+Noah+Harari+hardcover'},
       {name:'Sapiens — Kindle Edition', brand:'Amazon',    price:'$12.99', badge:'Instant',    img:OL('9780062316097'), link:'https://www.amazon.com/s?k=Sapiens+Harari+kindle'},
       {name:'Sapiens — Audiobook',      brand:'Audible',   price:'$14.95', badge:'Top Rated',  img:OL('9780062316097'), link:'https://www.audible.com/search?keywords=Sapiens+Harari'},
     ],
@@ -214,7 +212,6 @@ const flows = {
     label: 'Handmade Truffle Cacio e Pepe — Trattoria Da Enzo al 29, Rome',
     confidence: '96%', coverCat:'Food',
     nearbyTitle: 'Italian Restaurants Near You',
-    // Map embed: Rome, Trattoria Da Enzo area
     mapEmbed: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2970!2d12.4763!3d41.8884!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132f6046e8f8e679%3A0xa4ba29e7a40acfdc!2sTrattoria%20Da%20Enzo%20al%2029!5e0!3m2!1sen!2sin!4v1699999999999',
     nearby: [
       {name:'Trattoria Da Enzo al 29', dist:'Rome, Italy', rating:'4.9', img:'https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&w=200', link:'https://www.google.com/maps/search/Trattoria+Da+Enzo+al+29+Rome'},
@@ -290,11 +287,11 @@ const flows = {
       {l:'Lonely Planet — Paris Guide',   u:'Full Paris travel guide & tips',    link:'https://www.lonelyplanet.com/france/paris'},
     ],
   },
-
 };
 
 // ── ROUTING ──────────────────────────────────────────────────────────────────
 function go(s, isBack=false){
+  if(analyzeTimer){ clearInterval(analyzeTimer); analyzeTimer = null; }
   if(!isBack && navStack[navStack.length-1]!==s) navStack.push(s);
   const fn=screens[s];
   if(fn){screen.innerHTML=fn();screen.scrollTop=0;attachEvents(s);}
@@ -480,7 +477,7 @@ results:()=>{
   <div style="color:#666;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px">Explore More</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
     ${flow.saves.map(s=>`
-    <div onclick="openLink('${s.link}')" style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f;cursor:pointer;transition:border-color 0.15s" onmouseenter="this.style.borderColor='#9333EA66'" onmouseleave="this.style.borderColor='#1f1f1f'">
+    <div onclick="openLink('${escapeAttr(s.link)}')" style="background:#111;border-radius:12px;padding:10px;border:1px solid #1f1f1f;cursor:pointer;transition:border-color 0.15s" onmouseenter="this.style.borderColor='#9333EA66'" onmouseleave="this.style.borderColor='#1f1f1f'">
       <div style="font-size:10px;color:#eee;font-weight:600;margin-bottom:3px">${s.l}</div>
       <div style="font-size:9px;color:#a855f7">${s.u} ›</div>
     </div>`).join('')}
@@ -507,7 +504,7 @@ ${hasMap?`
       <div style="font-size:13px;font-weight:700">${item.name}</div>
       <div style="font-size:10px;color:#888;margin-top:2px">${item.dist} · ★ ${item.rating}</div>
     </div>
-    <button class="action-badge" onclick="openLink('${item.link}')">Open →</button>
+    <button class="action-badge" onclick="openLink('${escapeAttr(item.link)}')">Open →</button>
   </div>`).join('')}
 </div>`},
 
@@ -520,14 +517,14 @@ ${hasMap?`
 </div>
 <div style="padding:10px 16px">
   ${flow.shop.map(item=>`
-  <div class="sub-card" style="cursor:pointer" onclick="openLink('${item.link}')">
+  <div class="sub-card" style="cursor:pointer" onclick="openLink('${escapeAttr(item.link)}')">
     <img src="${item.img}" referrerpolicy="no-referrer-when-downgrade"/>
     <div style="flex:1">
       <div style="font-size:12px;font-weight:700">${item.name}</div>
       <div style="font-size:10px;color:#888;margin-top:2px">${item.brand} · <span style="color:#EC4899;font-weight:600">${item.price}</span></div>
       <div style="margin-top:3px;display:inline-block;padding:2px 7px;background:#F59E0B22;color:#F59E0B;border-radius:8px;font-size:9px;font-weight:600">${item.badge}</div>
     </div>
-    <button class="action-badge" style="background:#EC4899" onclick="openLink('${item.link}')">Shop →</button>
+    <button class="action-badge" style="background:#EC4899" onclick="openLink('${escapeAttr(item.link)}')">Shop →</button>
   </div>`).join('')}
 </div>`,
 
@@ -590,7 +587,7 @@ saved:()=>{
       </div>`;
     }).join('')}
   </div>
-</div>`},
+</div>`}
 };
 
 // ── SEARCH ─────────────────────────────────────────────────────────────────
@@ -642,17 +639,30 @@ function handleFile(file){
 
 function attachEvents(s){
   const b=document.getElementById('back');
-  if(b) b.onclick=()=>{if(navStack.length>1){navStack.pop();go(navStack[navStack.length-1],true)}else go('home',true)};
+  if(b) b.onclick=()=>{
+    if(navStack.length>1){
+      navStack.pop();
+      go(navStack[navStack.length-1],true);
+    } else {
+      go('home',true);
+    }
+  };
+
   if(s==='analyzing'){
     let p=0;
     const bar=document.getElementById('progbar'),num=document.getElementById('prognum'),items=document.querySelectorAll('.step-item');
-    const iv=setInterval(()=>{
+    analyzeTimer=setInterval(()=>{
       p=Math.min(p+5,95);
       if(bar)bar.style.width=p+'%';
       if(num)num.textContent=p+'%';
       items.forEach((it,i)=>{if(i<=Math.floor(p/25))it.style.opacity='1'});
     },50);
-    setTimeout(()=>{clearInterval(iv);if(bar)bar.style.width='100%';if(num)num.textContent='100%';setTimeout(()=>go('results'),250)},1800);
+    setTimeout(()=>{
+      if(analyzeTimer) clearInterval(analyzeTimer);
+      if(bar)bar.style.width='100%';
+      if(num)num.textContent='100%';
+      setTimeout(()=>go('results'),250);
+    },1800);
   }
 }
 
