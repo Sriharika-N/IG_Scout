@@ -108,6 +108,13 @@ var IMG={
   trench:     usp('1520013252-4a30a6a87bd1'),
   denim:      usp('1541099649105-f69ad21f3246'),
   bomber:     usp('1552374196-1ab2a1c593e8'),
+  // Additional location-specific images
+  fira:       usp('1554254648-2d58a1bc3fd5'),   // Fira Santorini cliff view
+  stmarks:    usp('1534523785856-3e5f4c39b6d4'), // Venice waterfront  
+  bamboo:     usp('1528360983277-13d401cdc186'), // Kyoto bamboo grove
+  murano:     usp('1530103043960-5a0a2c8f2587'), // Venice Murano colorful
+  montmartre: usp('1499856845952-5e0d23be41d3'), // Paris Montmartre/dusk
+  louvre:     usp('1499856845952-5e0d23be41d3'), // Paris alternative
 };
 
 // ── POSTS — jumbled mix, correct image per caption ──────────────────────────
@@ -190,7 +197,7 @@ travel_paris:{label:'Eiffel Tower, Champ de Mars — Paris, France',conf:'98%',c
     {name:'Paris 3-Day Museum Pass',   brand:'ParisMPass',  price:'₹5,400',badge:'Best Value',img:IMG.eiffel2,link:'https://www.parismuseumpass.fr/en/'},
   ],
   planTitle:'3-Day Paris Itinerary',
-  planImgs:{1:IMG.eiffel,2:IMG.eiffel2,3:IMG.santorini},
+  planImgs:{1:IMG.eiffel,2:IMG.montmartre,3:IMG.louvre},
   days:{
     1:{t:'Day 1 — Eiffel Tower & Seine',    d:'Morning walk at Champ de Mars. Book summit tickets in advance. Evening Seine cruise to see Paris light up.'},
     2:{t:'Day 2 — Louvre & Le Marais',      d:'3 hours at the Louvre (pre-book timed entry). Afternoon boutique shopping in Le Marais. Dinner at Breizh Café.'},
@@ -207,7 +214,7 @@ travel_santorini:{label:'Blue Dome Churches of Oia — Santorini, Greece',conf:'
   mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3193!2d25.3753!3d36.4618!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1499ce77abda5e05%3A0x5a8f1200ce12b480!2sOia%2C+Santorini!5e0!3m2!1sen!2sin!4v1699999999',
   nearby:[
     {name:'Oia Village',  info:'Santorini, Greece · ★ 4.9',img:IMG.santorini,link:'https://www.google.com/maps/place/Oia,+Santorini'},
-    {name:'Fira Town',    info:'Capital of Santorini · ★ 4.7',img:IMG.eiffel2,link:'https://www.google.com/maps/place/Fira,+Santorini'},
+    {name:'Fira Town',    info:'Capital of Santorini · ★ 4.7',img:IMG.fira,link:'https://www.google.com/maps/place/Fira,+Santorini'},
   ],
   shopTitle:'Book Santorini Experiences',
   shop:[
@@ -216,7 +223,7 @@ travel_santorini:{label:'Blue Dome Churches of Oia — Santorini, Greece',conf:'
     {name:'Santorini Photography Tour',brand:'Airbnb Exp.', price:'₹3,200',badge:'Unique',    img:IMG.santorini,link:'https://www.airbnb.com/s/Santorini--Greece/experiences'},
   ],
   planTitle:'3-Day Santorini Itinerary',
-  planImgs:{1:IMG.santorini,2:IMG.santorini,3:IMG.eiffel2},
+  planImgs:{1:IMG.santorini,2:IMG.santorini,3:IMG.fira},
   days:{
     1:{t:'Day 1 — Arrive & Explore Oia',   d:'Check in, walk Oia village, watch the iconic sunset from the castle ruins. Dinner at Ambrosia restaurant.'},
     2:{t:'Day 2 — Caldera Boat Tour',       d:'Full-day sailing: hot springs, Red Beach, White Beach. Evening wine tasting at a local vineyard.'},
@@ -285,7 +292,7 @@ travel_venice:{label:'Grand Canal at Sunset — Venice, Italy',conf:'97%',cat:'t
   mapEmbed:'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2796!2d12.3381!3d45.4371!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x477eb1daf1d63d89%3A0x729d3c95c9b7a5f3!2sGrand+Canal%2C+Venice!5e0!3m2!1sen!2sin!4v1699999999',
   nearby:[
     {name:'Grand Canal',     info:'Venice, Italy · ★ 4.9',img:IMG.venice,link:'https://www.google.com/maps/place/Grand+Canal,+Venice'},
-    {name:"St Mark's Square",info:'Venice, Italy · ★ 4.8',img:IMG.eiffel2,link:"https://www.google.com/maps/place/St+Mark's+Square,+Venice"},
+    {name:"St Mark's Square",info:'Venice, Italy · ★ 4.8',img:IMG.stmarks,link:"https://www.google.com/maps/place/St+Mark's+Square,+Venice"},
   ],
   shopTitle:'Book Venice Experiences',
   shop:[
@@ -294,7 +301,7 @@ travel_venice:{label:'Grand Canal at Sunset — Venice, Italy',conf:'97%',cat:'t
     {name:"Skip-Line Doge's Palace",    brand:'GetYourGuide',price:'₹2,800',badge:'Bestseller', img:IMG.venice,link:'https://www.getyourguide.com/venice-l35/'},
   ],
   planTitle:'3-Day Venice Itinerary',
-  planImgs:{1:IMG.venice,2:IMG.venice,3:IMG.eiffel2},
+  planImgs:{1:IMG.venice,2:IMG.murano,3:IMG.stmarks},
   days:{
     1:{t:"Day 1 — Grand Canal & San Marco",  d:"Morning vaporetto along the Grand Canal. St Mark's Basilica and Doge's Palace (pre-book). Sunset at Rialto bridge."},
     2:{t:'Day 2 — Murano & Burano Islands',  d:'Morning glass-blowing at Murano. Afternoon at colourful Burano. Fresh seafood dinner at Osteria alle Testiere.'},
@@ -692,6 +699,7 @@ lit_stevejobs:{label:'Steve Jobs — Walter Isaacson',conf:'95%',cat:'literature
 // ── ROUTING ───────────────────────────────────────────────────────────────────
 function go(s,back){
   if(s==='saved'&&!back)savedCat=null;
+  if(s==='home'){userImg2=null;var fks=Object.keys(flows);for(var i=0;i<fks.length;i++)delete flows[fks[i]]._lensLabel;}
   if(!back&&stack[stack.length-1]!==s)stack.push(s);
   var fn=screens[s];if(fn){S.innerHTML=fn();S.scrollTop=0;attachEvents(s);}
 }
@@ -851,7 +859,7 @@ results:function(){
     +'</div>'
     +'<div style="padding:12px 14px;display:flex;gap:8px;align-items:flex-start">'
     +'<span style="color:#9333EA;font-size:14px;flex-shrink:0">✦</span>'
-    +'<p style="font-size:13px;line-height:1.4;margin:0;font-weight:500">'+flow.label+'</p>'
+    +'<p style="font-size:13px;line-height:1.4;margin:0;font-weight:500">'+(flow._lensLabel||flow.label)+'</p>'
     +'</div></div></div>'
     +'<div style="margin:0 16px 12px;padding:10px 14px;border-radius:12px;background:#111;border:1px solid #222;display:flex;align-items:center;gap:12px">'
     +'<div style="flex:1"><div style="color:#666;font-size:10px;margin-bottom:4px">Scout Confidence</div>'
@@ -1039,10 +1047,70 @@ function doSearch(val){
   area.innerHTML=h;
 }
 
+var kwFlows={
+  'eiffel tower':'travel_paris','paris':'travel_paris',
+  'santorini':'travel_santorini','oia':'travel_santorini','greece':'travel_santorini',
+  'bali':'travel_bali','ubud':'travel_bali','rice terrace':'travel_bali',
+  'kyoto':'travel_kyoto','fushimi inari':'travel_kyoto','torii':'travel_kyoto','japan':'travel_kyoto',
+  'venice':'travel_venice','grand canal':'travel_venice','gondola':'travel_venice',
+  'pasta':'food_rome','cacio e pepe':'food_rome','rome':'food_rome',
+  'sushi':'food_sushi','nigiri':'food_sushi','tokyo':'food_sushi',
+  'pizza':'food_pizza','margherita':'food_pizza','naples':'food_pizza',
+  'ramen':'food_ramen','tonkotsu':'food_ramen','ichiran':'food_ramen',
+  'croissant':'food_paris','pastry':'food_paris','patisserie':'food_paris',
+  'white blazer':'fashion_blazer','linen blazer':'fashion_blazer','blazer':'fashion_blazer',
+  'camel coat':'fashion_camelcoat','wool coat':'fashion_camelcoat',
+  'trench coat':'fashion_trench','trench':'fashion_trench',
+  'denim':'fashion_denim','jeans':'fashion_denim',
+  'bomber jacket':'fashion_bomber','bomber':'fashion_bomber','streetwear':'fashion_bomber',
+  'sapiens':'lit_sapiens','yuval harari':'lit_sapiens',
+  'atomic habits':'lit_atomichabits','james clear':'lit_atomichabits',
+  'psychology of money':'lit_psychmoney','morgan housel':'lit_psychmoney',
+  'deep work':'lit_deepwork','cal newport':'lit_deepwork',
+  'steve jobs':'lit_stevejobs','isaacson':'lit_stevejobs',
+};
+
+function detectFlow(text){
+  var t=text.toLowerCase();
+  var keys=Object.keys(kwFlows);
+  for(var i=0;i<keys.length;i++){if(t.indexOf(keys[i])>-1)return kwFlows[keys[i]];}
+  if(t.indexOf('travel')>-1||t.indexOf('landmark')>-1)return 'travel_paris';
+  if(t.indexOf('food')>-1||t.indexOf('dish')>-1)return 'food_rome';
+  if(t.indexOf('fashion')>-1||t.indexOf('outfit')>-1)return 'fashion_blazer';
+  if(t.indexOf('book')>-1)return 'lit_sapiens';
+  return 'travel_paris';
+}
+
 function handleFile(file){
   if(!file)return;
   var r=new FileReader();
-  r.onload=function(e){userImg2=e.target.result;activeFlow=flows.fashion_blazer;go('analyzing')};
+  r.onload=function(e){
+    userImg2=e.target.result;
+    var parts=e.target.result.split(',');
+    var b64=parts[1];
+    var mime=parts[0].indexOf('png')>-1?'image/png':parts[0].indexOf('webp')>-1?'image/webp':'image/jpeg';
+    activeFlow=flows.travel_paris;
+    go('analyzing');
+    fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:400,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+          {type:'text',text:'You are Google Lens with 99% accuracy. Analyze this image and identify: 1) The exact subject (specific landmark name, restaurant dish, garment type, or book title and author). 2) If it is a place: city and country. 3) Category: travel, food, fashion, or literature. Reply in 2 concise sentences with maximum specificity.'}
+        ]}]
+      })
+    }).then(function(res){return res.json()}).then(function(data){
+      var text=(data.content&&data.content[0])?data.content[0].text:'';
+      if(text){
+        var fk=detectFlow(text);
+        activeFlow=flows[fk]||flows.travel_paris;
+        activeFlow._lensLabel=text;
+      }
+    }).catch(function(err){console.warn('Vision API error:',err)});
+  };
   r.readAsDataURL(file);
 }
 
